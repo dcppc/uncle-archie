@@ -9,3 +9,10 @@ body {
 div.body {
     background-color: #FAFAFA;
 }
+a.md-logo img {
+    width: 30px;
+    height: 30px;
+}
+.md-typeset code {
+    font-size: 100%;
+}
