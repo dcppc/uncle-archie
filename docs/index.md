@@ -9,6 +9,18 @@ so that SSL can be used. This requires the server running
 Uncle Jenkins be accessible at a domain name, and not just be
 a bare IP address.
 
+## Table of Contents
+
+[installing jenkins](installing.md)
+
+[nginx reverse proxy](nginx.md)
+
+[set up jenkins](setup.md)
+
+[github pull request builder plugin](ghprb.md)
+
+## Links
+
 Documentation (you are here): <https://pages.charlesreid1.com/uncle-jenkins>
 
 Source code: <https://git.charlesreid1.com/bots/uncle-jenkins>
