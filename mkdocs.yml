@@ -15,8 +15,8 @@ theme:
   name: null
   custom_dir: 'mkdocs-material/material'
   palette:
-    primary: 'red'
-    accent: 'red'
+    primary: 'teal'
+    accent:  'teal'
   logo: 'images/unclejenkinswt.svg'
   font:
     text: 'Roboto'

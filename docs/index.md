@@ -9,7 +9,7 @@ so that SSL can be used. This requires the server running
 Uncle Jenkins be accessible at a domain name, and not just be
 a bare IP address.
 
-Documentation: see <https://pages.charlesreid1.com/uncle-jenkins> or [`docs/index.md`](docs/index.md)
+Documentation (you are here): <https://pages.charlesreid1.com/uncle-jenkins>
 
 Source code: <https://git.charlesreid1.com/bots/uncle-jenkins>
 
