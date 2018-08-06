@@ -23,6 +23,10 @@ theme:
     code: 'Roboto Mono'
 pages:
   - 'Index' : 'index.md'
+  - 'Installing Jenkins' : 'installing.md'
+  - 'Nginx and Jenkins' : 'nginx.md'
+  - 'Set Up Jenkins' : 'setup.md'
+  - 'Github Pull Request Builder' : 'ghprb.md'
 
 # Extensions
 markdown_extensions:

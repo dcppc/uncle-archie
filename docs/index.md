@@ -13,11 +13,11 @@ a bare IP address.
 
 [installing jenkins](installing.md)
 
-[nginx reverse proxy](nginx.md)
+[nginx and jenkins](nginx.md)
 
 [set up jenkins](setup.md)
 
-[github pull request builder plugin](ghprb.md)
+[github pull request builder](ghprb.md)
 
 ## Links
 

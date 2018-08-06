@@ -1,4 +1,4 @@
-# nginx reverse proxy
+# nginx and jenkins
 
 ## some background
 
