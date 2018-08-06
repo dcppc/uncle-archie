@@ -1,9 +1,25 @@
 # set up jenkins
 
-To set up Jenkins, visit the configuration page.
+To set up your jenkins instance, visit the jenkins configuration page.
 
-If you are running Jenkins behind a reverse proxy,
-make sure that the URL that takes you to nginx
-is the same URL configured in the Jenkins 
-configuration page.
+## jenkins configuration page
+
+Start by logging into your Jenkins instance.
+
+Once you are logged in you should see a view like this:
+
+<img src="/images/jenkins-login-post.png" width="500px" />
+
+After clicking "Manage Jenkins" on the left, you should see a list of menu items:
+
+<img src="/images/jenkins-manage.png" width="500px" />
+
+After clicking the first item, "Configure System", you should see a page with
+many sections:
+
+<img src="/images/jenkins-manage-configure.png" width="500px" />
+
+
+
+
 
