@@ -1,6 +1,6 @@
-# nginx and jenkins
+# Nginx and Jenkins
 
-## some background
+## background
 
 ### what is nginx?
 
@@ -27,7 +27,7 @@ is running.
 The advantage of this is that Jenkins is not accessible via port
 8080 to outside users. Every request must pass through nginx.
 
-## installing nginx
+## first steps: installing nginx
 
 recommend using your operating system's package manager.
 
@@ -48,11 +48,14 @@ sudo service nginx start
 sudo service nginx stop
 ```
 
-## nginx configuration
+## configuring nginx
 
 What follows is an nginx configuration file for
 using Jenkins behind an nginx reverse proxy, and
 making it available via a subdomain like `jenkins.mysite.com`.
+
+**NOTE: As a reminder the local Jenkins server is available at
+`localhost:8080`.**
 
 Here is the nginx configuration file and the location
 on disk where it should be using an aptitude-installed
@@ -61,8 +64,6 @@ nginx:
 **`/etc/nginx/sites-available/jenkins.conf`**
 
 ```plain
-# jenkins service is available at localhost:8080
-
 server {
     listen 80;
     listen [::]:80;
@@ -97,7 +98,18 @@ server {
         add_header 'X-SSH-Endpoint' 'jenkins.domain.tld:50022' always;
     }
 }
+```
 
+Alternatively, if you want your server to be publicly available on a non-standard 
+port, but still use SSL, for example being available at
+
+```
+https://jenkins.mydomain.com:8081
+```
+
+then you can remove the port 80 redirect and change port 443 to 8081:
+
+```
 server {
     listen 8081;
     listen [::]:8081;

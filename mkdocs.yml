@@ -22,11 +22,18 @@ theme:
     text: 'Roboto'
     code: 'Roboto Mono'
 pages:
-  - 'Index' : 'index.md'
-  - 'Installing Jenkins' : 'installing.md'
-  - 'Nginx and Jenkins' : 'nginx.md'
-  - 'Set Up Jenkins' : 'setup.md'
-  - 'Github Pull Request Builder' : 'ghprb.md'
+  - Index: 'index.md'
+
+  - Preparing Jenkins:
+    - Installing Jenkins: 'installing.md'
+    - Nginx and Jenkins: 'nginx.md'
+    - Configuring Jenkins: 'configuring.md'
+    - Plugins: 
+      - Installing Plugins: 'plugins.md'
+      - Github Pull Request Builder: 'plugins_ghprb.md'
+
+  - Pipelines:
+    - Pull Request Reviews: 'pr.md'
 
 # Extensions
 markdown_extensions:
