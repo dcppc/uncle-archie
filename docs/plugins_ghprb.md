@@ -67,7 +67,9 @@ This has a couple of key fields:
 * Advanced: this button will open up a whole host of options. These are covered
   below.
 
-### basic configuration: authenticating with Github API
+## basic configuration
+
+### authenticating with the Github API
 
 Click the "Add" button next to credentials and select Jenkins as your 
 credentials provider. Create a credential of Kind "Secret Text".
@@ -148,5 +150,31 @@ Here's what it should look like if everything goes according to plan:
 
 <img src="/images/jenkins-ghprb-5-test-5.png" width="500px" />
 
+Let's keep moving through the tests, there is still one more to get through!
+
+The last test is the most important, and that is testing whether the Jenkins
+server can mark a pull request as passing or failing checks, or whether they
+resulted in an error.
+
+Click the "Test updating commit status" button and it will give several
+options to set. For the commit hash, use the commit hash of the single
+commit in the pull request. We will test setting the state to FAILURE.
+
+The other settings will make more sense in context, but we can set a
+URL that links to a page with more details on the build, a message
+to post about the failure, and some context (more info).
+
+Here is what the settings look like filled out:
+
+<img src="/images/jenkins-ghprb-5-test-6.png" width="500px" />
+
+When "Update Status" is clicked it results in the following change to
+the pull request page:
+
+<img src="/images/jenkins-ghprb-5-test-7.png" width="500px" />
+
+Note that the pull request can still be merged, but in the repository
+settings we can require that build checks pass before any pull requests
+can be merged.
 
 

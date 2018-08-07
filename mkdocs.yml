@@ -28,12 +28,10 @@ pages:
     - Installing Jenkins: 'installing.md'
     - Nginx and Jenkins: 'nginx.md'
     - Configuring Jenkins: 'configuring.md'
-    - Plugins: 
-      - Installing Plugins: 'plugins.md'
-      - Github Pull Request Builder: 'plugins_ghprb.md'
 
-  - Pipelines:
-    - Pull Request Reviews: 'pr.md'
+  - Jenkins Plugins: 
+    - Installing Plugins: 'plugins.md'
+    - Github Pull Request Builder: 'plugins_ghprb.md'
 
 # Extensions
 markdown_extensions:

@@ -11,13 +11,20 @@ a bare IP address.
 
 ## Table of Contents
 
-[installing jenkins](installing.md)
 
-[nginx and jenkins](nginx.md)
+Preparing Jenkins:
 
-[set up jenkins](setup.md)
+- Preparing Jenkins
+  - [Installing Jenkins](installing.md)
+  - [Nginx and Jenkins](nginx.md)
+  - [Configuring Jenkins](configuring.md)
 
-[github pull request builder](ghprb.md)
+- Jenkins Plugins: 
+  - [Installing Plugins](plugins.md)
+  - [Github Pull Request Builder](plugins_ghprb.md)
+
+- Pipelines:
+  - [Pull Request Reviews](#) (in progress)
 
 ## Links
 
