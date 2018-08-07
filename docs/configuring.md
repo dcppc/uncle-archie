@@ -8,16 +8,16 @@ Start by logging into your Jenkins instance.
 
 Once you are logged in you should see a view like this:
 
-<img src="/images/jenkins-login-post.png" width="500px" />
+![Jenkins home view](images/jenkins-login-post.png)
 
 After clicking "Manage Jenkins" on the left, you should see a list of menu items:
 
-<img src="/images/jenkins-manage.png" width="500px" />
+![Manage Jenkins page](images/jenkins-manage.png)
 
 After clicking the first item, "Configure System", you should see a page with
 many sections:
 
-<img src="/images/jenkins-configure.png" width="500px" />
+![Configure Jenkins page](images/jenkins-configure.png)
 
 Let's go through some settings you can change.
 
@@ -33,4 +33,4 @@ In the example below, the Jenkins server is running at
 at <https://jenkins.nihdatacommons.us>. The location of
 the Jenkins server is set to <https://jenkins.nihdatacommons.us>.
 
-<img src="images/jenkins-config-location.png" width="500px" />
+![Configure Jenkins page - location](images/jenkins-configure-location.png)

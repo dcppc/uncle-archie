@@ -1,6 +1,6 @@
 # Github Pull Request Builder (GHPRB) Jenkins Plugin
 
-Also see the [plugins](plugins.md) page.
+Also see the [Installing Plugins](plugins.md) page.
 
 ## installing jenkins GHPRB plugin 
 
@@ -14,12 +14,12 @@ the box next to it. Then click the button at the bottom that says
 Now click the Installed tab on the plugin manager page to see a list
 of plugins that are installed on the server: 
 
-<img src="/images/jenkins-pm-inst.png" width="500px" />
+![Installed tab of Plugin Manager page](images/jenkins-pm-inst.png)
 
 Control + F search for "Github Pull Request Builder" and you should
 see it come up:
 
-<img src="/images/jenkins-pm-inst-2.png" width="500px" />
+![GHPRB in Installed tab of Plugin Manager page](images/jenkins-pm-inst-2.png)
 
 Don't bother clicking the link, since it will take you to
 the Jenkins wiki page for the plugin. 
@@ -28,16 +28,16 @@ the Jenkins wiki page for the plugin.
 
 To configure the GHPRB plugin, start from the home view:
 
-<img src="/images/jenkins-login-post.png" width="500px" />
+![Jenkins home page](images/jenkins-login-post.png)
 
 After clicking "Manage Jenkins" on the left, you should see a list of menu items:
 
-<img src="/images/jenkins-manage.png" width="500px" />
+![Manage Jenkins page](images/jenkins-manage.png)
 
 After clicking the first item, "Configure System", you should see a page with
 many sections:
 
-<img src="/images/jenkins-configure.png" width="500px" />
+![Configure Jenkins page](images/jenkins-configure.png)
 
 Let's go through how to set up the pull request build plugin
 to properly authenticate with Github.
@@ -52,7 +52,7 @@ repo](https://github.com/jenkinsci/ghprb-plugin/blob/master/README.md)
 Once at the configuration page, scroll down to the section titled
 "Github Pull Request Builder" (or Control + F it).
 
-<img src="/images/jenkins-ghprb-1.png" width="500px" />
+![GHPRB section on Configure Jenkins page](images/jenkins-ghprb-1.png)
 
 This has a couple of key fields:
 
@@ -78,7 +78,7 @@ which we'll cover next.
 
 Here is what the jenkins credentials provider looks like:
 
-<img src="/images/jenkins-ghprb-2.png" width="500px" />
+![Credentials Provider in GHPRB section on Configure Jenkins page](images/jenkins-ghprb-2.png)
 
 To create a Github Authentication Token, log in to Github using the account
 jenkins will review PRs as. Go to the Settings page and click Developer Settings,
@@ -88,7 +88,7 @@ once you are logged in.
 Now click "Generate New Token". You will see some options like those shown
 below. Configure the check boxes to match those shown in the image below:
 
-<img src="/images/jenkins-ghprb-3.png" width="500px" />
+![Generate New Token in GHPRB section on Configure Jenkins page](images/jenkins-ghprb-3.png)
 
 Now create a token. The token will only be shown once, and cannot be viewed
 again, so store it somewhere safe like a password manager.
@@ -100,7 +100,7 @@ other fields blank. Click Add.
 Here's what the Github Pull Request Builder section of the jenkins configuration 
 page will look like once you've authenticated with Github: 
 
-<img src="/images/jenkins-ghprb-3.png" width="500px" />
+![Github Auth in GHPRB section on Configure Jenkins page](images/jenkins-ghprb-3.png)
 
 Now test the authentication mechanism by clicking Test Credentials.
 
@@ -112,22 +112,22 @@ working okay.
 Starting from the Github Pull Request Builder section of the configuration
 page, click the Test Credentials button:
 
-<img src="/images/jenkins-ghprb-4.png" width="500px" />
+![Test Credentials in GHPRB section](images/jenkins-ghprb-4.png)
 
 This opens several checkboxes with options. To run the given test,
 you check the box. (Weird, I know.)
 
-<img src="/images/jenkins-ghprb-5-test-1.png" width="500px" />
+![Test Credentials in GHPRB section - test 1](images/jenkins-ghprb-5-test-1.png)
 
 When you check the "Test basic connection to Github" box, you'll see
 the results of checking that you can connect to Github:
 
-<img src="/images/jenkins-ghprb-5-test-2.png" width="500px" />
+![Test Credentials in GHPRB section - test 2](images/jenkins-ghprb-5-test-2.png)
 
 Enter a repository that your Jenkins user should have access to, 
 and then check the next checkbox, "Test Permissions to a Repository":
 
-<img src="/images/jenkins-ghprb-5-test-3.png" width="500px" />
+![Test Credentials in GHPRB section - test 3](images/jenkins-ghprb-5-test-3.png)
 
 For the next test, you should create a pull request in the repository
 that you entered in the text box. You can do this easily by opening
@@ -140,7 +140,7 @@ the change as a pull request, click the "Pull Requests" tab of the repository
 and find the pull request's number. In the example below, the pull request
 is #1:
 
-<img src="/images/jenkins-ghprb-5-test-4.png" width="500px" />
+![Test Credentials in GHPRB section - test 4](images/jenkins-ghprb-5-test-4.png)
 
 When you click "Comment to Issue", Jenkins will use the Github credentials
 to attempt to leave the comment specified in the text box in the pull
@@ -148,7 +148,7 @@ request thread.
 
 Here's what it should look like if everything goes according to plan:
 
-<img src="/images/jenkins-ghprb-5-test-5.png" width="500px" />
+![Comment on a pull request](images/jenkins-ghprb-5-test-5.png)
 
 Let's keep moving through the tests, there is still one more to get through!
 
@@ -166,12 +166,12 @@ to post about the failure, and some context (more info).
 
 Here is what the settings look like filled out:
 
-<img src="/images/jenkins-ghprb-5-test-6.png" width="500px" />
+![Settings filled out in GHPRB section](images/jenkins-ghprb-5-test-6.png)
 
 When "Update Status" is clicked it results in the following change to
 the pull request page:
 
-<img src="/images/jenkins-ghprb-5-test-7.png" width="500px" />
+![Failed pull request](images/jenkins-ghprb-5-test-7.png)
 
 Note that the pull request can still be merged, but in the repository
 settings we can require that build checks pass before any pull requests

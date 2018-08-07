@@ -15,24 +15,24 @@ we want.
 
 Once you are logged in you should see a view like this:
 
-<img src="/images/jenkins-login-post.png" width="500px" />
+![Jenkins home page](images/jenkins-login-post.png)
 
 After clicking "Manage Jenkins" on the left, you should see a list of menu items:
 
-<img src="/images/jenkins-manage.png" width="500px" />
+![Manage Jenkins page](images/jenkins-manage.png)
 
 Scroll down to the item "Manage Plugins" (gren puzzle piece):
 
-<img src="/images/jenkins-manage-2.png" width="500px" />
+![Manage Plugins item on Manage Jenkins page](images/jenkins-manage-2.png)
 
 This takes you to the plugin manager view:
 
-<img src="/images/jenkins-pm.png" width="500px" />
+![Plugin Manager page](images/jenkins-pm.png)
 
 Click the Available tab to see a list of plugins that are available on the
 server and can be installed into your Jenkins instance:
 
-<img src="/images/jenkins-pm-avail.png" width="500px" />
+![Available tab of Plugin Manager page](images/jenkins-pm-avail.png)
 
 From here, you can install any of the plugins listed.
 
