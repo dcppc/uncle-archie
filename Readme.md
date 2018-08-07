@@ -1,5 +1,7 @@
 # uncle-jenkins
 
+<img src="docs/images/unclejenkinsbk.svg" width="100px" />
+
 **Uncle Jenkins** is a home-brewed continuous integration server.
 It handles pull request checks (build-test) and push-to-deploy 
 functionality (build-test-deploy).
