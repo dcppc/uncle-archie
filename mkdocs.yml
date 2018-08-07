@@ -33,6 +33,9 @@ pages:
     - Installing Plugins: 'plugins.md'
     - Github Pull Request Builder: 'plugins_ghprb.md'
 
+  - Jobs:
+    - Pull Request Builder: 'jobs_ghprb.md'
+
 # Extensions
 markdown_extensions:
   - admonition

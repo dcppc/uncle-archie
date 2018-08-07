@@ -56,7 +56,7 @@ Once you set up an admin user, you should now see
 the following login page when you visit your jenkins
 instance:
 
-<img src="/images/jenkins-login-pre.png" width="500px" />
+![Jenkins pre-login](images/jenkins-login-pre.png)
 
 
 ## installing nginx proxy
