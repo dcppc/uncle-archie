@@ -177,4 +177,47 @@ Note that the pull request can still be merged, but in the repository
 settings we can require that build checks pass before any pull requests
 can be merged.
 
+## advanced configuration
+
+The configuration never ends. Clicking the "Advanced" button reveals additional
+configuration options:
+
+![Advanced config options](images/jenkins-ghprb-6-config-1.png)
+
+![More advanced config options](images/jenkins-ghprb-6-config-2.png)
+
+Let's walk through what these mean.
+
+* **Request for testing phase:** (default value: "Can one of the admins verify this
+  patch please?") When a new pull request is opened in the project and the author of 
+  the pull request isn't whitelisted, builder will post this message.
+
+* **Accept to test phrase:** (default value: "ok to test") one of the admins can
+  comment with this message to green-light this pull request for testing
+  (prevents random strangers from running code thru Jenkins tests).
+
+* **Add to whitelist phrase:** (default value: "add to whitelist") one of the
+  admins can reply with this message to instruct Jenkins to add the author of the 
+  PR to the whitelist.
+
+* **Test phrase:** (default value: "test this please") one of the admins can comment 
+  with this message to instruct Jenkins to do a one-time test run.
+
+* **Skip build phrase:** (default value: "skip ci") one of the admins can
+  comment with this message to instruct Jenkins not to run any tests
+
+* **Crontab line:** the jenkins user on the server installs its own crontab to
+  check for new jobs. crontab has a maximum resolution of 1 minute, so that's
+  the fastest you can check for new tasks.
+
+* **List of GitHub labels for which the build should not be triggered:** this
+  allows users to skip CI by applying a label to their pull request.
+
+* **List of GitHub labels for which the build should only be triggered. (Leave
+  blank for 'any')** (Self-explanatory)
+
+* **Application Setup:** this section allows you to update the build status
+  while the build is going on. We will leave this alone for the purposes of
+  these instructions.
+
 
