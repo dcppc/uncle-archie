@@ -14,17 +14,17 @@ a bare IP address.
 
 Preparing Jenkins:
 
-- Preparing Jenkins
-  - [Installing Jenkins](installing.md)
-  - [Nginx and Jenkins](nginx.md)
-  - [Configuring Jenkins](configuring.md)
+* Preparing Jenkins:
+    * [Installing Jenkins](installing.md)
+    * [Nginx and Jenkins](nginx.md)
+    * [Configuring Jenkins](configuring.md)
 
-- Jenkins Plugins: 
-  - [Installing Plugins](plugins.md)
-  - [Github Pull Request Builder](plugins_ghprb.md)
+* Jenkins Plugins: 
+    * [Installing Plugins](plugins.md)
+    * [Github Pull Request Builder](plugins_ghprb.md)
 
-- Pipelines:
-  - [Pull Request Reviews](#) (in progress)
+* Pipelines:
+    * [Pull Request Reviews](#) (in progress)
 
 ## Links
 
