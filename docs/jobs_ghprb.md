@@ -54,4 +54,63 @@ Now your home page should show your new job!
 
 ![Jenkins create new job](images/jenkins-job-5.png)
 
+Ready to rock.
+
+## running PR builder job
+
+Once you have created the Github PR Builder job, you are ready to
+trigger it. Starting from the Jenkins home page, you should see
+your job in the list:
+
+![List of jobs, Running Jenkins page](images/jenkins-running-1.png)
+
+Click the project name to open the project page. On the left side,
+you will see a "Build Now" option. Use this to trigger a build job.
+
+Before you trigger a build job, open another pull request for the
+GHPRB to try and build.
+
+![Build now action, Running Jenkins page](images/jenkins-running-2.png)
+
+Once you trigger a build, it will show up in a box on the bottom 
+left part of the page, labeled "Build History". 
+
+![Viewing build results, Running Jenkins page](images/jenkins-running-3.png)
+
+Click on a build number to open its page:
+
+![Viewing individual build result, Running Jenkins page](images/jenkins-running-4.png)
+
+From here, you can also view the output log from the build job.
+
+![Viewing build log, Running Jenkins page](images/jenkins-running-5.png)
+
+## dealing with failed build
+
+Your first build will probably result in a failure:
+
+![Viewing build log, Running Jenkins page](images/jenkins-running-5.png)
+
+The error message is:
+
+    ERROR: Couldn't find any revision to build. Verify the repository and branch configuration for this job.
+    Finished: FAILURE
+
+This issue is caused by a change in Jenkins and how it deals with exporting
+variables. See [this issue](https://github.com/jenkinsci/ghprb-plugin/issues/341)
+in the GHPRB plugin repo, and [this announcement](https://jenkins.io/blog/2016/05/11/security-update/)
+from Jenkins about what changed and broke GHPRB.
+
+To make this work, we need to modify the Jenkins startup service
+in `/etc/init.d/jenkins` and add flags to the Jenkins run line.
+Specifically, change this line (line 157):
+
+    $SU -l $JENKINS_USER --shell=/bin/bash -c "$DAEMON $DAEMON_ARGS -- $JAVA $JAVA_ARGS  -jar $JENKINS_WAR $JENKINS_ARGS" || return 2
+
+to this line:
+
+    $SU -l $JENKINS_USER --shell=/bin/bash -c "$DAEMON $DAEMON_ARGS -- $JAVA $JAVA_ARGS -Dhudson.model.ParametersAction.safeParameters=ghprbActualCommit,ghprbActualCommitAuthor,ghprbActualCommitAuthorEmail,ghprbAuthorRepoGitUrl,ghprbCommentBody,ghprbCredentialsId,ghprbGhRepository,ghprbPullAuthorEmail,ghprbPullAuthorLogin,ghprbPullAuthorLoginMention,ghprbPullDescription,ghprbPullId,ghprbPullLink,ghprbPullLongDescription,ghprbPullTitle,ghprbSourceBranch,ghprbTargetBranch,ghprbTriggerAuthor,ghprbTriggerAuthorEmail,ghprbTriggerAuthorLogin,ghprbTriggerAuthorLoginMention,GIT_BRANCH,sha1 -jar $JENKINS_WAR $JENKINS_ARGS" || return 2
+
+
+
 
