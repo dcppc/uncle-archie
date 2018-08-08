@@ -20,7 +20,7 @@ server.
 
 
 app = Flask(__name__)
-
+count = 0
 
 logging.basicConfig(filename='/tmp/uncle_archie.log',
                     filemode='a',
@@ -32,6 +32,7 @@ def index():
     """
     Main WSGI application entry.
     """
+    print("Uncle Archie got a visitor!")
     path = os.path.dirname(os.path.abspath(__file__))
 
     # Only POST is implemented
@@ -41,8 +42,13 @@ def index():
         #abort(501)
 
     # Load config
-    with open(os.path.join(path, 'config.json'), 'r') as cfg:
-        config = json.loads(cfg.read())
+    try:
+        pth = os.path.join(path, 'config.json')
+        with open(pth, 'r') as cfg:
+            config = json.loads(cfg.read())
+    except FileNotFoundError:
+        logging.error("ERROR: No config file found at %s"%(pth))
+        abort(501)
 
     # Implement ping/pong
     event = request.headers.get('X-GitHub-Event', 'ping')
@@ -57,15 +63,16 @@ def index():
         logging.warning('Request parsing failed')
         abort(400)
 
-    # Enforce secret
-    secret = config.get('enforce_secret', '')
-    if secret!='':
-        try:
-            if payload['secret'] != secret:
-                logging.error('Invalid secret %s.'%(payload['secret']))
-                abort(403)
-        except:
-            abort(501)
+    ## payload['secret'] does not exist???
+    ## Enforce secret
+    #secret = config.get('enforce_secret', '')
+    #if secret!='':
+    #    try:
+    #        if payload['secret'] != secret:
+    #            logging.error('Invalid secret %s.'%(payload['secret']))
+    #            abort(403)
+    #    except:
+    #        abort(501)
 
     # Determining the branch is tricky, as it only appears for certain event
     # types an at different levels
@@ -109,7 +116,6 @@ def index():
     # Here, we pass off the hook info
     # to user-defined python functions
 
-    print(meta)
     process_payload(payload,meta)
 
     # And done.
