@@ -1,16 +1,18 @@
 """
-private-www CI Hook for Uncle Archie
+just_print CI Hook for Uncle Archie
 
 This script is a continuous integration hook for 
 Uncle Archie. This function is called with all 
 received webhooks, so it must use payload and meta
-to determin when to run.
+to determine when to run.
 
 payload and meta are JSON containers with info about
 the repository in them.
 """
 
 def process_payload(payload,meta):
+    with open('/tmp/yes_just_print_hook_works','w') as f:
+        f.write(str(payload))
     print("*"*40)
     print(payload)
     print("*"*40)
