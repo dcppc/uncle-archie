@@ -36,8 +36,9 @@ def index():
 
     # Only POST is implemented
     if request.method != 'POST':
-        logging.error('ERROR: Only POST method is implemented')
-        abort(501)
+        return('<h2>hello world</h2>')
+        #logging.error('ERROR: Only POST method is implemented')
+        #abort(501)
 
     # Load config
     with open(os.path.join(path, 'config.json'), 'r') as cfg:
@@ -108,6 +109,7 @@ def index():
     # Here, we pass off the hook info
     # to user-defined python functions
 
+    print(meta)
     process_payload(payload,meta)
 
     # And done.
@@ -119,5 +121,5 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='127.0.0.1', port=5005)
 
