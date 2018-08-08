@@ -21,10 +21,10 @@ world beyond the proxy).
 A reverse proxy means that instead of "surrounding" and "wrapping"
 the client, a reverse proxy wraps the end server. That means that
 any requests for , say, `https://archie.mydomain.com` can be reverse 
-proxied to the Uncle Archie Flask server at `http://localhost:5000/`.
+proxied to the Uncle Archie Flask server at `http://localhost:50005/`.
 
 The advantage of this is that Uncle Archie Flask is not accessible
-via port 5000 to outside users. Every request must pass through nginx.
+via port 50005 to outside users. Every request must pass through nginx.
 
 ## First Steps: Installing Nginx
 
@@ -47,8 +47,8 @@ sudo service nginx start
 sudo service nginx stop
 ```
 
-**Uncle Archie runs on port 5000 and is available at
-`localhost:5000`.**
+**Uncle Archie runs on port 50005 and is available at
+`localhost:50005`.**
 
 ## Nginx Standard Configuration
 
@@ -100,11 +100,11 @@ server {
                       application/atom+xml;
 
     location /webhook {
-        # /webhook* anything takes user to port 5000, api
+        # /webhook* anything takes user to port 5005, api
         proxy_set_header   X-Real-IP  $remote_addr;
         proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header   Host $host;
-        proxy_pass http://54.191.178.27:5000/webhook;
+        proxy_pass http://127.0.0.1:5005/webhook;
     }
 
     ### location / {
