@@ -21,8 +21,12 @@ theme:
   font:
     text: 'Roboto'
     code: 'Roboto Mono'
+
 pages:
   - Index: 'index.md'
+  - How It Works: 'how.md'
+  - Flask: 'flask.md'
+  - Nginx: 'nginx.md'
 
 # Extensions
 markdown_extensions:

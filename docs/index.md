@@ -12,7 +12,7 @@ so that SSL can be used. This requires that the server running
 Uncle Archie be accessible via a domain name, and not just a bare 
 IP address.
 
-Documentation: <https://pages.charlesreid1.com/uncle-archie> or [`docs/index.md`](docs/index.md)
+Documentation: <https://pages.charlesreid1.com/uncle-archie>
 
 Source code: <https://git.charlesreid1.com/bots/uncle-archie>
 
