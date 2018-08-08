@@ -20,6 +20,10 @@ Source code mirror: <https://github.com/charlesreid1/uncle-archie>
 
 ## Table of Contents
 
-* [Architecture of Uncle Archie](arch.md)
+* [How It Works](how.md)
+
+* [Flask Webhook Server](flask.md)
+
+* [Nginx Web Server](nginx.md)
 
 
