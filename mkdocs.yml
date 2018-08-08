@@ -1,7 +1,7 @@
-site_name: uncle-jenkins
-site_url: https://pages.charlesreid1.com/uncle-jenkins
-repo_name: uncle-jenkins
-repo_url: https://github.com/charlesreid1/uncle-jenkins
+site_name: uncle-archie
+site_url: https://pages.charlesreid1.com/uncle-archie
+repo_name: uncle-archie
+repo_url: https://github.com/charlesreid1/uncle-archie
 edit_uri: ""
 
 copyright: 'Copyright &copy; 2018 <a href="https://charlesreid1.com">Charles Reid</a>, released under the <a href="https://opensource.org/licenses/MIT">MIT license</a> <br /><br />
@@ -17,24 +17,12 @@ theme:
   palette:
     primary: 'teal'
     accent:  'teal'
-  logo: 'images/unclejenkinswt.svg'
+  logo: 'images/unclearchiewt.svg'
   font:
     text: 'Roboto'
     code: 'Roboto Mono'
 pages:
   - Index: 'index.md'
-
-  - Preparing Jenkins:
-    - Installing Jenkins: 'installing.md'
-    - Nginx and Jenkins: 'nginx.md'
-    - Configuring Jenkins: 'configuring.md'
-
-  - Jenkins Plugins: 
-    - Installing Plugins: 'plugins.md'
-    - Github Pull Request Builder: 'plugins_ghprb.md'
-
-  - Jobs:
-    - Pull Request Builder: 'jobs_ghprb.md'
 
 # Extensions
 markdown_extensions:
