@@ -1,8 +1,8 @@
 # Nginx and Jenkins
 
-## background
+## Background
 
-### what is nginx?
+### What Is Nginx?
 
 nginx is a web server that can allow for a lot more flexibility
 in routing domain names and web traffic from the frontend to
@@ -11,7 +11,7 @@ various backend servers.
 One of the more useful functionalities in nginx is the ability to
 set up a reverse proxy.
 
-### what is a reverse proxy?
+### What Is A Reverse Proxy?
 
 A proxy is defined as _the authority to represent someone else_.
 Typically a proxy is set up to "surround" and "wrap" actions that
@@ -27,15 +27,15 @@ is running.
 The advantage of this is that Jenkins is not accessible via port
 8080 to outside users. Every request must pass through nginx.
 
-## first steps: installing nginx
+## First Steps: Installing Nginx
 
-recommend using your operating system's package manager.
+Using your operating system's package manager is recommended:
 
 ```
 apt-get install nginx
 ```
 
-On ubuntu, this will install configuration files to
+On Ubuntu, this will install configuration files to:
 
 ```
 /etc/nginx/
@@ -48,14 +48,18 @@ sudo service nginx start
 sudo service nginx stop
 ```
 
-## configuring nginx
-
-What follows is an nginx configuration file for
-using Jenkins behind an nginx reverse proxy, and
-making it available via a subdomain like `jenkins.mysite.com`.
-
-**NOTE: As a reminder the local Jenkins server is available at
+**Jenkins runs on port 8080 and is available at
 `localhost:8080`.**
+
+## Nginx Standard Configuration
+
+The "standard configuration" for nginx is to use port 443 for
+HTTPS, port 80 for HTTP, and to automatically redirect HTTP
+requests on port 80 to the more secure port 443.
+
+The nginx configuration file below sets up nginx as a 
+reverse proxy in front of Jenkins, and makes it available 
+via a subdomain like `jenkins.mysite.com`.
 
 Here is the nginx configuration file and the location
 on disk where it should be using an aptitude-installed
@@ -100,8 +104,10 @@ server {
 }
 ```
 
+### Alternative Nginx Configuration
+
 Alternatively, if you want your server to be publicly available on a non-standard 
-port, but still use SSL, for example being available at
+port like 8081, but still use SSL, for example being available at
 
 ```
 https://jenkins.mydomain.com:8081
@@ -156,5 +162,4 @@ Now nginx can be restarted:
 ```
 sudo service nginx restart
 ```
-
 

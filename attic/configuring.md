@@ -2,7 +2,7 @@
 
 To set up your jenkins instance, visit the jenkins configuration page.
 
-## getting to the jenkins configuration page
+## Getting To The Jenkins Configuration Page
 
 Start by logging into your Jenkins instance.
 
@@ -21,7 +21,7 @@ many sections:
 
 Let's go through some settings you can change.
 
-## nginx users: proxy url
+## Nginx Users: Proxy Url
 
 If you are using Jenkins behind a proxy, the first thing you
 will want to fix is the URL location of the Jenkins instance.

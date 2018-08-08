@@ -8,7 +8,7 @@ These instructions assume you are running Ubuntu 16.04.
 * See [jenkins download page](https://jenkins.io/download/) on jenkins.io
   to download jenkins for your platform.
 
-## installing jenkins with aptitude
+## Installing Jenkins With Aptitude
 
 To install jenkins, we use aptitude, which installs
 jenkins as a system service:
@@ -26,7 +26,7 @@ Now start jenkins running on port 8080:
 sudo systemctl start jenkins
 ```
 
-## starting/stopping the jenkins service
+## Starting/Stopping The Jenkins Service
 
 Jenkins will be installed as a system service, so it can be 
 started and stopped using systemctl:
@@ -37,12 +37,15 @@ sudo systemctl stop jenkins
 sudo systemctl restart jenkins
 ```
 
-## unlocking jenkins
+## Unlocking Jenkins
 
 Verify your installation went okay by visiting
 `http://<server-ip>:8080` in your browser. You should
-be asked for an admin password, available in the file
-`/var/lib/jenkins/secrets/initialAdminPassword`:
+be asked for an admin password:
+
+![Jenkins unlock](images/jenkins-installing-1.png)
+
+Run this from the Jenkins server to get the key:
 
 ```
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
@@ -52,6 +55,16 @@ You can set a new user/password, or you can use
 the admin username with the alphanumeric string in
 the above file as the password.
 
+Next it will ask if you want to install any plugins. 
+I selected the default (the "community choice"
+plugins):
+
+![Jenkins unlock](images/jenkins-installing-2.png)
+
+This will run through an installation process:
+
+![Jenkins unlock](images/jenkins-installing-3.png)
+
 Once you set up an admin user, you should now see
 the following login page when you visit your jenkins
 instance:
@@ -59,7 +72,7 @@ instance:
 ![Jenkins pre-login](images/jenkins-login-pre.png)
 
 
-## installing nginx proxy
+## Installing Nginx Proxy
 
 If you are running Jenkins behind an nginx server (optional), 
 this is the proper time to set up the nginx server to reverse 

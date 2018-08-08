@@ -1,6 +1,6 @@
 # Jenkins Job: Github Pull Request Builder (GHPRB)
 
-## creating PR builder job
+## Creating PR Builder Job
 
 Start by logging into your Jenkins instance.
 
@@ -85,7 +85,7 @@ From here, you can also view the output log from the build job.
 
 ![Viewing build log, Running Jenkins page](images/jenkins-running-5.png)
 
-## dealing with failed build
+## Dealing With Failed Build
 
 Your first build will probably result in a failure:
 
@@ -110,7 +110,5 @@ Specifically, change this line (line 157):
 to this line:
 
     $SU -l $JENKINS_USER --shell=/bin/bash -c "$DAEMON $DAEMON_ARGS -- $JAVA $JAVA_ARGS -Dhudson.model.ParametersAction.safeParameters=ghprbActualCommit,ghprbActualCommitAuthor,ghprbActualCommitAuthorEmail,ghprbAuthorRepoGitUrl,ghprbCommentBody,ghprbCredentialsId,ghprbGhRepository,ghprbPullAuthorEmail,ghprbPullAuthorLogin,ghprbPullAuthorLoginMention,ghprbPullDescription,ghprbPullId,ghprbPullLink,ghprbPullLongDescription,ghprbPullTitle,ghprbSourceBranch,ghprbTargetBranch,ghprbTriggerAuthor,ghprbTriggerAuthorEmail,ghprbTriggerAuthorLogin,ghprbTriggerAuthorLoginMention,GIT_BRANCH,sha1 -jar $JENKINS_WAR $JENKINS_ARGS" || return 2
-
-
 
 
