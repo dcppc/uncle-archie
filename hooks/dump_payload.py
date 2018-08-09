@@ -7,7 +7,7 @@ def process_payload(payload,meta,config):
 
     from datetime import datetime
     fname = datetime.now().isoformat()
-    with open('/tmp/archie_dumppayload_%s'%(fname),'w') as f:
+    with open('/tmp/archie/dump_payload_%s'%(fname),'w') as f:
         f.write(json.dumps(payload,indent=4))
 
 if __name__=="__main__":

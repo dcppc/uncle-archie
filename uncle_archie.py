@@ -22,7 +22,9 @@ server.
 app = Flask(__name__)
 count = 0
 
-logging.basicConfig(filename='/tmp/uncle_archie.log',
+subprocess.call(['mkdir','-p','/tmp/archie/'])
+
+logging.basicConfig(filename='/tmp/archie/uncle_archie.log',
                     filemode='a',
                     level=logging.DEBUG)
 
@@ -118,7 +120,7 @@ def index():
 
     from datetime import datetime
     fname = datetime.now().isoformat()
-    with open('/tmp/archie_payload_%s'%(fname),'w') as f:
+    with open('/tmp/archie/flask_payload_%s'%(fname),'w') as f:
         f.write(json.dumps(payload,indent=4))
 
     process_payload(payload,meta,config)
