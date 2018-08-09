@@ -1,6 +1,6 @@
 # Startup Service
 
-See `archie.service`
+See [`scripts/archie.service`](https://github.com/charlesreid1/uncle-archie/blob/master/scripts/archie.service)
 
 Now install the service to `/etc/systemd/system/archie.servce`,
 and activate it:
