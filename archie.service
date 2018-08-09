@@ -4,8 +4,8 @@ After=multi-user.target
 
 [Service]
 Restart=always
-ExecStart=/usr/bin/sudo -H -u ubuntu /home/ubuntu/uncle-archie/scripts/start_archie.sh
-ExecStop=/usr/bin/sudo -H -u ubuntu /home/ubuntu/uncle-archie/scripts/stop_archie.sh
+ExecStart=/usr/bin/sudo -H -u ubuntu /usr/bin/bash /home/ubuntu/uncle-archie/scripts/start_archie.sh
+ExecStop=/usr/bin/sudo -H -u ubuntu /usr/bin/bash /home/ubuntu/uncle-archie/scripts/stop_archie.sh
 
 [Install]
 WantedBy=multi-user.target
