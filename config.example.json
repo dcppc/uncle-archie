@@ -1,3 +1,4 @@
 {
+    "github_access_token" : "XXXXXXXXXX",
     "enforce_secret": "SOMELONGSECRETSTRINGTHATYOUPASTEINTOGITHUBORGITEAWEBINTERFACE"
 }
