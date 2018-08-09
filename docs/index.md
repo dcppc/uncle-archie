@@ -1,6 +1,6 @@
 # uncle-archie
 
-![uncle archie](images/unclearchiebk.svg)
+<img src="https://raw.githubusercontent.com/charlesreid1/uncle-archie/master/docs/images/unclearchiebk.svg?sanitize=true" width="100px"/>
 
 **Uncle Archie** is a home-brewed continuous integration server.
 It handles pull request checks (build-test) and push-to-deploy 
