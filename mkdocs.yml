@@ -22,13 +22,16 @@ theme:
     text: 'Roboto'
     code: 'Roboto Mono'
 
-pages:
+nav:
   - Index: 'index.md'
   - How It Works: 'how.md'
-  - Flask: 'flask.md'
-  - Nginx: 'nginx.md'
-  - Payload Processing: 'payloads.md'
-  - Hook Functions: 'hooks.md'
+  - DevOps:
+    - Flask: 'flask.md'
+    - Nginx: 'nginx.md'
+    - Startup Service: 'service.md'
+  - Payloads and Hooks:
+    - Payload Processing: 'payloads.md'
+    - Hook Functions: 'hooks.md'
 
 # Extensions
 markdown_extensions:
