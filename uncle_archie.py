@@ -76,7 +76,7 @@ def index():
 
     # Determining the branch is tricky, as it only appears for certain event
     # types an at different levels
-    branch = None
+    branch = ''
     try:
         # Case 1: a ref_type indicates the type of ref.
         # This true for create and delete events.
@@ -97,8 +97,8 @@ def index():
 
 
     except KeyError:
-        # If the payload structure isn't what we expect, we'll live without
-        # the branch name
+        # If the payload structure isn't what we expect, 
+        # we'll live without the branch name
         pass
 
     # All current events have a repository, but some legacy events do not,
@@ -117,11 +117,11 @@ def index():
     # to user-defined python functions
 
     from datetime import datetime
-    right_now = datetime.now().isoformat()
-    tmpfile = "tmp_%s"%(right_now)
-    with open('/tmp/%s'%(tmpfile),'w') as f:
-        f.write(str(payload))
-    process_payload(payload,meta)
+    fname = datetime.now().isoformat()
+    with open('/tmp/archie_payload_%s'%(fname),'w') as f:
+        f.write(json.dumps(payload,indent=4))
+
+    process_payload(payload,meta,config)
 
     # And done.
     ##############################
