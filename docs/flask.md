@@ -12,12 +12,13 @@ running at `archie.mydomain.com`, you should install webhooks with an endpoint
 of `https://archie.mydomain.com/webhook` (more on domain configuration
 and HTTPS on the [Nginx](nginx.md) page).
 
-The `/webhook` route is being sent a JSON payload. The Flask server
-just needs to parse that JSON and process it. The Flask server
-extracts meta-info (the name of the repository, the name of the 
-event, and the name of the branch from the payload) about the 
-webhook event, then passes the payload and meta-info on to the
-`process_payload()` function in `process_payload.py`.
+The `/webhook` route is sent a JSON payload from Github. 
+
+The Flask server extracts meta-info (name of repo, type of event,
+name of branch) about the webhook event from the payload,
+then passes all of this information to `process_payload()`
+in the `process_payload.py` file, which passes it on to 
+user-defined functions.
 
 There are also [webhook examples](https://developer.github.com/webhooks/)
 in the Github documentation.
@@ -40,7 +41,7 @@ The webhook secret is set in `config.json`, loaded by the Flask
 application. This is used to verify that incoming webhooks are,
 in fact, legitimate.
 
-Finally, the events that you want to send should be _all_.
-That allows our CI server to be much more flexible about
-branches and pull requests.
+Finally, the events that you want to send should be picked out
+from the menu of possible webhook events, affording the CI server
+maximum flexibility.
 
