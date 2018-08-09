@@ -4,6 +4,14 @@ The first component of Uncle Archie is the flask webhook server.
 This is a server with one endpoint whose sole function is to 
 receive and process webhooks from any number of repositories.
 
+## Port and Bind Address
+
+Uncle Archie listens on port 5005.
+
+Uncle Archie binds to `127.0.0.1:5005` on the host.
+
+(Note: this is important for the [Nginx](nginx.md) setup.)
+
 ## Routes
 
 The Uncle Archie Flask server has one endpoint, `/webhook`. That is

@@ -62,7 +62,7 @@ via a subdomain like `archie.mysite.com`.
 
 Here is the nginx configuration file and the location
 on disk where it should be using an aptitude-installed
-nginx:
+nginx (also see `nginx/archie.conf` in the repo):
 
 **`/etc/nginx/sites-available/archie.conf`**
 
@@ -70,24 +70,24 @@ nginx:
 server {
     listen 80;
     listen [::]:80;
-    server_name archie.mydomain.com;
+    server_name archie.nihdatacommons.us;
     location / {
-        return 301 https://archie.mydomain.com$request_uri;
+        return 301 https://archie.nihdatacommons.us$request_uri;
     }
 }
 
 server {
     listen 443;
     listen [::]:443;
-    server_name archie.mydomain.com;
+    server_name archie.nihdatacommons.us;
 
     ssl on;
-    ssl_certificate /etc/letsencrypt/live/archie.mydomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/archie.mydomain.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/archie.nihdatacommons.us/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/archie.nihdatacommons.us/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
 
     client_max_body_size 100m;
- 
+
     gzip              on;
     gzip_http_version 1.0;
     gzip_proxied      any;
@@ -99,6 +99,20 @@ server {
                       application/x-javascript
                       application/atom+xml;
 
+    #################
+    # This section is not necessary,
+    # it makes the root url / into a 
+    # static hosted site
+
+    root /www/archie.nihdatacommons.us/htdocs;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    # now on with the show...
+    ##################
+
     location /webhook {
         # /webhook* anything takes user to port 5005, api
         proxy_set_header   X-Real-IP  $remote_addr;
@@ -106,13 +120,6 @@ server {
         proxy_set_header   Host $host;
         proxy_pass http://127.0.0.1:5005/webhook;
     }
-
-    ### location / {
-    ###     # Here, you can optionally redirect the user to 
-    ###     # a landing page explaining the webhook server.
-    ###     #
-    ###     # ......or not.
-    ### }
 }
 ```
 

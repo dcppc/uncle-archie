@@ -20,6 +20,8 @@ Source code mirror: <https://github.com/charlesreid1/uncle-archie>
 
 ## Table of Contents
 
+Uncle Archie:
+
 * [How It Works](how.md)
 
 * [Quick Start](quick.md)
