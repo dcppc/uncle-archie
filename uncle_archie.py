@@ -116,6 +116,11 @@ def index():
     # Here, we pass off the hook info
     # to user-defined python functions
 
+    from datetime import datetime
+    right_now = datetime.now().isoformat()
+    tmpfile = "tmp_%s"%(right_now)
+    with open('/tmp/%s'%(tmpfile),'w') as f:
+        f.write(str(payload))
     process_payload(payload,meta)
 
     # And done.
