@@ -25,6 +25,7 @@ theme:
 pages:
   - Index: 'index.md'
   - How It Works: 'how.md'
+  - Quick Start: 'quick.md'
   - DevOps:
     - Flask: 'flask.md'
     - Nginx: 'nginx.md'
