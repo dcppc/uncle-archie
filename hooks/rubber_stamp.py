@@ -23,7 +23,7 @@ def process_payload(payload,meta,config):
 
     # Set parameters for the PR builder
     params = {
-            'repo_whitelist' : ['search-demo-mkdocs-material'],
+            'repo_whitelist' : ['charlesreid1/search-demo-mkdocs-material'],
             'task_name' : 'Uncle Archie Pull Request Tester',
     }
 
@@ -42,7 +42,7 @@ def process_payload(payload,meta,config):
     # This must be a whitelisted repo
     repo_name = payload['repository']['name']
     full_repo_name = payload['repository']['full_name']
-    if repo_name not in params['repo_whitelist']:
+    if full_repo_name not in params['repo_whitelist']:
         return
 
     # Keep it simple:
