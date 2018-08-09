@@ -1,0 +1,11 @@
+[Unit]
+Description=Uncle Archie CI Server
+After=multi-user.target
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/sudo -H -u ubuntu /home/ubuntu/.pyenv/shims/python /home/ubuntu/services/uncle-archie/uncle_archie.py
+ExecStop=/usr/bin/pgrep uncle_archie | /usr/bin/xargs kill
+
+[Install]
+WantedBy=multi-user.target
