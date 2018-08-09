@@ -27,6 +27,8 @@ pages:
   - How It Works: 'how.md'
   - Flask: 'flask.md'
   - Nginx: 'nginx.md'
+  - Payload Processing: 'payloads.md'
+  - Hook Functions: 'hooks.md'
 
 # Extensions
 markdown_extensions:

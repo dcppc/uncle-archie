@@ -1,3 +1,4 @@
 Flask>=0.12.1
 PyGithub>=1.39
 requests>=2.19
+mkdocs

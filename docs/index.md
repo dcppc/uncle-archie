@@ -23,7 +23,10 @@ Source code mirror: <https://github.com/charlesreid1/uncle-archie>
 * [How It Works](how.md)
 
 * [Flask Webhook Server](flask.md)
-
+    
 * [Nginx Web Server](nginx.md)
 
+* [How Payloads Are Processed](payloads.md)
+
+* [Creating Payload Hooks](hooks.md)
 
