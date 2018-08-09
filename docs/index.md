@@ -22,9 +22,17 @@ Source code mirror: <https://github.com/charlesreid1/uncle-archie>
 
 * [How It Works](how.md)
 
+
+DevOps:
+
 * [Flask Webhook Server](flask.md)
     
 * [Nginx Web Server](nginx.md)
+
+* [Uncle Archie Startup Service](service.md)
+
+
+Payloads and Hooks and Things:
 
 * [How Payloads Are Processed](payloads.md)
 
