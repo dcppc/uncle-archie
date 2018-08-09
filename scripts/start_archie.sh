@@ -1,5 +1,13 @@
 #!/bin/bash
 #
+# To test-run:
+# 
+#       sudo -H -u ubuntu ./start_archie.sh
+# 
+# To actually run:
+# 
+#       (install archie.service startup service)
+#
 # Shell script used to start up uncle archie
 # so uncle archie can run as a startup service.
 # 
