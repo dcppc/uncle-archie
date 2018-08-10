@@ -58,16 +58,15 @@ def index():
 
 
     # -----
-    # get source IP (from request)
-    # get Github IP (from API)
-    # verify the requester
-    whitelist = requests.get('https://api.github.com/meta').json()['hooks']
-    for valid_ip in whitelist:
-        if src_ip in ip_network(valid_ip):
-            break
-        else:
-            logging.error('IP {} not allowed'.format(src_ip))
-            abort(403)
+    # Verify webhooks are from Github
+    if 'github_ips_only' in config and config['github_ips_only'] is True:
+        whitelist = requests.get('https://api.github.com/meta').json()['hooks']
+        for valid_ip in whitelist:
+            if src_ip in ip_network(valid_ip):
+                break
+            else:
+                logging.error('IP {} not allowed'.format(src_ip))
+                abort(403)
 
 
     # -----
