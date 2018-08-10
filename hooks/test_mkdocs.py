@@ -1,4 +1,5 @@
 import subprocess
+from subprocess import PIPE
 import tempfile
 import json, os, re
 from github import Github, GithubException
@@ -24,7 +25,7 @@ def process_payload(payload, meta, config):
     # Set parameters for the PR builder
     params = {
             'repo_whitelist' : ['charlesreid1/search-demo-mkdocs-material'],
-            'task_name' : 'Uncle Archie Pull Request Tester',
+            'task_name' : 'Uncle Archie Mkdocs Tester',
             'pass_msg' : 'The mkdocs build test passed!',
             'fail_msg' : 'The mkdocs build test failed.',
     }
@@ -59,8 +60,6 @@ def process_payload(payload, meta, config):
     # -----------------------------------------------
     # start mkdocs build
 
-    import pdb; pdb.set_trace()
-
 
     ######################
     # logic. noise.
@@ -91,11 +90,11 @@ def process_payload(payload, meta, config):
     clonecmd = ['git','clone','--recursive',ghurl]
     cloneproc = subprocess.Popen(
             clonecmd, 
-            stdout=FNULL, 
-            stderr=FNULL, 
+            stdout=PIPE, 
+            stderr=PIPE, 
             cwd=scratch_dir
     )
-    if check_for_exceptions(coproc):
+    if check_for_errors(cloneproc):
         build_status = "fail"
         abort = True
 
@@ -105,25 +104,28 @@ def process_payload(payload, meta, config):
         cocmd = ['git','checkout',head_commit]
         coproc = subprocess.Popen(
                 cocmd,
-                stdout=FNULL, 
-                stderr=FNULL, 
+                stdout=PIPE, 
+                stderr=PIPE, 
                 cwd=repo_dir
         )
-        if check_for_exceptions(coproc):
+        if check_for_errors(coproc):
             build_status = "fail"
             abort = True
 
     if not abort:
         buildcmd = ['mkdocs','build']
-        buildproc = subpocess.Popen(
+        buildproc = subprocess.Popen(
                 buildcmd, 
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE, 
+                stdout=PIPE,
+                stderr=PIPE, 
                 cwd=repo_dir
         )
-        if check_for_exceptions(coproc):
+        if check_for_errors(buildproc):
             build_status = "fail"
             abort = True
+        else:
+            # the only test that mattered, passed
+            build_status = "pass"
 
     # end mkdocs build
     # -----------------------------------------------
@@ -169,9 +171,13 @@ def process_payload(payload, meta, config):
         ###return
 
 
-def check_for_exceptions(proc):
-    if "Exception" in proc.stdout.read().decode('utf-8') \
-    or "Exception" in proc.stderr.read().decode('utf-8'):
+def check_for_errors(proc):
+    if "exception" in proc.stdout.read().decode('utf-8').lower() \
+    or "exception" in proc.stderr.read().decode('utf-8').lower():
+        return True
+    if "error" in proc.stdout.read().decode('utf-8').lower() \
+    or "error" in proc.stderr.read().decode('utf-8').lower():
         return True
     else:
         return False
+
