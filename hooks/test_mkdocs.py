@@ -170,7 +170,7 @@ def process_payload(payload, meta, config):
 
 
 def check_for_exceptions(proc):
-    if "Exception" in proc.stdout.read().decode('utf-8')
+    if "Exception" in proc.stdout.read().decode('utf-8') \
     or "Exception" in proc.stderr.read().decode('utf-8'):
         return True
     else:
