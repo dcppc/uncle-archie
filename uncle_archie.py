@@ -2,6 +2,9 @@ import os
 import logging
 import subprocess
 from tempfile import mkstemp
+
+from ipaddress import ip_address, ip_network
+
 from os import access, remove, fdopen
 import requests
 import json
@@ -35,12 +38,15 @@ def index():
     print("Uncle Archie got a visitor!")
     path = os.path.dirname(os.path.abspath(__file__))
 
-    # Only POST is implemented
-    if request.method != 'POST':
-        return('<h2>hello world</h2>')
-        #logging.error('ERROR: Only POST method is implemented')
-        #abort(501)
 
+    # -----
+    # Implement a nice hello world landing page
+    if request.method != 'POST':
+        # We really need to make a Jinja template instead.
+        return('<h2>Hello World! This is Uncle Archie, your local home-brewed CI server.</h2>')
+
+
+    # -----
     # Load config
     try:
         pth = os.path.join(path, 'config.json')
@@ -50,6 +56,20 @@ def index():
         logging.error("ERROR: No config file found at %s"%(pth))
         abort(501)
 
+
+    # -----
+    # Verify webhooks are from Github
+    if 'github_ips_only' in config and config['github_ips_only'] is True:
+        whitelist = requests.get('https://api.github.com/meta').json()['hooks']
+        for valid_ip in whitelist:
+            if src_ip in ip_network(valid_ip):
+                break
+            else:
+                logging.error('IP {} not allowed'.format(src_ip))
+                abort(403)
+
+
+    # -----
     # Implement ping/pong
     event = request.headers.get('X-GitHub-Event', 'ping')
     if event == 'ping':
