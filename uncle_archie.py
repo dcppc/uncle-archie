@@ -27,7 +27,7 @@ count = 0
 
 logging.basicConfig(filename='/tmp/archie/uncle_archie.log',
                     filemode='a',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 
 
 @app.route('/webhook', methods=['GET', 'POST'])
