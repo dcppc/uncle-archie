@@ -82,6 +82,9 @@ def process_payload(payload, meta, config):
     # build.
     ######################
 
+    # Remember: you can only read() the output
+    # of a PIPEd process once.
+
     abort = False
 
     # the repo must be on github
@@ -162,22 +165,17 @@ def process_payload(payload, meta, config):
         logging.info("    Repo %s"%full_repo_name)
         return
 
-        ###from datetime import datetime
-        ###right_now = datetime.now().isoformat()
-        ###tmpfile = "tmp_%s"%(right_now)
-        ###with open('/tmp/archie/testmkdocs_FAIL_%s'%(tmpfile),'w') as f:
-        ###    f.write("The commit status failed to update.\n")
-        ###    f.write(repr(e))
-        ###return
 
 
 def check_for_errors(proc):
-    if "exception" in proc.stdout.read().decode('utf-8').lower() \
-    or "exception" in proc.stderr.read().decode('utf-8').lower():
+    out = proc.stdout.read().decode('utf-8').lower()
+    err = proc.stderr.read().decode('utf-8').lower()
+
+    if "exception" in out or "exception" in err:
         return True
-    if "error" in proc.stdout.read().decode('utf-8').lower() \
-    or "error" in proc.stderr.read().decode('utf-8').lower():
+
+    if "error" in out or "error" in err:
         return True
-    else:
-        return False
+
+    return False
 
