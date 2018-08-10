@@ -149,11 +149,6 @@ def index():
     # Here, we pass off the hook info
     # to user-defined python functions
 
-    from datetime import datetime
-    fname = datetime.now().isoformat()
-    with open('/tmp/archie/flask_payload_%s'%(fname),'w') as f:
-        f.write(json.dumps(payload,indent=4))
-
     process_payload(payload,meta,config)
 
     # And done.
