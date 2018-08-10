@@ -59,6 +59,8 @@ def process_payload(payload, meta, config):
     # -----------------------------------------------
     # start mkdocs build
 
+    import pdb; pdb.set_trace()
+
 
     ######################
     # logic. noise.
@@ -97,7 +99,7 @@ def process_payload(payload, meta, config):
         build_status = "fail"
         abort = True
 
-    if !abort:
+    if not abort:
         repo_dir = os.path.join(scratch_dir, repo_name)
 
         cocmd = ['git','checkout',head_commit]
@@ -111,7 +113,7 @@ def process_payload(payload, meta, config):
             build_status = "fail"
             abort = True
 
-    if !abort:
+    if not abort:
         buildcmd = ['mkdocs','build']
         buildproc = subpocess.Popen(
                 buildcmd, 
