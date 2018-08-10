@@ -34,10 +34,12 @@ DevOps:
 
 * [Uncle Archie Startup Service](service.md)
 
-
 Payloads and Hooks and Things:
 
 * [How Payloads Are Processed](payloads.md)
 
 * [Creating Payload Hooks](hooks.md)
+
+[Acknowledgements](ack.md)
+
 

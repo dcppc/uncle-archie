@@ -33,6 +33,7 @@ pages:
   - Payloads and Hooks:
     - Payload Processing: 'payloads.md'
     - Hook Functions: 'hooks.md'
+  - Acknowledgements: 'ack.md'
 
 # Extensions
 markdown_extensions:
