@@ -83,17 +83,30 @@ def index():
         logging.warning('Request parsing failed')
         abort(400)
 
-    ## payload['secret'] does not exist???
-    ## Enforce secret
-    #secret = config.get('enforce_secret', '')
-    #if secret!='':
-    #    try:
-    #        if payload['secret'] != secret:
-    #            logging.error('Invalid secret %s.'%(payload['secret']))
-    #            abort(403)
-    #    except:
-    #        abort(501)
 
+
+
+    # Enforce secret
+    secret = config.get('enforce_secret', '')
+    if secret:
+        # Only SHA1 is supported
+        header_signature = request.headers.get('X-Hub-Signature')
+        if header_signature is None:
+            abort(403)
+
+        sha_name, signature = header_signature.split('=')
+        if sha_name != 'sha1':
+            abort(501)
+
+        # HMAC requires the key to be bytes, but data is string
+        mac = hmac.new(str(secret), msg=request.data, digestmod='sha1')
+
+        if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
+            logging.error(' XXXXXXXX A webhook with an invalid secret was received.')
+            abort(403)
+
+
+    # -----
     # Determining the branch is tricky, as it only appears for certain event
     # types an at different levels
     branch = ''
