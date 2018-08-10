@@ -4,6 +4,8 @@ import subprocess
 from tempfile import mkstemp
 
 from ipaddress import ip_address, ip_network
+import hmac
+from hashlib import sha1
 
 from os import access, remove, fdopen
 import requests
@@ -24,6 +26,8 @@ server.
 
 app = Flask(__name__)
 count = 0
+
+subprocess.call(['mkdir','-p','/tmp/archie'])
 
 logging.basicConfig(filename='/tmp/archie/uncle_archie.log',
                     filemode='a',
@@ -165,6 +169,5 @@ def index():
 
 
 if __name__ == '__main__':
-    subprocess.call(['mkdir','-p','/tmp/archie/'])
     app.run(host='127.0.0.1', port=5005)
 
