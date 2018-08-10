@@ -25,6 +25,7 @@ def process_payload(payload,meta,config):
     params = {
             'repo_whitelist' : ['charlesreid1/search-demo-mkdocs-material'],
             'task_name' : 'Uncle Archie Pull Request Tester',
+            'pass_descr' : 'This is a rubber stamp PR approval.'
     }
 
     # This must be a pull request
@@ -51,38 +52,43 @@ def process_payload(payload,meta,config):
     head_commit = payload['pull_request']['head']['sha']
     pull_number = payload['number']
 
-    # wait... we are getting here when we *close* a PR?
-
-    # where does token come from?
-    # can pass in the app
+    # Use Github access token to get API instance
     token = config['github_access_token']
     g = Github(token)
     r = g.get_repo(full_repo_name)
     c = r.get_commit(head_commit)
 
-    # This is where we would clone into our workspace
+    # -----------------------------------------------
 
-    descr = "This is a rubber stamp PR approval. No implementation yet."
+
+
+    # This is where we would clone into our workspace,
+    # or otherwise do actual work.
+
+
+
+    # -----------------------------------------------
 
     try:
         commit_status = c.create_status(
                 state = "success",
-                description = descr,
+                description = params['pass_descr'],
                 context = params['task_name']
         )
+
     except GithubException as e:
         from datetime import datetime
         right_now = datetime.now().isoformat()
         tmpfile = "tmp_%s"%(right_now)
-        with open('/tmp/archie_commitstatus_FAIL_%s'%(tmpfile),'w') as f:
+        with open('/tmp/archie/rubberstamp_commitstatus_FAIL_%s'%(tmpfile),'w') as f:
             f.write("The commit status failed to update.\n")
             f.write(repr(e))
-
+        return
 
     from datetime import datetime
     right_now = datetime.now().isoformat()
     tmpfile = "tmp_%s"%(right_now)
-    with open('/tmp/archie_commitstatus_%s'%(tmpfile),'w') as f:
+    with open('/tmp/archie/rubberstamp_commitstatus_%s'%(tmpfile),'w') as f:
         f.write("The commit status was updated successfully.\n")
 
 
