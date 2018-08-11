@@ -108,7 +108,7 @@ and responds with pong, the webhook will have a green check,
 otherwise a red x.
 
 
-### A More Interesting Pull Hook Function
+### A More Interesting Pull Request Hook Function
 
 The hook function above is really boring, so let's replace it with
 a slightly more interesting one. This one inspects the payload
