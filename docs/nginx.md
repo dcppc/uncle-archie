@@ -4,12 +4,13 @@
 
 ### What Is Nginx?
 
-nginx is a web server that can allow for a lot more flexibility
+Nginx is a web server that can allow for a lot more flexibility
 in routing domain names and web traffic from the frontend to
 various backend servers.
 
 One of the more useful functionalities in nginx is the ability to
 set up a reverse proxy.
+
 
 ### What Is A Reverse Proxy?
 
@@ -26,7 +27,8 @@ proxied to the Uncle Archie Flask server at `http://localhost:50005/`.
 The advantage of this is that Uncle Archie Flask is not accessible
 via port 50005 to outside users. Every request must pass through nginx.
 
-## First Steps: Installing Nginx
+
+## Installing Nginx
 
 Using your operating system's package manager is recommended:
 
