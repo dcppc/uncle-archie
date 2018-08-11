@@ -3,17 +3,15 @@
 Uncle Archie runs a Flask server to receive webhooks.
 Github sends webhooks in the form of JSON to the Flask
 server when events occur on Github. The JSON file contains
-lots of information about the event - the who/what/where/when/how.
+lots of information about the event.
 
 The JSON webhook is converted to a Python dictionary and is
 passed to the `process_payload()` function defined in 
-`process_payload.py`.  The function takes three arguments:
-the full payload, the meta-information (name of repo,
-name of branch, type of event), and the config dictionary
-coming from `config.json` (this contains the Github API
-key we need).
+`process_payload.py`. 
 
 ## Hooks
+
+Directory: [`hooks/`](https://github.com/charlesreid1/uncle-archie/tree/master/hooks)
 
 Each incoming webhook payload is passed to a set of hook functions,
 which are Python functions that live in the `hooks/` folder.
@@ -30,22 +28,28 @@ of the repository.
 
 ## Uncle Archie Configuration File
 
+File: [`config.json`](https://github.com/charlesreid1/uncle-archie/blob/master/config.example.json)
+
 The configuration file `config.json` contains **both** Flask **and** 
-backend (hook-specific) configuration details.
+back end hook function configuration details.
 
-For example, the secret key for the Flask server is a key that must
-be embedded in the webhook for the webhook to be processed.
-This is a flask-specific configuration detail. But the Github
-API key for the Github bot is also specified in the configuration
-file, and that is information used by the hook functions.
+An example of a Flask configuration variable is the secret key that
+must be included with the webhook's header for the webhook to be
+processed.
 
-API keys are sensitive information so this file 
-should be kept secret (hence it is in `.gitignore`).
+An example of a back end hook function's configuration detail is
+the Github API access token for the bot account that Uncle Archie
+uses, which is only used in the hook functions to interact with
+the Github API.
+
+(API keys are sensitive information so this file 
+should be kept secret, hence the configuration file
+is in `.gitignore`).
 
 The config is loaded by the Flask application, since it contains
 flask-specific configuration details. The configuration is then
 handed off to the process payload function, which passes it on 
 to each hook function.
 
-It is avialable via the variable `conf`.
+It is available via the variable `conf`.
 
