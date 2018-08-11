@@ -21,10 +21,22 @@ your `~/.bash_profile` that will set your Github username/email credentials.
 sudo -H -u florence /bin/bash
 
 # now you are the user florence
+
+# generate ssh key
 ssh-keygen -t rsa -N '' -b 4096 -f $HOME/.ssh/id_rsa -C "<email-of-github-bot-account>"
 chmod 700 $HOME/.ssh
 touch $HOME/.ssh/authorized_keys
 chmod 600 $HOME/.ssh/authorized_keys
+
+# add this to ~/bash_profile
+GIT_AUTHOR_NAME="<uncle-archie-bot-name>"
+GIT_AUTHOR_EMAIL="<uncle-archie-bot-email>"
+
+GIT_COMMITTER_NAME="${GIT_AUTHOR_NAME}"
+GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
+
+git config --global user.name "${GIT_AUTHOR_NAME}"
+git config --global user.email "${GIT_AUTHOR_EMAIL}"
 ```
 
 **Update** `archie.service` to run Uncle Archie as the new user
