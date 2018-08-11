@@ -1,6 +1,7 @@
 import subprocess
 from subprocess import PIPE
 import tempfile
+import logging
 import json, os, re
 from github import Github, GithubException
 
@@ -24,7 +25,8 @@ def process_payload(payload, meta, config):
     """
     # Set parameters for the PR builder
     params = {
-            'repo_whitelist' : ['charlesreid1/search-demo-mkdocs-material'],
+            'repo_whitelist' : ['charlesreid1/search-demo-mkdocs-material',
+                                'dcppc/private-www'],
             'task_name' : 'Uncle Archie Mkdocs Tester',
             'pass_msg' : 'The mkdocs build test passed!',
             'fail_msg' : 'The mkdocs build test failed.',
@@ -88,7 +90,16 @@ def process_payload(payload, meta, config):
     abort = False
 
     # the repo must be on github
-    ghurl = "https://github.com/%s"%full_repo_name
+    ghurl = "git@github.com:%s"%(full_repo_name)
+    logging.info("Cloning repo at %s"%(ghurl))
+
+    # Note that this checks out repos
+    # using the SSH keys in ~/.ssh
+    # and the github username in ~/.extras
+    # 
+    # If you push any changes, make sure you
+    # change your user first!
+    # https://help.github.com/articles/setting-your-username-in-git/
 
     clonecmd = ['git','clone','--recursive',ghurl]
     cloneproc = subprocess.Popen(
@@ -97,7 +108,7 @@ def process_payload(payload, meta, config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    if check_for_errors(cloneproc):
+    if check_for_errors(cloneproc,"git clone"):
         build_status = "fail"
         abort = True
 
@@ -111,7 +122,7 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        if check_for_errors(coproc):
+        if check_for_errors(coproc,"git checkout"):
             build_status = "fail"
             abort = True
 
@@ -123,12 +134,19 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        if check_for_errors(buildproc):
+        if check_for_errors(buildproc,"mkdocs build"):
             build_status = "fail"
             abort = True
         else:
             # the only test that mattered, passed
             build_status = "pass"
+
+    ###############
+    # clean up.
+    ###############
+
+    logging.info("Cleaning up after repo %s"%(full_repo_name))
+    subprocess.call(['rm','-fr',scratch_dir])
 
     # end mkdocs build
     # -----------------------------------------------
@@ -155,7 +173,7 @@ def process_payload(payload, meta, config):
                         context = params['task_name']
         )
         logging.info("Uncle Archie: mkdocs build failure:")
-        logging.info("    Commit %s"%commit)
+        logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
         return
@@ -178,9 +196,13 @@ def process_payload(payload, meta, config):
 
 
 
-def check_for_errors(proc):
+def check_for_errors(proc,label):
     out = proc.stdout.read().decode('utf-8').lower()
     err = proc.stderr.read().decode('utf-8').lower()
+
+    logging.info("Results from process %s:"%(label))
+    logging.info("%s"%(out))
+    logging.info("%s"%(err))
 
     if "exception" in out or "exception" in err:
         return True
