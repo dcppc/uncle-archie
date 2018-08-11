@@ -1,4 +1,5 @@
 import subprocess
+import logging
 from subprocess import PIPE
 import tempfile
 import json, os, re
@@ -39,19 +40,22 @@ def process_payload(payload, meta, config):
 
     # We are only interested in PRs that have the label
     # ""Run private-www integration test"
-    pr_labels = payload['pull_request']['labels']
+    pr_labels = [d['name'] for d in payload['pull_request']['labels']]
     if 'Run private-www integration test' not in pr_labels:
+        logging.debug("Skipping private-www integration test: this PR is not labeled with \"Run private-www integration test\"")
         return
 
     # We are only interested in PRs that are
     # being opened or updated
     if payload['action'] not in ['opened','synchronize']:
+        logging.debug("Skipping private-www integration test: this is not opening/updating a PR")
         return
 
     # This must be a whitelisted repo
     repo_name = payload['repository']['name']
     full_repo_name = payload['repository']['full_name']
     if full_repo_name not in params['repo_whitelist']:
+        logging.debug("Skipping private-www integration test: this is not a whitelisted repo")
         return
 
     # Keep it simple:
@@ -131,7 +135,7 @@ def process_payload(payload, meta, config):
 
         # Assemble submodule directory by determining which submdule
         # was updated from the payload (repo_name)
-        repo_dir = os.path.join(scratch_dir, repo_name)
+        repo_dir = os.path.join(scratch_dir, "private-www")
         docs_dir = os.path.join(repo_dir,'docs')
         submodule_dir = os.path.join(docs_dir,repo_name)
 
