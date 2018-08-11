@@ -181,7 +181,7 @@ def process_payload(payload, meta, config):
                         context = params['task_name']
         )
         logging.info("private-www integration test succes:")
-        logging.info("    Commit %s"%commit)
+        logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
         return
@@ -197,7 +197,7 @@ def process_payload(payload, meta, config):
                         context = params['task_name']
         )
         logging.info("private-www integration test failure:")
-        logging.info("    Commit %s"%commit)
+        logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
         return
