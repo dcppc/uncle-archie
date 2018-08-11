@@ -133,6 +133,17 @@ def process_payload(payload, meta, config):
     # end mkdocs build
     # -----------------------------------------------
 
+
+    ###########################
+    # NOTE: 
+    # 
+    # We need to make the results
+    # available in a file, and put
+    # that file behind a static route
+    # like archie.nihdatacommons.us/output/
+    # 
+    ###########################
+
     if build_status == "pass":
 
         if build_msg == "":
