@@ -67,6 +67,7 @@ def process_payload(payload, meta, config):
 
     # -----------------------------------------------
     # start private-www integration test build
+    logging.info("Starting private-www integration test build for submodule %s"%(full_repo_name))
 
     # Strategy:
     # * This will _always_ use private-www  as the build repo
@@ -106,6 +107,7 @@ def process_payload(payload, meta, config):
     ghurl = "git@github.com:dcppc/private-www"
 
     clonecmd = ['git','clone','--recursive',ghurl]
+    logging.debug("Runing clone cmd %s"%(' '.join(clonecmd)))
     cloneproc = subprocess.Popen(
             clonecmd, 
             stdout=PIPE, 
@@ -134,6 +136,7 @@ def process_payload(payload, meta, config):
         submodule_dir = os.path.join(docs_dir,repo_name)
 
         cocmd = ['git','checkout',head_commit]
+        logging.debug("Runing checkout cmd %s from %s"%(' '.join(cocmd), submodule_dir))
         coproc = subprocess.Popen(
                 cocmd,
                 stdout=PIPE, 
@@ -146,6 +149,7 @@ def process_payload(payload, meta, config):
 
     if not abort:
         buildcmd = ['mkdocs','build']
+        logging.debug("Runing build command %s"%(' '.join(buildcmd)))
         buildproc = subprocess.Popen(
                 buildcmd, 
                 stdout=PIPE,
@@ -172,7 +176,7 @@ def process_payload(payload, meta, config):
                         description = build_msg,
                         context = params['task_name']
         )
-        logging.info("Uncle Archie: mkdocs build failure:")
+        logging.info("private-www integration test succes:")
         logging.info("    Commit %s"%commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
@@ -188,7 +192,7 @@ def process_payload(payload, meta, config):
                         description = build_msg,
                         context = params['task_name']
         )
-        logging.info("Uncle Archie: mkdocs build failure:")
+        logging.info("private-www integration test failure:")
         logging.info("    Commit %s"%commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
