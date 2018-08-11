@@ -25,6 +25,18 @@ To make a new hook function:
 * Define a method `process_payload()` (following `process_payload.py`)
 * Import hook in `process_payload.py`
 
-And you're done.
+And you're done defining your hook.
 
+## How To Use A New Hook Function?
+
+Once you have defined a new hook function, and 
+it is being called from `process_payload.py`,
+you must restart the Uncle Archie Flask server.
+
+To instruct Github to send webhooks for 
+events in your repository to Uncle Archie,
+you must activate webhooks in the repositories
+where you want Uncle Archie to run.
+
+See [Activating Hooks in Github](github.md).
 

@@ -33,6 +33,7 @@ pages:
   - Payloads and Hooks:
     - Payload Processing: 'payloads.md'
     - Hook Functions: 'hooks.md'
+    - Activating Hooks in Github: 'github.md'
   - Acknowledgements: 'ack.md'
 
 # Extensions
