@@ -22,7 +22,7 @@ theme:
     text: 'Roboto'
     code: 'Roboto Mono'
 
-pages:
+nav:
   - Index: 'index.md'
   - How It Works: 'how.md'
   - Quick Start: 'quick.md'
