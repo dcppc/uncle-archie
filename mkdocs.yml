@@ -5,7 +5,9 @@ repo_url: https://github.com/charlesreid1/uncle-archie
 edit_uri: ""
 
 copyright: 'Copyright &copy; 2018 <a href="https://charlesreid1.com">Charles Reid</a>, released under the <a href="https://opensource.org/licenses/MIT">MIT license</a> <br /><br />
-<div>Icon made by Freepik, obtained from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>, used under a <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div> license.'
+<div>Icon by Freepik, from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>, used under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>.'
+
+strict: true
 
 docs_dir: docs
 site_dir: site
@@ -33,7 +35,7 @@ nav:
   - Payloads and Hooks:
     - Payload Processing: 'payloads.md'
     - Hook Functions: 'hooks.md'
-    - Activating Hooks in Github: 'github.md'
+    - Adding Hooks in Github: 'github.md'
   - Acknowledgements: 'ack.md'
 
 # Extensions
