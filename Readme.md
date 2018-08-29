@@ -2,6 +2,13 @@
 
 <img src="https://raw.githubusercontent.com/charlesreid1/uncle-archie/master/docs/images/unclearchiebk.svg?sanitize=true" width="100px"/>
 
+> _"But, I say," said Archie, "it's all a mistake, you know. Absolutely_
+> _a frightful error, my dear old constables. I'm not the lad you're_
+> _after at all. The chappie you want is a different sort of fellow_
+> _altogether. Another blighter entirely."_
+> 
+> _\- P. G. Wodehouse,_ The Indiscretions of Archie
+
 **Uncle Archie** is a home-brewed continuous integration server.
 It handles pull request checks (build-test) and push-to-deploy 
 functionality (build-test-deploy). It is written in Python
