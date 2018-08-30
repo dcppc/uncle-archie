@@ -118,7 +118,7 @@ def process_payload(payload, meta, config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    if check_for_errors(cloneproc):
+    if check_for_errors(cloneproc,"git clone"):
         build_status = "fail"
         abort = True
 
@@ -137,7 +137,7 @@ def process_payload(payload, meta, config):
             abort = True
 
     if not abort:
-        buildcmd = ['snakemake','build']
+        buildcmd = ['snakemake','build_docs']
         buildproc = subprocess.Popen(
                 buildcmd, 
                 stdout=PIPE,
