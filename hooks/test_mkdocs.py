@@ -25,8 +25,7 @@ def process_payload(payload, meta, config):
     """
     # Set parameters for the PR builder
     params = {
-            'repo_whitelist' : ['charlesreid1/search-demo-mkdocs-material',
-                                'dcppc/private-www'],
+            'repo_whitelist' : ['charlesreid1/search-demo-mkdocs-material'],
             'task_name' : 'Uncle Archie Mkdocs Tester',
             'pass_msg' : 'The mkdocs build test passed!',
             'fail_msg' : 'The mkdocs build test failed.',
