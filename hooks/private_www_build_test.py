@@ -36,13 +36,6 @@ def process_payload(payload, meta, config):
     if ('pull_request' not in payload.keys()) or ('action' not in payload.keys()):
         return
 
-    # We are only interested in PRs that have the label
-    # ""Run private-www build test"
-    pr_labels = [d['name'] for d in payload['pull_request']['labels']]
-    if 'Run private-www build test' not in pr_labels:
-        logging.debug("Skipping private-www build test: this PR is not labeled with \"Run private-www build test\"")
-        return
-
     # We are only interested in PRs that are
     # being opened or updated
     if payload['action'] not in ['opened','synchronize']:
