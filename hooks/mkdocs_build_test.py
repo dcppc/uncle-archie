@@ -6,7 +6,7 @@ import json, os, re
 from github import Github, GithubException
 
 """
-Mkdocs Documentation Tester CI Hook for Uncle Archie
+Mkdocs Build Test CI Hook for Uncle Archie
 
 This hook checks out a particular commit in a repo,
 and attempts to build the mkdocs documentation from it. 
