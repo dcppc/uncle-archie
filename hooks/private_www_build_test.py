@@ -68,7 +68,8 @@ def process_payload(payload, meta, config):
     c = r.get_commit(head_commit)
 
     # -----------------------------------------------
-    # start private-www build test build
+    # start private-www build test with snakemake
+
     logging.info("Starting private-www build test build for submodule %s"%(full_repo_name))
 
     # Strategy:
@@ -108,6 +109,14 @@ def process_payload(payload, meta, config):
     # This is always the repo we clone
     ghurl = "git@github.com:dcppc/private-www"
 
+    # Note that this checks out repos
+    # using the SSH keys in ~/.ssh
+    # and the github username in ~/.extras
+    # 
+    # If you push any changes, make sure you
+    # change your user first!
+    # https://help.github.com/articles/setting-your-username-in-git/
+
     clonecmd = ['git','clone','--recursive',ghurl]
     logging.debug("Running clone cmd %s"%(' '.join(clonecmd)))
     cloneproc = subprocess.Popen(
@@ -121,51 +130,35 @@ def process_payload(payload, meta, config):
         abort = True
 
     if not abort:
-
-        # We are always using the latest version of private-www,
-        # of the default branch, so no need to check out any version.
-
-        # However, we do want to check out the correct submodule commit
-        # in the docs/ folder before we test the mkdocs build command.
-        # That's what triggered this test in the first place - one of the 
-        # submodules was updated in a PR. Make the submodule point
-        # to the head commit of that PR.
-
-        # Assemble submodule directory by determining which submdule
-        # was updated from the payload (repo_name)
-        repo_dir = os.path.join(scratch_dir, "private-www")
-        docs_dir = os.path.join(repo_dir,'docs')
-        submodule_dir = os.path.join(docs_dir,repo_name)
+        repo_dir = os.path.join(scratch_dir, repo_name)
 
         cocmd = ['git','checkout',head_commit]
-        logging.debug("Running checkout cmd %s from %s"%(' '.join(cocmd), submodule_dir))
         coproc = subprocess.Popen(
                 cocmd,
                 stdout=PIPE, 
                 stderr=PIPE, 
-                cwd=submodule_dir
+                cwd=repo_dir
         )
-        if check_for_errors(coproc):
+        if check_for_errors(coproc,"git checkout"):
             build_status = "fail"
             abort = True
 
     if not abort:
         buildcmd = ['snakemake','build']
-        logging.debug("Running build command %s"%(' '.join(buildcmd)))
         buildproc = subprocess.Popen(
                 buildcmd, 
                 stdout=PIPE,
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        if check_for_errors(buildproc):
+        if check_for_errors(buildproc,"snakemake build"):
             build_status = "fail"
             abort = True
         else:
             # the only test that mattered, passed
             build_status = "pass"
 
-    # end mkdocs build
+    # end snakemake build
     # -----------------------------------------------
 
     if build_status == "pass":
