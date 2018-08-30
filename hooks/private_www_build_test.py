@@ -6,12 +6,10 @@ import json, os, re
 from github import Github, GithubException
 
 """
-private-www Integration Test CI Hook for Uncle Archie
+private-www Build Test CI Hook for Uncle Archie
 
-This hook should be installed into all submodules of private-www.
-When a pull request in any of these submodules is updated, and that 
-pull request has a label "Run private-www integration test",
-we run a CI test and update the status of the head commit on the PR.
+This hook should be installed in the private-www repository.
+This will use snakemake to attempt to build the site.
 
 If the build succeeds, the commit is marked as having succeed.
 Otherwise the commit is marked as failed.
@@ -28,10 +26,10 @@ def process_payload(payload, meta, config):
     """
     # Set parameters for the PR builder
     params = {
-            'repo_whitelist' : ['dcppc/internal','dcppc/organize','dcppc/nih-demo-meetings'],
-            'task_name' : 'Uncle Archie private-www Integration Test',
-            'pass_msg' : 'The private-www integration test passed!',
-            'fail_msg' : 'The private-www integration test failed.',
+            'repo_whitelist' : ['dcppc/private-www'],
+            'task_name' : 'Uncle Archie private-www Build Test',
+            'pass_msg' : 'The private-www build test passed!',
+            'fail_msg' : 'The private-www build test failed.',
     }
 
     # This must be a pull request
@@ -39,23 +37,23 @@ def process_payload(payload, meta, config):
         return
 
     # We are only interested in PRs that have the label
-    # ""Run private-www integration test"
+    # ""Run private-www build test"
     pr_labels = [d['name'] for d in payload['pull_request']['labels']]
-    if 'Run private-www integration test' not in pr_labels:
-        logging.debug("Skipping private-www integration test: this PR is not labeled with \"Run private-www integration test\"")
+    if 'Run private-www build test' not in pr_labels:
+        logging.debug("Skipping private-www build test: this PR is not labeled with \"Run private-www build test\"")
         return
 
     # We are only interested in PRs that are
     # being opened or updated
     if payload['action'] not in ['opened','synchronize']:
-        logging.debug("Skipping private-www integration test: this is not opening/updating a PR")
+        logging.debug("Skipping private-www build test: this is not opening/updating a PR")
         return
 
     # This must be a whitelisted repo
     repo_name = payload['repository']['name']
     full_repo_name = payload['repository']['full_name']
     if full_repo_name not in params['repo_whitelist']:
-        logging.debug("Skipping private-www integration test: this is not a whitelisted repo")
+        logging.debug("Skipping private-www build test: this is not a whitelisted repo")
         return
 
     # Keep it simple:
@@ -70,8 +68,8 @@ def process_payload(payload, meta, config):
     c = r.get_commit(head_commit)
 
     # -----------------------------------------------
-    # start private-www integration test build
-    logging.info("Starting private-www integration test build for submodule %s"%(full_repo_name))
+    # start private-www build test build
+    logging.info("Starting private-www build test build for submodule %s"%(full_repo_name))
 
     # Strategy:
     # * This will _always_ use private-www  as the build repo
@@ -180,7 +178,7 @@ def process_payload(payload, meta, config):
                         description = build_msg,
                         context = params['task_name']
         )
-        logging.info("private-www integration test succes:")
+        logging.info("private-www build test succes:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
@@ -196,7 +194,7 @@ def process_payload(payload, meta, config):
                         description = build_msg,
                         context = params['task_name']
         )
-        logging.info("private-www integration test failure:")
+        logging.info("private-www build test failure:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
