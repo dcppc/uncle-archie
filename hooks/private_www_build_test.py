@@ -187,10 +187,13 @@ def process_payload(payload, meta, config):
         return
 
 
-
-def check_for_errors(proc):
+def check_for_errors(proc,label):
     out = proc.stdout.read().decode('utf-8').lower()
     err = proc.stderr.read().decode('utf-8').lower()
+
+    logging.info("Results from process %s:"%(label))
+    logging.info("%s"%(out))
+    logging.info("%s"%(err))
 
     if "exception" in out or "exception" in err:
         return True
