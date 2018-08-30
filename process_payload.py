@@ -7,7 +7,7 @@ from hooks.private_www_build_test       import process_payload as private_www_bu
 def process_payload(payload,meta,config):
     dump_payload(payload,meta,config)
     rubber_stamp(payload,meta,config)
-    mkdocsbuild_test(payload,meta,config)
+    mkdocs_build_test(payload,meta,config)
     private_www_integration_test(payload,meta,config)
     private_www_build_test(payload,meta,config)
 
