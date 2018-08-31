@@ -3,6 +3,9 @@ import logging
 from subprocess import PIPE
 import tempfile
 import json, os, re
+
+from datetime import datetime
+
 from github import Github, GithubException
 
 
@@ -89,7 +92,7 @@ def process_payload(payload, meta, config):
 
 
     ######################
-    # build.
+    # clone.
     ######################
 
     # Remember: you can only read() the output
@@ -124,7 +127,8 @@ def process_payload(payload, meta, config):
     # unique branch name
     ######################
 
-    branch_name = "update-submodules/201808301630"
+    now = datetime.now().strftime("%Y%m%d%H%M")
+    branch_name = "update-submodules/%s"%(now)
 
 
     ######################
@@ -142,7 +146,7 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        if check_for_errors(coproc,"git branch"):
+        if check_for_errors(brproc,"git branch"):
             abort = True
 
         cocmd = ['git','checkout',branch_name]
@@ -154,6 +158,7 @@ def process_payload(payload, meta, config):
         )
         if check_for_errors(coproc,"git checkout"):
             abort = True
+
 
     ######################
     # Check out the master branch of the submodule
@@ -182,8 +187,9 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=submodule_dir
         )
-        if check_for_errors(subcoproc,"git checkout submodule"):
+        if check_for_errors(pullproc,"git checkout submodule"):
             abort = True
+
 
     ######################
     # Add commit push the new submodule
@@ -229,7 +235,6 @@ def process_payload(payload, meta, config):
         )
         if check_for_errors(pushproc,"git push submodule"):
             abort = True
-
 
 
     ######################
