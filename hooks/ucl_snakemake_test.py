@@ -149,12 +149,12 @@ def process_payload(payload,meta,config):
                 cwd=repo_dir
         )
         # Modify this to save the output first
-        status, status_file = record_and_check_output(buildproc,"snakemake build")
-        if status:
+        status_failed, status_file = record_and_check_output(buildproc,"snakemake build")
+        if status_failed:
+            build_status = "fail"
+        else:
             # the only test that mattered, passed
             build_status = "pass"
-        else:
-            build_status = "fail"
 
     # end snakemake build
     # -----------------------------------------------
