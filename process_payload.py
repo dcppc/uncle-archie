@@ -3,7 +3,7 @@ from hooks.rubber_stamp                 import process_payload as rubber_stamp
 from hooks.mkdocs_build_test            import process_payload as mkdocs_build_test
 from hooks.private_www_integration_test import process_payload as private_www_integration_test
 from hooks.private_www_build_test       import process_payload as private_www_build_test
-from hooks.ucl_snakemake                import process_payload as ucl_snakemake_test
+from hooks.ucl_snakemake_test           import process_payload as ucl_snakemake_test
 
 def process_payload(payload,meta,config):
     dump_payload(payload,meta,config)
