@@ -1,4 +1,8 @@
-import json, os, re, logging
+import subprocess
+import logging
+from subprocess import PIPE
+import tempfile
+import json, os, re
 from github import Github, GithubException
 
 """
