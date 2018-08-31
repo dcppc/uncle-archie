@@ -149,7 +149,7 @@ def process_payload(payload,meta,config):
                 cwd=repo_dir
         )
         # Modify this to save the output first
-        status, status_ile = record_and_check_output(buildproc,"snakemake build")
+        status, status_file = record_and_check_output(buildproc,"snakemake build")
         if status:
             # the only test that mattered, passed
             build_status = "pass"
@@ -159,7 +159,7 @@ def process_payload(payload,meta,config):
     # end snakemake build
     # -----------------------------------------------
 
-    status_url = "https://archie.nihdatacommons.us/output/%s"%(output_file)
+    status_url = "https://archie.nihdatacommons.us/output/%s"%(status_file)
 
     if build_status == "pass":
 
@@ -244,12 +244,12 @@ def record_and_check_output(proc,label):
     logging.info("Recorded in file %s"%(output_file))
 
     if "exception" in out or "exception" in err:
-        return True, output_file
+        return True, unique_filename
 
     if "error" in out or "error" in err:
-        return True, output_file 
+        return True, unique_filename
 
-    return False, output_file 
+    return False, unique_filename
 
 
 def check_for_errors(proc,label):
