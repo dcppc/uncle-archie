@@ -1,4 +1,4 @@
-import json, os, re
+import json, os, re, logging
 from github import Github, GithubException
 
 """
