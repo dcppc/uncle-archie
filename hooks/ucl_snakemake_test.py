@@ -192,28 +192,24 @@ def process_payload(payload,meta,config):
         logging.info("    Repo %s"%full_repo_name)
         return
 
+def check_for_errors(proc,label):
+    out = proc.stdout.read().decode('utf-8').lower()
+    err = proc.stderr.read().decode('utf-8').lower()
 
-    try:
-        commit_status = c.create_status(
-                state = "success",
-                description = params['pass_descr'],
-                context = params['task_name']
-        )
+    logging.info("Results from process %s:"%(label))
+    logging.info("%s"%(out))
+    logging.info("%s"%(err))
 
-    except GithubException as e:
-        from datetime import datetime
-        right_now = datetime.now().isoformat()
-        tmpfile = "tmp_%s"%(right_now)
-        with open('/tmp/archie/rubberstamp_commitstatus_FAIL_%s'%(tmpfile),'w') as f:
-            f.write("The commit status failed to update.\n")
-            f.write(repr(e))
-        return
+    if "exception" in out or "exception" in err:
+        return True
 
-    from datetime import datetime
-    right_now = datetime.now().isoformat()
-    tmpfile = "tmp_%s"%(right_now)
-    with open('/tmp/archie/rubberstamp_commitstatus_%s'%(tmpfile),'w') as f:
-        f.write("The commit status was updated successfully.\n")
+    if "error" in out or "error" in err:
+        return True
+
+    return False
+
+
+
 
 
 if __name__=="__main__":
