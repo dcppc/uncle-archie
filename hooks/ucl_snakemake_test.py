@@ -4,6 +4,7 @@ from subprocess import PIPE
 import tempfile
 import json, os, re
 from github import Github, GithubException
+from datetime import datetime
 
 """
 Use Case Library Snakemake Test CI Hook for Uncle Archie
@@ -21,6 +22,8 @@ Process:
 - run command
 - update commit status
 """
+
+HTDOCS="/www/archie.nihdatacommons.us/htdocs"
 
 def process_payload(payload,meta,config):
     """
@@ -145,15 +148,18 @@ def process_payload(payload,meta,config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        if check_for_errors(buildproc,"snakemake build"):
-            build_status = "fail"
-            abort = True
-        else:
+        # Modify this to save the output first
+        status, status_ile = record_and_check_output(buildproc,"snakemake build"):
+        if status:
             # the only test that mattered, passed
             build_status = "pass"
+        else:
+            build_status = "fail"
 
     # end snakemake build
     # -----------------------------------------------
+
+    status_url = "https://archie.nihdatacommons.us/output/%s"%(output_file)
 
     if build_status == "pass":
 
@@ -163,6 +169,7 @@ def process_payload(payload,meta,config):
         try:
             commit_status = c.create_status(
                             state = "success",
+                            target_url = status_url,
                             description = build_msg,
                             context = params['task_name']
             )
@@ -184,6 +191,7 @@ def process_payload(payload,meta,config):
         try:
             commit_status = c.create_status(
                             state = "failure",
+                            target_url = status_url,
                             description = build_msg,
                             context = params['task_name']
             )
@@ -196,7 +204,59 @@ def process_payload(payload,meta,config):
         logging.info("    Repo %s"%full_repo_name)
         return
 
+
+
+
+def record_and_check_output(proc,label):
+    """
+    Given a process, get the stdout and stderr streams
+    and record them in an output file that can be provided
+    to users as a link. Also return a boolean on whether
+    there was a problem with the process.
+
+    Run this function on the last/most important step
+    in your CI test. 
+    """ 
+    unique = datetime.now().strftime("%Y%m%d%H%M%S")
+    unique_filename = "ucl_snakemake_test_%s"%(unique)
+
+    output_path = os.path.join(HTDOCS,'output')
+    output_file = os.path.join(output_path,unique_filename)
+
+    out = proc.stdout.read().decode('utf-8').lower()
+    err = proc.stderr.read().decode('utf-8').lower()
+
+    lines = [ "="*40, "\n",
+              "="*10, "STDOUT", "="*10, "\n",
+              out,
+              "\n\n",
+              "="*40, "\n",
+              "="*10, "STDERR", "="*10, "\n",
+              err,
+              "\n\n"]
+
+    with open(output_file,'w') as f:
+        [f.write(j) for j in lines]
+
+    logging.info("Results from process %s:"%(label))
+    logging.info("%s"%(out))
+    logging.info("%s"%(err))
+    logging.info("Recorded in file %s"%(output_file))
+
+    if "exception" in out or "exception" in err:
+        return True, output_file
+
+    if "error" in out or "error" in err:
+        return True, output_file 
+
+    return False, output_file 
+
+
 def check_for_errors(proc,label):
+    """
+    Given a process, get the stdout and stderr streams and look for
+    exceptions or errors.  Return a boolean whether there was a problem.
+    """ 
     out = proc.stdout.read().decode('utf-8').lower()
     err = proc.stderr.read().decode('utf-8').lower()
 
