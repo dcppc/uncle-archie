@@ -13,6 +13,25 @@ from github import Github, GithubException
 private-www Submodule Update PR for Uncle Archie
 
 
+
+Notes:
+
+We need to set up a submodule experiment with search-demo-mkdocs-material
+and the submodule fake-docs so that we can troubleshoot this before we
+deploy it for real.
+
+- search-demo is private-www
+- fake-docs is submodule
+- install webhooks for uncle archie
+- add a second hook script, and work on parameterizing it 
+- make changes to fake-docs (submodule) and make a pull request
+- merge the pull request to trigger the hook function
+
+
+
+
+Description:
+
 This is a bit of an odd "CI test" because it isn't exactly a CI test, but it is
 part of a step-by-step CI workflow.
 
