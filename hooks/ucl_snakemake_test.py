@@ -226,12 +226,12 @@ def record_and_check_output(proc,label):
     out = proc.stdout.read().decode('utf-8').lower()
     err = proc.stderr.read().decode('utf-8').lower()
 
-    lines = [ "="*40, "\n",
-              "="*10, "STDOUT", "="*10, "\n",
+    lines = [ "======================\n",
+              "======= STDOUT =======\n",
               out,
               "\n\n",
-              "="*40, "\n",
-              "="*10, "STDERR", "="*10, "\n",
+              "======================\n",
+              "======= STDERR =======\n",
               err,
               "\n\n"]
 
