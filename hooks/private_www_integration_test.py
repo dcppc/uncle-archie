@@ -18,6 +18,8 @@ If the build succeeds, the commit is marked as having succeed.
 Otherwise the commit is marked as failed.
 """
 
+HTDOCS="/www/archie.nihdatacommons.us/htdocs"
+
 def process_payload(payload, meta, config):
     """
     Look for events that are pull requests being opened or updated. 
