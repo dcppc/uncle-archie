@@ -46,7 +46,7 @@ def process_payload(payload, meta, config):
     repo_name = payload['repository']['name']
     full_repo_name = payload['repository']['full_name']
     if full_repo_name not in params['repo_whitelist']:
-        logging.debug("Skipping private-www build test: this is not a whitelisted repo")
+        logging.debug("Skipping private-www build test: this is not the private-www repo")
         return
 
     # Keep it simple:
