@@ -85,7 +85,7 @@ def process_payload(payload, meta, config):
 
 
     unique = datetime.now().strftime("%Y%m%d%H%M%S")
-    unique_filename = "ucl_snakemake_test_%s"%(unique)
+    unique_filename = "private_www_integration_test_%s"%(unique)
 
 
     ######################
@@ -162,7 +162,7 @@ def process_payload(payload, meta, config):
             abort = True
 
     if not abort:
-        buildcmd = ['snakemake','build']
+        buildcmd = ['snakemake','build_docs']
         logging.debug("Running build command %s"%(' '.join(buildcmd)))
         buildproc = subprocess.Popen(
                 buildcmd, 
