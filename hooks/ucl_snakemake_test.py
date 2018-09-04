@@ -40,18 +40,20 @@ def process_payload(payload,meta,config):
             'fail_msg' : 'The use-case-library build test failed.',
     }
 
-    # This must be a pull request
-    if 'pull_request' not in payload.keys():
-        return
-
-    if 'action' not in payload.keys():
-        return
-
-    # This must be a whitelisted repo
+    # This must be the use-case-library repo
     repo_name = payload['repository']['name']
     full_repo_name = payload['repository']['full_name']
     if full_repo_name not in params['repo_whitelist']:
         logging.debug("Skipping use-case-library integration test: this is not the use-case-library repo")
+        return
+
+    # This must be a pull request
+    if 'pull_request' not in payload.keys():
+        logging.debug("Skipping use-case-library integration test: this is not a pull request")
+        return
+
+    if 'action' not in payload.keys():
+        logging.debug("Skipping use-case-library integration test: this is not a pull request")
         return
 
     # We are only interested in PRs that are
@@ -59,6 +61,9 @@ def process_payload(payload,meta,config):
     if payload['action'] not in ['opened','synchronize']:
         logging.debug("Skipping use-case-library integration test: this is not opening/updating a PR")
         return
+
+
+
 
     # Keep it simple:
     # get the head commit
@@ -77,6 +82,11 @@ def process_payload(payload,meta,config):
 
 
     logging.info("Starting use case library build test")
+
+
+    unique = datetime.now().strftime("%Y%m%d%H%M%S")
+    unique_filename = "ucl_snakemake_test_%s"%(unique)
+
 
     ######################
     # logic. noise.
