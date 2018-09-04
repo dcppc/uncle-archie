@@ -137,14 +137,6 @@ def process_payload(payload, meta, config):
     # get the API token
     token = config['github_access_token']
 
-    # Note that this checks out repos
-    # using the SSH keys in ~/.ssh
-    # and the github username in ~/.extras
-    # 
-    # If you push any changes, make sure you
-    # change your user first!
-    # https://help.github.com/articles/setting-your-username-in-git/
-
     clonecmd = ['git','clone','--recursive','-b','master',parent_repo_url]
     logging.debug("Running clone cmd %s"%(' '.join(clonecmd)))
     cloneproc = subprocess.Popen(
