@@ -4,6 +4,7 @@ from subprocess import PIPE
 import tempfile
 import json, os, re
 from github import Github, GithubException
+from datetime import datetime
 
 """
 private-www Integration Test CI Hook for Uncle Archie
@@ -16,6 +17,8 @@ we run a CI test and update the status of the head commit on the PR.
 If the build succeeds, the commit is marked as having succeed.
 Otherwise the commit is marked as failed.
 """
+
+HTDOCS="/www/archie.nihdatacommons.us/htdocs"
 
 def process_payload(payload, meta, config):
     """
@@ -38,6 +41,13 @@ def process_payload(payload, meta, config):
     if ('pull_request' not in payload.keys()) or ('action' not in payload.keys()):
         return
 
+    # This must be a whitelisted repo
+    repo_name = payload['repository']['name']
+    full_repo_name = payload['repository']['full_name']
+    if full_repo_name not in params['repo_whitelist']:
+        logging.debug("Skipping private-www integration test: this is not a whitelisted repo")
+        return
+
     # We are only interested in PRs that have the label
     # ""Run private-www integration test"
     pr_labels = [d['name'] for d in payload['pull_request']['labels']]
@@ -49,13 +59,6 @@ def process_payload(payload, meta, config):
     # being opened or updated
     if payload['action'] not in ['opened','synchronize']:
         logging.debug("Skipping private-www integration test: this is not opening/updating a PR")
-        return
-
-    # This must be a whitelisted repo
-    repo_name = payload['repository']['name']
-    full_repo_name = payload['repository']['full_name']
-    if full_repo_name not in params['repo_whitelist']:
-        logging.debug("Skipping private-www integration test: this is not a whitelisted repo")
         return
 
     # Keep it simple:
@@ -79,6 +82,10 @@ def process_payload(payload, meta, config):
     # * This will _only_ update the submodule of interest,
     #   to the head commit of the pull request.
     # * This will run mkdocs on the entire private-www site.
+
+
+    unique = datetime.now().strftime("%Y%m%d%H%M%S")
+    unique_filename = "private_www_integration_test_%s"%(unique)
 
 
     ######################
@@ -118,7 +125,9 @@ def process_payload(payload, meta, config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    if check_for_errors(cloneproc):
+    # save the output first
+    status_failed, status_file = record_and_check_output(cloneproc,"git clone",unique_filename)
+    if status_failed:
         build_status = "fail"
         abort = True
 
@@ -147,12 +156,13 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=submodule_dir
         )
-        if check_for_errors(coproc):
+        status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
+        if status_failed:
             build_status = "fail"
             abort = True
 
     if not abort:
-        buildcmd = ['snakemake','build']
+        buildcmd = ['snakemake','--nocolor','build_docs']
         logging.debug("Running build command %s"%(' '.join(buildcmd)))
         buildproc = subprocess.Popen(
                 buildcmd, 
@@ -160,9 +170,10 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        if check_for_errors(buildproc):
+        # save the output first
+        status_failed, status_file = record_and_check_output(buildproc,"snakemake build",unique_filename)
+        if status_failed:
             build_status = "fail"
-            abort = True
         else:
             # the only test that mattered, passed
             build_status = "pass"
@@ -170,20 +181,28 @@ def process_payload(payload, meta, config):
     # end mkdocs build
     # -----------------------------------------------
 
+    status_url = "https://archie.nihdatacommons.us/output/%s"%(status_file)
+
     if build_status == "pass":
 
         if build_msg == "":
             build_msg = params['pass_msg']
 
-        commit_status = c.create_status(
-                        state = "success",
-                        description = build_msg,
-                        context = params['task_name']
-        )
-        logging.info("private-www integration test succes:")
+        try:
+            commit_status = c.create_status(
+                            state = "success",
+                            target_url = status_url,
+                            description = build_msg,
+                            context = params['task_name']
+            )
+        except GithubException as e:
+            logging.info("Github error: commit status failed to update.")
+
+        logging.info("private-www integration test success:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
+        logging.info("    Link %s"%status_url)
         return
 
     elif build_status == "fail":
@@ -191,22 +210,77 @@ def process_payload(payload, meta, config):
         if build_msg == "":
             build_msg = params['fail_msg']
 
-        commit_status = c.create_status(
-                        state = "failure",
-                        description = build_msg,
-                        context = params['task_name']
-        )
+        try:
+            commit_status = c.create_status(
+                            state = "failure",
+                            target_url = status_url,
+                            description = build_msg,
+                            context = params['task_name']
+            )
+        except GithubException as e:
+            logging.info("Github error: commit status failed to update.")
+
         logging.info("private-www integration test failure:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
+        logging.info("    Link %s"%status_url)
         return
 
 
+def record_and_check_output(proc,label,unique_filename):
+    """
+    Given a process, get the stdout and stderr streams
+    and record them in an output file that can be provided
+    to users as a link. Also return a boolean on whether
+    there was a problem with the process.
 
-def check_for_errors(proc):
+    Run this function on the last/most important step
+    in your CI test. 
+    """ 
+    output_path = os.path.join(HTDOCS,'output')
+    output_file = os.path.join(output_path,unique_filename)
+
     out = proc.stdout.read().decode('utf-8').lower()
     err = proc.stderr.read().decode('utf-8').lower()
+
+    lines = [ "======================\n",
+              "======= STDOUT =======\n",
+              out,
+              "\n\n",
+              "======================\n",
+              "======= STDERR =======\n",
+              err,
+              "\n\n"]
+
+    with open(output_file,'a') as f:
+        [f.write(j) for j in lines]
+
+    logging.info("Results from process %s:"%(label))
+    logging.info("%s"%(out))
+    logging.info("%s"%(err))
+    logging.info("Recorded in file %s"%(output_file))
+
+    if "exception" in out or "exception" in err:
+        return True, unique_filename
+
+    if "error" in out or "error" in err:
+        return True, unique_filename
+
+    return False, unique_filename
+
+
+def check_for_errors(proc,label):
+    """
+    Given a process, get the stdout and stderr streams and look for
+    exceptions or errors.  Return a boolean whether there was a problem.
+    """ 
+    out = proc.stdout.read().decode('utf-8').lower()
+    err = proc.stderr.read().decode('utf-8').lower()
+
+    logging.info("Results from process %s:"%(label))
+    logging.info("%s"%(out))
+    logging.info("%s"%(err))
 
     if "exception" in out or "exception" in err:
         return True
