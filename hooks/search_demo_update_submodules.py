@@ -77,10 +77,8 @@ def process_payload(payload, meta, config):
 
 
     # This must be the use-case-library repo
-    repo_name = payload['repository']['name']
-    full_repo_name = payload['repository']['full_name']
     if full_repo_name not in params['repo_whitelist']:
-        logging.debug("Skipping search demo submodule PR: this is not the use-case-library repo")
+        logging.debug("Skipping search demo submodule PR: this is not the search-demo-mkdocs-material repo")
         return
 
     # This must be a pull request
@@ -92,16 +90,14 @@ def process_payload(payload, meta, config):
         logging.debug("Skipping search demo submodule PR: this is not a pull request")
         return
 
-    # We are only interested in PRs that are
-    # being opened or updated
-    if payload['action'] not in ['opened','synchronize']:
-        logging.debug("Skipping search demo submodule PR: this is not opening/updating a PR")
+    if payload['action'] not 'closed':
+        logging.debug("Skipping search demo submodule PR: this pull request has not been closed yet")
         return
 
-    # Only whitelisted repos
-    if full_repo_name not in params['repo_whitelist']:
-        logging.debug("Skipping search demo submodule PR: this is not a whitelisted repo")
-        return
+    # We want PRs that are being merged
+    if 'merge_commit_sha' not in payload['pull_request']:
+        logging.debug("Skipping search demo submodule PR: this pull request was not merged")
+
 
     # -----------------------------------------------
     # start private-www submodule update PR 
@@ -137,7 +133,7 @@ def process_payload(payload, meta, config):
     # change your user first!
     # https://help.github.com/articles/setting-your-username-in-git/
 
-    clonecmd = ['git','clone','--recursive',ghurl]
+    clonecmd = ['git','clone','--recursive','-b','master',ghurl]
     logging.debug("Running clone cmd %s"%(' '.join(clonecmd)))
     cloneproc = subprocess.Popen(
             clonecmd, 
@@ -145,7 +141,9 @@ def process_payload(payload, meta, config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    if check_for_errors(cloneproc,"git clone"):
+    status_failed, status_file = record_and_check_output(cloneproc,"git clone",unique_filename)
+    if status_failed:
+        build_status = "fail"
         abort = True
 
 
@@ -158,22 +156,13 @@ def process_payload(payload, meta, config):
 
 
     ######################
-    # Make a new branch for the PR and check it out
+    # Create new branch
+    # from master branch HEAD
     ######################
 
     if not abort:
 
         repo_dir = os.path.join(scratch_dir, repo_name)
-
-        brcmd = ['git','branch',branch_name]
-        brproc = subprocess.Popen(
-                brcmd,
-                stdout=PIPE, 
-                stderr=PIPE, 
-                cwd=repo_dir
-        )
-        if check_for_errors(brproc,"git branch"):
-            abort = True
 
         cocmd = ['git','checkout',branch_name]
         coproc = subprocess.Popen(
@@ -182,7 +171,9 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        if check_for_errors(coproc,"git checkout"):
+        status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
+        if status_failed:
+            build_status = "fail"
             abort = True
 
 
@@ -203,7 +194,9 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=submodule_dir
         )
-        if check_for_errors(subcoproc,"git checkout submodule"):
+        status_failed, status_file = record_and_check_output(subcoproc,"git checkout submodule",unique_filename)
+        if status_failed:
+            build_status = "fail"
             abort = True
 
         pullcmd = ['git','pull','origin','master']
@@ -213,7 +206,9 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=submodule_dir
         )
-        if check_for_errors(pullproc,"git checkout submodule"):
+        status_failed, status_file = record_and_check_output(pullproc,"git pull submodule",unique_filename)
+        if status_failed:
+            build_status = "fail"
             abort = True
 
 
@@ -234,7 +229,9 @@ def process_payload(payload, meta, config):
                 stderr=PIPE,
                 cwd=repo_dir
         )
-        if check_for_errors(addproc,"git add submodule"):
+        status_failed, status_file = record_and_check_output(addproc,"git add submodule",unique_filename)
+        if status_failed:
+            build_status = "fail"
             abort = True
 
 
@@ -247,7 +244,9 @@ def process_payload(payload, meta, config):
                 stderr=PIPE,
                 cwd=repo_dir
         )
-        if check_for_errors(commitproc,"git commit submodule"):
+        status_failed, status_file = record_and_check_output(commitproc,"git commit submodule",unique_filename)
+        if status_failed:
+            build_status = "fail"
             abort = True
 
 
@@ -259,7 +258,9 @@ def process_payload(payload, meta, config):
                 stderr=PIPE,
                 cwd=repo_dir
         )
-        if check_for_errors(pushproc,"git push submodule"):
+        status_failed, status_file = record_and_check_output(pushproc,"git push origin branch",unique_filename)
+        if status_failed:
+            build_status = "fail"
             abort = True
 
 
@@ -282,7 +283,8 @@ def process_payload(payload, meta, config):
                 stderr=PIPE,
                 cwd=repo_dir
         )
-        if check_for_errors(hubproc,"create pull request"):
+        status_failed, status_file = record_and_check_output(hubproc,"create pull request",unique_filename)
+        if status_failed:
             build_status = "fail"
             abort = True
 
@@ -306,7 +308,55 @@ def process_payload(payload, meta, config):
     return
 
 
+
+
+def record_and_check_output(proc,label,unique_filename):
+    """
+    Given a process, get the stdout and stderr streams
+    and record them in an output file that can be provided
+    to users as a link. Also return a boolean on whether
+    there was a problem with the process.
+
+    Run this function on the last/most important step
+    in your CI test. 
+    """ 
+    output_path = os.path.join(HTDOCS,'output')
+    output_file = os.path.join(output_path,unique_filename)
+
+    out = proc.stdout.read().decode('utf-8').lower()
+    err = proc.stderr.read().decode('utf-8').lower()
+
+    lines = [ "======================\n",
+              "======= STDOUT =======\n",
+              out,
+              "\n\n",
+              "======================\n",
+              "======= STDERR =======\n",
+              err,
+              "\n\n"]
+
+    with open(output_file,'w') as f:
+        [f.write(j) for j in lines]
+
+    logging.info("Results from process %s:"%(label))
+    logging.info("%s"%(out))
+    logging.info("%s"%(err))
+    logging.info("Recorded in file %s"%(output_file))
+
+    if "exception" in out or "exception" in err:
+        return True, unique_filename
+
+    if "error" in out or "error" in err:
+        return True, unique_filename
+
+    return False, unique_filename
+
+
 def check_for_errors(proc,label):
+    """
+    Given a process, get the stdout and stderr streams and look for
+    exceptions or errors.  Return a boolean whether there was a problem.
+    """ 
     out = proc.stdout.read().decode('utf-8').lower()
     err = proc.stderr.read().decode('utf-8').lower()
 
@@ -321,5 +371,10 @@ def check_for_errors(proc,label):
         return True
 
     return False
+
+
+if __name__=="__main__":
+    process_payload({'type':'test','name':'private_www'},{'a':1,'b':2})
+
 
 
