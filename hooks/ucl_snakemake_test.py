@@ -133,7 +133,7 @@ def process_payload(payload,meta,config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    status_failed, status_file = record_and_check_output(buildproc,"git clone",unique_filename)
+    status_failed, status_file = record_and_check_output(cloneproc,"git clone",unique_filename)
     if status_failed:
         build_status = "fail"
         abort = True
@@ -149,7 +149,7 @@ def process_payload(payload,meta,config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        status_failed, status_file = record_and_check_output(buildproc,"git checkout",unique_filename)
+        status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
         if status_failed:
             build_status = "fail"
             abort = True
@@ -284,9 +284,6 @@ def check_for_errors(proc,label):
         return True
 
     return False
-
-
-
 
 
 if __name__=="__main__":
