@@ -10,20 +10,15 @@ from github import Github, GithubException
 
 
 """
-private-www Submodule Update PR for Uncle Archie
+search-demo-mkdocs-material Submodule Update PR for Uncle Archie
 
 
 
 Notes:
 
-We need to set up a submodule experiment with search-demo-mkdocs-material
-and the submodule fake-docs so that we can troubleshoot this before we
-deploy it for real.
-
 - search-demo is private-www
 - fake-docs is submodule
 - install webhooks for uncle archie
-- add a second hook script, and work on parameterizing it 
 - make changes to fake-docs (submodule) and make a pull request
 - merge the pull request to trigger the hook function
 
@@ -35,29 +30,25 @@ Description:
 This is a bit of an odd "CI test" because it isn't exactly a CI test, but it is
 part of a step-by-step CI workflow.
 
-This hook listens for incoming push to master events from private-www
-submodules.  When this type of event occurs, the hook opens an "update
-private-www submodules" pull request.
+This hook listens for incoming push to master events from fake-docs
+
+When this type of event occurs, the hook opens an "update submodules" PR
+in the search-demo-mkdocs-material repo
 
 (At that point, a new webhook is triggered and Uncle Archie will run a continuous
 integration test on the newly-opened pull request.)
-
-
-Installing webhoks:
-
-Need to install a push to master webhook into each submodule.
 """
 
 
 def process_payload(payload, meta, config):
     """
     Look for any push events to the repositories 
-    that are private-www submodules.
+    that are search-demo-mkdocs-material submodules.
 
     When we get a push event, we should figure out
     whether it is on the master branch, and if so, 
-    we open a new pull request that updates the submodules.
-
+    we open a new pull request in search-demo-mkdocs-material
+    that updates this submodule.
 
     Strategy:
     - use the shell, because it will work
@@ -71,35 +62,51 @@ def process_payload(payload, meta, config):
     """
     # Set parameters for the submodule update PR opener
     params = {
-            'repo_whitelist' : ['dcppc/internal','dcppc/organize','dcppc/nih-demo-meetings'],
-            'task_name' : 'Uncle Archie private-www Submodules Update PR',
-            'pass_msg' : 'The private-www submodules update PR passed!',
-            'fail_msg' : 'The private-www submodules update PR failed.',
+            'repo_whitelist' : ['charlesreid1/fake-docs'],
+            'task_name' : 'Uncle Archie search-demo-mkdocs-material Submodules Update PR',
+            'pass_msg' : 'The search-demo-mkdocs-material submodules update PR passed!',
+            'fail_msg' : 'The search-demo-mkdocs-material submodules update PR failed.',
     }
 
-    # This must be a push event to one of the submodule repos
-    if 'pusher' not in payload.keys():
-        return
 
-    # This must be a push to master event
-    if 'ref' not in payload.keys() or payload['ref']!='refs/heads/master':
-        return
-
-    # Only whitelisted repos
     repo_name = payload['repository']['name']
     full_repo_name = payload['repository']['full_name']
 
     sub_name = payload['repository']['name']
     full_sub_name = payload['repository']['full_name']
 
+
+    # This must be the use-case-library repo
+    repo_name = payload['repository']['name']
+    full_repo_name = payload['repository']['full_name']
     if full_repo_name not in params['repo_whitelist']:
-        logging.debug("Skipping private-www update submodules task: this is not a whitelisted repo")
+        logging.debug("Skipping search demo submodule PR: this is not the use-case-library repo")
+        return
+
+    # This must be a pull request
+    if 'pull_request' not in payload.keys():
+        logging.debug("Skipping search demo submodule PR: this is not a pull request")
+        return
+
+    if 'action' not in payload.keys():
+        logging.debug("Skipping search demo submodule PR: this is not a pull request")
+        return
+
+    # We are only interested in PRs that are
+    # being opened or updated
+    if payload['action'] not in ['opened','synchronize']:
+        logging.debug("Skipping search demo submodule PR: this is not opening/updating a PR")
+        return
+
+    # Only whitelisted repos
+    if full_repo_name not in params['repo_whitelist']:
+        logging.debug("Skipping search demo submodule PR: this is not a whitelisted repo")
         return
 
     # -----------------------------------------------
     # start private-www submodule update PR 
 
-    logging.info("Starting private-www submodule update pull request for %s"%(full_repo_name))
+    logging.info("Starting search demo submodule PR for %s"%(full_repo_name))
 
 
     ######################
@@ -146,7 +153,7 @@ def process_payload(payload, meta, config):
     # unique branch name
     ######################
 
-    now = datetime.now().strftime("%Y%m%d%H%M")
+    now = datetime.now().strftime("%Y%m%d_%H%M%S")
     branch_name = "update-submodules/%s"%(now)
 
 
@@ -157,6 +164,9 @@ def process_payload(payload, meta, config):
     if not abort:
 
         repo_dir = os.path.join(scratch_dir, repo_name)
+
+        if not os.path.exists(repo_dir):
+            os.mkdir(repo_dir)
 
         brcmd = ['git','branch',branch_name]
         brproc = subprocess.Popen(
@@ -291,10 +301,10 @@ def process_payload(payload, meta, config):
 
 
     if not abort:
-        logging.info("private-www update submodule succeeded for submodule %s"%(full_repo_name))
+        logging.info("search demo submodule PR succeeded for submodule %s"%(full_repo_name))
 
     else:
-        logging.info("private-www update submodule failed for submodule %s"%(full_repo_name))
+        logging.info("search demo submodule PR failed for submodule %s"%(full_repo_name))
 
     return
 
