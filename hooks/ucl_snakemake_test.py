@@ -183,6 +183,7 @@ def process_payload(payload,meta,config):
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
+        logging.info("    Link %s"%status_url)
         return
 
 
@@ -205,6 +206,7 @@ def process_payload(payload,meta,config):
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
+        logging.info("    Link %s"%status_url)
         return
 
 

@@ -181,20 +181,28 @@ def process_payload(payload, meta, config):
     # end mkdocs build
     # -----------------------------------------------
 
+    status_url = "https://archie.nihdatacommons.us/output/%s"%(status_file)
+
     if build_status == "pass":
 
         if build_msg == "":
             build_msg = params['pass_msg']
 
-        commit_status = c.create_status(
-                        state = "success",
-                        description = build_msg,
-                        context = params['task_name']
-        )
+        try:
+            commit_status = c.create_status(
+                            state = "success",
+                            target_url = status_url,
+                            description = build_msg,
+                            context = params['task_name']
+            )
+        except GithubException as e:
+            logging.info("Github error: commit status failed to update.")
+
         logging.info("private-www integration test success:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
+        logging.info("    Link %s"%status_url)
         return
 
     elif build_status == "fail":
@@ -202,15 +210,21 @@ def process_payload(payload, meta, config):
         if build_msg == "":
             build_msg = params['fail_msg']
 
-        commit_status = c.create_status(
-                        state = "failure",
-                        description = build_msg,
-                        context = params['task_name']
-        )
+        try:
+            commit_status = c.create_status(
+                            state = "failure",
+                            target_url = status_url,
+                            description = build_msg,
+                            context = params['task_name']
+            )
+        except GithubException as e:
+            logging.info("Github error: commit status failed to update.")
+
         logging.info("private-www integration test failure:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
+        logging.info("    Link %s"%status_url)
         return
 
 
