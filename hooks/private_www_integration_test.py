@@ -160,9 +160,10 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        if check_for_errors(buildproc):
+        # save the output first
+        status_failed, status_file = record_and_check_output(buildproc,"snakemake build")
+        if status_failed:
             build_status = "fail"
-            abort = True
         else:
             # the only test that mattered, passed
             build_status = "pass"
@@ -203,10 +204,62 @@ def process_payload(payload, meta, config):
         return
 
 
+def record_and_check_output(proc,label):
+    """
+    Given a process, get the stdout and stderr streams
+    and record them in an output file that can be provided
+    to users as a link. Also return a boolean on whether
+    there was a problem with the process.
 
-def check_for_errors(proc):
+    Run this function on the last/most important step
+    in your CI test. 
+    """ 
+    unique = datetime.now().strftime("%Y%m%d%H%M%S")
+    unique_filename = "ucl_snakemake_test_%s"%(unique)
+
+    output_path = os.path.join(HTDOCS,'output')
+    output_file = os.path.join(output_path,unique_filename)
+
     out = proc.stdout.read().decode('utf-8').lower()
     err = proc.stderr.read().decode('utf-8').lower()
+
+    lines = [ "======================\n",
+              "======= STDOUT =======\n",
+              out,
+              "\n\n",
+              "======================\n",
+              "======= STDERR =======\n",
+              err,
+              "\n\n"]
+
+    with open(output_file,'w') as f:
+        [f.write(j) for j in lines]
+
+    logging.info("Results from process %s:"%(label))
+    logging.info("%s"%(out))
+    logging.info("%s"%(err))
+    logging.info("Recorded in file %s"%(output_file))
+
+    if "exception" in out or "exception" in err:
+        return True, unique_filename
+
+    if "error" in out or "error" in err:
+        return True, unique_filename
+
+    return False, unique_filename
+
+
+def check_for_errors(proc,label):
+    """
+    Given a process, get the stdout and stderr streams and look for
+    exceptions or errors.  Return a boolean whether there was a problem.
+    """ 
+    out = proc.stdout.read().decode('utf-8').lower()
+    err = proc.stderr.read().decode('utf-8').lower()
+
+    logging.info("Results from process %s:"%(label))
+    logging.info("%s"%(out))
+    logging.info("%s"%(err))
 
     if "exception" in out or "exception" in err:
         return True
