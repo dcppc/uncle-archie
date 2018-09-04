@@ -127,7 +127,7 @@ def process_payload(payload, meta, config):
     abort = False
 
     # This is always the repo we clone
-    ghurl = "git@github.com:dcppc/private-www"
+    ghurl = "git@github.com:charlesreid1/search-demo-mkdocs-material"
 
     # Note that this checks out repos
     # using the SSH keys in ~/.ssh
@@ -164,9 +164,6 @@ def process_payload(payload, meta, config):
     if not abort:
 
         repo_dir = os.path.join(scratch_dir, repo_name)
-
-        if not os.path.exists(repo_dir):
-            os.mkdir(repo_dir)
 
         brcmd = ['git','branch',branch_name]
         brproc = subprocess.Popen(
@@ -276,7 +273,7 @@ def process_payload(payload, meta, config):
         os.environ['GITHUB_TOKEN'] = token
 
         hubcmd = ['hub','pull-request',
-                '-b','dcppc:master',
+                '-b','charlesreid1:master',
                 '-h',branch_name,
                 '-m',pr_msg]
         hubproc = subprocess.Popen(
