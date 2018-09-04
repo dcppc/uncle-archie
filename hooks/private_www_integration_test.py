@@ -118,7 +118,7 @@ def process_payload(payload, meta, config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    if check_for_errors(cloneproc):
+    if check_for_errors(cloneproc,"git clone"):
         build_status = "fail"
         abort = True
 
@@ -147,7 +147,7 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=submodule_dir
         )
-        if check_for_errors(coproc):
+        if check_for_errors(coproc,"git checkout"):
             build_status = "fail"
             abort = True
 
