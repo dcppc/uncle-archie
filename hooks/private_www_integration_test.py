@@ -162,7 +162,7 @@ def process_payload(payload, meta, config):
             abort = True
 
     if not abort:
-        buildcmd = ['snakemake','build_docs']
+        buildcmd = ['snakemake','--nocolor','build_docs']
         logging.debug("Running build command %s"%(' '.join(buildcmd)))
         buildproc = subprocess.Popen(
                 buildcmd, 
