@@ -41,6 +41,13 @@ def process_payload(payload, meta, config):
     if ('pull_request' not in payload.keys()) or ('action' not in payload.keys()):
         return
 
+    # This must be a whitelisted repo
+    repo_name = payload['repository']['name']
+    full_repo_name = payload['repository']['full_name']
+    if full_repo_name not in params['repo_whitelist']:
+        logging.debug("Skipping private-www integration test: this is not a whitelisted repo")
+        return
+
     # We are only interested in PRs that have the label
     # ""Run private-www integration test"
     pr_labels = [d['name'] for d in payload['pull_request']['labels']]
@@ -52,13 +59,6 @@ def process_payload(payload, meta, config):
     # being opened or updated
     if payload['action'] not in ['opened','synchronize']:
         logging.debug("Skipping private-www integration test: this is not opening/updating a PR")
-        return
-
-    # This must be a whitelisted repo
-    repo_name = payload['repository']['name']
-    full_repo_name = payload['repository']['full_name']
-    if full_repo_name not in params['repo_whitelist']:
-        logging.debug("Skipping private-www integration test: this is not a whitelisted repo")
         return
 
     # Keep it simple:
@@ -82,6 +82,10 @@ def process_payload(payload, meta, config):
     # * This will _only_ update the submodule of interest,
     #   to the head commit of the pull request.
     # * This will run mkdocs on the entire private-www site.
+
+
+    unique = datetime.now().strftime("%Y%m%d%H%M%S")
+    unique_filename = "ucl_snakemake_test_%s"%(unique)
 
 
     ######################
@@ -121,7 +125,9 @@ def process_payload(payload, meta, config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    if check_for_errors(cloneproc,"git clone"):
+    # save the output first
+    status_failed, status_file = record_and_check_output(cloneproc,"git clone",unique_filename)
+    if status_failed:
         build_status = "fail"
         abort = True
 
@@ -150,7 +156,8 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=submodule_dir
         )
-        if check_for_errors(coproc,"git checkout"):
+        status_failed, status_file = record_and_check_output(buildproc,"git checkout",unique_filename)
+        if status_failed:
             build_status = "fail"
             abort = True
 
@@ -164,7 +171,7 @@ def process_payload(payload, meta, config):
                 cwd=repo_dir
         )
         # save the output first
-        status_failed, status_file = record_and_check_output(buildproc,"snakemake build")
+        status_failed, status_file = record_and_check_output(buildproc,"snakemake build",unique_filename)
         if status_failed:
             build_status = "fail"
         else:
@@ -184,7 +191,7 @@ def process_payload(payload, meta, config):
                         description = build_msg,
                         context = params['task_name']
         )
-        logging.info("private-www integration test succes:")
+        logging.info("private-www integration test success:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
@@ -207,7 +214,7 @@ def process_payload(payload, meta, config):
         return
 
 
-def record_and_check_output(proc,label):
+def record_and_check_output(proc,label,unique_filename):
     """
     Given a process, get the stdout and stderr streams
     and record them in an output file that can be provided
@@ -217,9 +224,6 @@ def record_and_check_output(proc,label):
     Run this function on the last/most important step
     in your CI test. 
     """ 
-    unique = datetime.now().strftime("%Y%m%d%H%M%S")
-    unique_filename = "ucl_snakemake_test_%s"%(unique)
-
     output_path = os.path.join(HTDOCS,'output')
     output_file = os.path.join(output_path,unique_filename)
 
@@ -235,7 +239,7 @@ def record_and_check_output(proc,label):
               err,
               "\n\n"]
 
-    with open(output_file,'w') as f:
+    with open(output_file,'a') as f:
         [f.write(j) for j in lines]
 
     logging.info("Results from process %s:"%(label))
