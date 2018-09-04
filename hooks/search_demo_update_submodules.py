@@ -40,6 +40,8 @@ integration test on the newly-opened pull request.)
 """
 
 
+HTDOCS="/www/archie.nihdatacommons.us/htdocs"
+
 def process_payload(payload, meta, config):
     """
     Look for any push events to the repositories 
@@ -90,7 +92,7 @@ def process_payload(payload, meta, config):
         logging.debug("Skipping search demo submodule PR: this is not a pull request")
         return
 
-    if payload['action'] not 'closed':
+    if payload['action']!='closed':
         logging.debug("Skipping search demo submodule PR: this pull request has not been closed yet")
         return
 
@@ -103,6 +105,11 @@ def process_payload(payload, meta, config):
     # start private-www submodule update PR 
 
     logging.info("Starting search demo submodule PR for %s"%(full_repo_name))
+
+
+    unique = datetime.now().strftime("%Y%m%d%H%M%S")
+    unique_filename = "search_demo_update_submodules_%s"%(unique)
+
 
 
     ######################
@@ -122,8 +129,13 @@ def process_payload(payload, meta, config):
 
     abort = False
 
+    parent_repo_name = "search-demo-mkdocs-material"
+
     # This is always the repo we clone
-    ghurl = "git@github.com:charlesreid1/search-demo-mkdocs-material"
+    parent_repo_url = "git@github.com:charlesreid1/%s"%(parent_repo_name)
+
+    # get the API token
+    token = config['github_access_token']
 
     # Note that this checks out repos
     # using the SSH keys in ~/.ssh
@@ -133,7 +145,7 @@ def process_payload(payload, meta, config):
     # change your user first!
     # https://help.github.com/articles/setting-your-username-in-git/
 
-    clonecmd = ['git','clone','--recursive','-b','master',ghurl]
+    clonecmd = ['git','clone','--recursive','-b','master',parent_repo_url]
     logging.debug("Running clone cmd %s"%(' '.join(clonecmd)))
     cloneproc = subprocess.Popen(
             clonecmd, 
@@ -152,7 +164,7 @@ def process_payload(payload, meta, config):
     ######################
 
     now = datetime.now().strftime("%Y%m%d_%H%M%S")
-    branch_name = "update-submodules/%s"%(now)
+    branch_name = "update_submodules_%s"%(now)
 
 
     ######################
@@ -162,9 +174,9 @@ def process_payload(payload, meta, config):
 
     if not abort:
 
-        repo_dir = os.path.join(scratch_dir, repo_name)
+        repo_dir = os.path.join(scratch_dir, parent_repo_name)
 
-        cocmd = ['git','checkout',branch_name]
+        cocmd = ['git','checkout','-b',branch_name]
         coproc = subprocess.Popen(
                 cocmd,
                 stdout=PIPE, 
