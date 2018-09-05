@@ -36,17 +36,17 @@ def process_payload(payload, meta, config):
     if ('pull_request' not in payload.keys()) or ('action' not in payload.keys()):
         return
 
-    # We are only interested in PRs that are
-    # being opened or updated
-    if payload['action'] not in ['opened','synchronize']:
-        logging.debug("Skipping private-www build test: this is not opening/updating a PR")
-        return
-
     # This must be a whitelisted repo
     repo_name = payload['repository']['name']
     full_repo_name = payload['repository']['full_name']
     if full_repo_name not in params['repo_whitelist']:
-        logging.debug("Skipping private-www build test: this is not a whitelisted repo")
+        logging.debug("Skipping private-www build test: this is not the private-www repo")
+        return
+
+    # We are only interested in PRs that are
+    # being opened or updated
+    if payload['action'] not in ['opened','synchronize']:
+        logging.debug("Skipping private-www build test: this is not opening/updating a PR")
         return
 
     # Keep it simple:

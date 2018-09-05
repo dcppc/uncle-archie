@@ -47,15 +47,17 @@ def process_payload(payload,meta,config):
     if 'action' not in payload.keys():
         return
 
-    if payload['action'] not in ['opened','synchronize']:
-        # we are only interested in PRs that are
-        # being opened or updated
-        return
-
     # This must be a whitelisted repo
     repo_name = payload['repository']['name']
     full_repo_name = payload['repository']['full_name']
     if full_repo_name not in params['repo_whitelist']:
+        logging.debug("Skipping use-case-library integration test: this is not the use-case-library repo")
+        return
+
+    # We are only interested in PRs that are
+    # being opened or updated
+    if payload['action'] not in ['opened','synchronize']:
+        logging.debug("Skipping use-case-library integration test: this is not opening/updating a PR")
         return
 
     # Keep it simple:
@@ -121,7 +123,8 @@ def process_payload(payload,meta,config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    if check_for_errors(cloneproc,"git clone"):
+    status_failed, status_file = record_and_check_output(buildproc,"git clone",unique_filename)
+    if status_failed:
         build_status = "fail"
         abort = True
 
@@ -136,12 +139,13 @@ def process_payload(payload,meta,config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        if check_for_errors(coproc,"git checkout"):
+        status_failed, status_file = record_and_check_output(buildproc,"git checkout",unique_filename)
+        if status_failed:
             build_status = "fail"
             abort = True
 
     if not abort:
-        buildcmd = ['snakemake','build']
+        buildcmd = ['snakemake','--nocolor','build']
         buildproc = subprocess.Popen(
                 buildcmd, 
                 stdout=PIPE,
@@ -149,7 +153,7 @@ def process_payload(payload,meta,config):
                 cwd=repo_dir
         )
         # Modify this to save the output first
-        status_failed, status_file = record_and_check_output(buildproc,"snakemake build")
+        status_failed, status_file = record_and_check_output(buildproc,"snakemake build",unique_filename)
         if status_failed:
             build_status = "fail"
         else:
@@ -180,6 +184,7 @@ def process_payload(payload,meta,config):
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
+        logging.info("    Link %s"%status_url)
         return
 
 
@@ -202,12 +207,13 @@ def process_payload(payload,meta,config):
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
+        logging.info("    Link %s"%status_url)
         return
 
 
 
 
-def record_and_check_output(proc,label):
+def record_and_check_output(proc,label,unique_filename):
     """
     Given a process, get the stdout and stderr streams
     and record them in an output file that can be provided
@@ -217,9 +223,6 @@ def record_and_check_output(proc,label):
     Run this function on the last/most important step
     in your CI test. 
     """ 
-    unique = datetime.now().strftime("%Y%m%d%H%M%S")
-    unique_filename = "ucl_snakemake_test_%s"%(unique)
-
     output_path = os.path.join(HTDOCS,'output')
     output_file = os.path.join(output_path,unique_filename)
 
