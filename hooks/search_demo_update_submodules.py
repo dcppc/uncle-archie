@@ -10,20 +10,15 @@ from github import Github, GithubException
 
 
 """
-private-www Submodule Update PR for Uncle Archie
+search-demo-mkdocs-material Submodule Update PR for Uncle Archie
 
 
 
 Notes:
 
-We need to set up a submodule experiment with search-demo-mkdocs-material
-and the submodule fake-docs so that we can troubleshoot this before we
-deploy it for real.
-
 - search-demo is private-www
 - fake-docs is submodule
 - install webhooks for uncle archie
-- add a second hook script, and work on parameterizing it 
 - make changes to fake-docs (submodule) and make a pull request
 - merge the pull request to trigger the hook function
 
@@ -35,29 +30,27 @@ Description:
 This is a bit of an odd "CI test" because it isn't exactly a CI test, but it is
 part of a step-by-step CI workflow.
 
-This hook listens for incoming push to master events from private-www
-submodules.  When this type of event occurs, the hook opens an "update
-private-www submodules" pull request.
+This hook listens for incoming push to master events from fake-docs
+
+When this type of event occurs, the hook opens an "update submodules" PR
+in the search-demo-mkdocs-material repo
 
 (At that point, a new webhook is triggered and Uncle Archie will run a continuous
 integration test on the newly-opened pull request.)
-
-
-Installing webhoks:
-
-Need to install a push to master webhook into each submodule.
 """
 
+
+HTDOCS="/www/archie.nihdatacommons.us/htdocs"
 
 def process_payload(payload, meta, config):
     """
     Look for any push events to the repositories 
-    that are private-www submodules.
+    that are search-demo-mkdocs-material submodules.
 
     When we get a push event, we should figure out
     whether it is on the master branch, and if so, 
-    we open a new pull request that updates the submodules.
-
+    we open a new pull request in search-demo-mkdocs-material
+    that updates this submodule.
 
     Strategy:
     - use the shell, because it will work
@@ -71,35 +64,52 @@ def process_payload(payload, meta, config):
     """
     # Set parameters for the submodule update PR opener
     params = {
-            'repo_whitelist' : ['dcppc/internal','dcppc/organize','dcppc/nih-demo-meetings'],
-            'task_name' : 'Uncle Archie private-www Submodules Update PR',
-            'pass_msg' : 'The private-www submodules update PR passed!',
-            'fail_msg' : 'The private-www submodules update PR failed.',
+            'repo_whitelist' : ['charlesreid1/fake-docs'],
+            'task_name' : 'Uncle Archie search-demo-mkdocs-material Submodules Update PR',
+            'pass_msg' : 'The search-demo-mkdocs-material submodules update PR passed!',
+            'fail_msg' : 'The search-demo-mkdocs-material submodules update PR failed.',
     }
 
-    # This must be a push event to one of the submodule repos
-    if 'pusher' not in payload.keys():
-        return
 
-    # This must be a push to master event
-    if 'ref' not in payload.keys() or payload['ref']!='refs/heads/master':
-        return
-
-    # Only whitelisted repos
     repo_name = payload['repository']['name']
     full_repo_name = payload['repository']['full_name']
 
     sub_name = payload['repository']['name']
     full_sub_name = payload['repository']['full_name']
 
+
+    # This must be the use-case-library repo
     if full_repo_name not in params['repo_whitelist']:
-        logging.debug("Skipping private-www update submodules task: this is not a whitelisted repo")
+        logging.debug("Skipping search demo submodule PR: this is not the search-demo-mkdocs-material repo")
         return
+
+    # This must be a pull request
+    if 'pull_request' not in payload.keys():
+        logging.debug("Skipping search demo submodule PR: this is not a pull request")
+        return
+
+    if 'action' not in payload.keys():
+        logging.debug("Skipping search demo submodule PR: this is not a pull request")
+        return
+
+    if payload['action']!='closed':
+        logging.debug("Skipping search demo submodule PR: this pull request has not been closed yet")
+        return
+
+    # We want PRs that are being merged
+    if 'merge_commit_sha' not in payload['pull_request']:
+        logging.debug("Skipping search demo submodule PR: this pull request was not merged")
+
 
     # -----------------------------------------------
     # start private-www submodule update PR 
 
-    logging.info("Starting private-www submodule update pull request for %s"%(full_repo_name))
+    logging.info("Starting search demo submodule PR for %s"%(full_repo_name))
+
+
+    unique = datetime.now().strftime("%Y%m%d%H%M%S")
+    unique_filename = "search_demo_update_submodules_%s"%(unique)
+
 
 
     ######################
@@ -119,18 +129,15 @@ def process_payload(payload, meta, config):
 
     abort = False
 
+    parent_repo_name = "search-demo-mkdocs-material"
+
     # This is always the repo we clone
-    ghurl = "git@github.com:dcppc/private-www"
+    parent_repo_url = "git@github.com:charlesreid1/%s"%(parent_repo_name)
 
-    # Note that this checks out repos
-    # using the SSH keys in ~/.ssh
-    # and the github username in ~/.extras
-    # 
-    # If you push any changes, make sure you
-    # change your user first!
-    # https://help.github.com/articles/setting-your-username-in-git/
+    # get the API token
+    token = config['github_access_token']
 
-    clonecmd = ['git','clone','--recursive',ghurl]
+    clonecmd = ['git','clone','--recursive','-b','master',parent_repo_url]
     logging.debug("Running clone cmd %s"%(' '.join(clonecmd)))
     cloneproc = subprocess.Popen(
             clonecmd, 
@@ -138,7 +145,9 @@ def process_payload(payload, meta, config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    if check_for_errors(cloneproc,"git clone"):
+    status_failed, status_file = record_and_check_output(cloneproc,"git clone",unique_filename)
+    if status_failed:
+        build_status = "fail"
         abort = True
 
 
@@ -146,36 +155,29 @@ def process_payload(payload, meta, config):
     # unique branch name
     ######################
 
-    now = datetime.now().strftime("%Y%m%d%H%M")
-    branch_name = "update-submodules/%s"%(now)
+    now = datetime.now().strftime("%Y%m%d_%H%M%S")
+    branch_name = "update_submodules_%s"%(now)
 
 
     ######################
-    # Make a new branch for the PR and check it out
+    # Create new branch
+    # from master branch HEAD
     ######################
 
     if not abort:
 
-        repo_dir = os.path.join(scratch_dir, repo_name)
+        repo_dir = os.path.join(scratch_dir, parent_repo_name)
 
-        brcmd = ['git','branch',branch_name]
-        brproc = subprocess.Popen(
-                brcmd,
-                stdout=PIPE, 
-                stderr=PIPE, 
-                cwd=repo_dir
-        )
-        if check_for_errors(brproc,"git branch"):
-            abort = True
-
-        cocmd = ['git','checkout',branch_name]
+        cocmd = ['git','checkout','-b',branch_name]
         coproc = subprocess.Popen(
                 cocmd,
                 stdout=PIPE, 
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        if check_for_errors(coproc,"git checkout"):
+        status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
+        if status_failed:
+            build_status = "fail"
             abort = True
 
 
@@ -196,7 +198,9 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=submodule_dir
         )
-        if check_for_errors(subcoproc,"git checkout submodule"):
+        status_failed, status_file = record_and_check_output(subcoproc,"git checkout submodule",unique_filename)
+        if status_failed:
+            build_status = "fail"
             abort = True
 
         pullcmd = ['git','pull','origin','master']
@@ -206,7 +210,9 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=submodule_dir
         )
-        if check_for_errors(pullproc,"git checkout submodule"):
+        status_failed, status_file = record_and_check_output(pullproc,"git pull submodule",unique_filename)
+        if status_failed:
+            build_status = "fail"
             abort = True
 
 
@@ -227,7 +233,9 @@ def process_payload(payload, meta, config):
                 stderr=PIPE,
                 cwd=repo_dir
         )
-        if check_for_errors(addproc,"git add submodule"):
+        status_failed, status_file = record_and_check_output(addproc,"git add submodule",unique_filename)
+        if status_failed:
+            build_status = "fail"
             abort = True
 
 
@@ -240,7 +248,9 @@ def process_payload(payload, meta, config):
                 stderr=PIPE,
                 cwd=repo_dir
         )
-        if check_for_errors(commitproc,"git commit submodule"):
+        status_failed, status_file = record_and_check_output(commitproc,"git commit submodule",unique_filename)
+        if status_failed:
+            build_status = "fail"
             abort = True
 
 
@@ -252,7 +262,9 @@ def process_payload(payload, meta, config):
                 stderr=PIPE,
                 cwd=repo_dir
         )
-        if check_for_errors(pushproc,"git push submodule"):
+        status_failed, status_file = record_and_check_output(pushproc,"git push origin branch",unique_filename)
+        if status_failed:
+            build_status = "fail"
             abort = True
 
 
@@ -266,7 +278,7 @@ def process_payload(payload, meta, config):
         os.environ['GITHUB_TOKEN'] = token
 
         hubcmd = ['hub','pull-request',
-                '-b','dcppc:master',
+                '-b','charlesreid1:master',
                 '-h',branch_name,
                 '-m',pr_msg]
         hubproc = subprocess.Popen(
@@ -275,7 +287,8 @@ def process_payload(payload, meta, config):
                 stderr=PIPE,
                 cwd=repo_dir
         )
-        if check_for_errors(hubproc,"create pull request"):
+        status_failed, status_file = record_and_check_output(hubproc,"create pull request",unique_filename)
+        if status_failed:
             build_status = "fail"
             abort = True
 
@@ -291,15 +304,63 @@ def process_payload(payload, meta, config):
 
 
     if not abort:
-        logging.info("private-www update submodule succeeded for submodule %s"%(full_repo_name))
+        logging.info("search demo submodule PR succeeded for submodule %s"%(full_repo_name))
 
     else:
-        logging.info("private-www update submodule failed for submodule %s"%(full_repo_name))
+        logging.info("search demo submodule PR failed for submodule %s"%(full_repo_name))
 
     return
 
 
+
+
+def record_and_check_output(proc,label,unique_filename):
+    """
+    Given a process, get the stdout and stderr streams
+    and record them in an output file that can be provided
+    to users as a link. Also return a boolean on whether
+    there was a problem with the process.
+
+    Run this function on the last/most important step
+    in your CI test. 
+    """ 
+    output_path = os.path.join(HTDOCS,'output')
+    output_file = os.path.join(output_path,unique_filename)
+
+    out = proc.stdout.read().decode('utf-8').lower()
+    err = proc.stderr.read().decode('utf-8').lower()
+
+    lines = [ "======================\n",
+              "======= STDOUT =======\n",
+              out,
+              "\n\n",
+              "======================\n",
+              "======= STDERR =======\n",
+              err,
+              "\n\n"]
+
+    with open(output_file,'w') as f:
+        [f.write(j) for j in lines]
+
+    logging.info("Results from process %s:"%(label))
+    logging.info("%s"%(out))
+    logging.info("%s"%(err))
+    logging.info("Recorded in file %s"%(output_file))
+
+    if "exception" in out or "exception" in err:
+        return True, unique_filename
+
+    if "error" in out or "error" in err:
+        return True, unique_filename
+
+    return False, unique_filename
+
+
 def check_for_errors(proc,label):
+    """
+    Given a process, get the stdout and stderr streams and look for
+    exceptions or errors.  Return a boolean whether there was a problem.
+    """ 
     out = proc.stdout.read().decode('utf-8').lower()
     err = proc.stderr.read().decode('utf-8').lower()
 
@@ -314,5 +375,10 @@ def check_for_errors(proc,label):
         return True
 
     return False
+
+
+if __name__=="__main__":
+    process_payload({'type':'test','name':'private_www'},{'a':1,'b':2})
+
 
 
