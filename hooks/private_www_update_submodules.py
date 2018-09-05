@@ -3,10 +3,8 @@ import logging
 from subprocess import PIPE
 import tempfile
 import json, os, re
-
-from datetime import datetime
-
 from github import Github, GithubException
+from datetime import datetime
 
 
 """
