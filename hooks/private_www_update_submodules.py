@@ -48,6 +48,7 @@ Installing webhoks:
 Need to install a push to master webhook into each submodule.
 """
 
+HTDOCS="/www/archie.nihdatacommons.us/htdocs"
 
 def process_payload(payload, meta, config):
     """
@@ -85,9 +86,9 @@ def process_payload(payload, meta, config):
     full_sub_name = payload['repository']['full_name']
 
 
-    # This must be the use-case-library repo
+    # This must be a private-www submodule
     if full_repo_name not in params['repo_whitelist']:
-        logging.debug("Skipping private-www submodule PR: this is not the private-www repo")
+        logging.debug("Skipping private-www submodule PR: this is not a whitelisted repo: %s"%(",".join(params['repo_whitelist'])))
         return
 
     # This must be a pull request
@@ -106,6 +107,7 @@ def process_payload(payload, meta, config):
     # We want PRs that are being merged
     if 'merge_commit_sha' not in payload['pull_request']:
         logging.debug("Skipping private-www submodule PR: this pull request was not merged")
+        return
 
 
     # -----------------------------------------------
@@ -146,7 +148,7 @@ def process_payload(payload, meta, config):
     token = config['github_access_token']
 
     clonecmd = ['git','clone','--recursive','-b','master',parent_repo_url]
-    logging.debug("Running clone cmd %s"%(' '.join(clonecmd)))
+    logging.debug("Running cmd: %s"%(' '.join(clonecmd)))
     cloneproc = subprocess.Popen(
             clonecmd, 
             stdout=PIPE, 
@@ -177,6 +179,7 @@ def process_payload(payload, meta, config):
         repo_dir = os.path.join(scratch_dir, parent_repo_name)
 
         cocmd = ['git','checkout','-b',branch_name]
+        logging.debug("Running cmd: %s"%(' '.join(cocmd)))
         coproc = subprocess.Popen(
                 cocmd,
                 stdout=PIPE, 
@@ -200,6 +203,7 @@ def process_payload(payload, meta, config):
         submodule_dir = os.path.join(repo_dir, submodule_dir_relative)
 
         subcocmd = ['git','checkout','master']
+        logging.debug("Running cmd: %s"%(' '.join(subcocmd)))
         subcoproc = subprocess.Popen(
                 subcocmd,
                 stdout=PIPE, 
@@ -212,6 +216,7 @@ def process_payload(payload, meta, config):
             abort = True
 
         pullcmd = ['git','pull','origin','master']
+        logging.debug("Running cmd: %s"%(' '.join(pullcmd)))
         pullproc = subprocess.Popen(
                 pullcmd,
                 stdout=PIPE, 
@@ -235,6 +240,7 @@ def process_payload(payload, meta, config):
 
         # Add the submodule
         addcmd = ['git','add',submodule_dir_relative]
+        logging.debug("Running cmd: %s"%(' '.join(addcmd)))
         addproc = subprocess.Popen(
                 addcmd,
                 stdout=PIPE,
@@ -250,6 +256,7 @@ def process_payload(payload, meta, config):
         # Commit the new submodule
 
         commitcmd = ['git','commit',submodule_dir_relative,'-m',commit_msg]
+        logging.debug("Running cmd: %s"%(' '.join(commitcmd)))
         commitproc = subprocess.Popen(
                 commitcmd,
                 stdout=PIPE,
@@ -264,6 +271,7 @@ def process_payload(payload, meta, config):
 
 
         pushcmd = ['git','push','origin',branch_name]
+        logging.debug("Running cmd: %s"%(' '.join(pushcmd)))
         pushproc = subprocess.Popen(
                 pushcmd,
                 stdout=PIPE,
@@ -289,6 +297,7 @@ def process_payload(payload, meta, config):
                 '-b','dcppc:master',
                 '-h',branch_name,
                 '-m',pr_msg]
+        logging.debug("Running cmd: %s"%(' '.join(hubcmd)))
         hubproc = subprocess.Popen(
                 hubcmd,
                 stdout=PIPE,
