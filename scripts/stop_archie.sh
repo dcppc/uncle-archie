@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# This one is quite a bit simpler.
-# This kills any screen(s) named archie.
+# This command actually goes straight into
+# archie.service, don't use this script.
 
-screen -X -S archie quit
+/usr/bin/sudo pkill -f uncle_archie
 

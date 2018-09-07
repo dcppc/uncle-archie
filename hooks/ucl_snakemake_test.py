@@ -40,18 +40,20 @@ def process_payload(payload,meta,config):
             'fail_msg' : 'The use-case-library build test failed.',
     }
 
-    # This must be a pull request
-    if 'pull_request' not in payload.keys():
-        return
-
-    if 'action' not in payload.keys():
-        return
-
-    # This must be a whitelisted repo
+    # This must be the use-case-library repo
     repo_name = payload['repository']['name']
     full_repo_name = payload['repository']['full_name']
     if full_repo_name not in params['repo_whitelist']:
         logging.debug("Skipping use-case-library integration test: this is not the use-case-library repo")
+        return
+
+    # This must be a pull request
+    if 'pull_request' not in payload.keys():
+        logging.debug("Skipping use-case-library integration test: this is not a pull request")
+        return
+
+    if 'action' not in payload.keys():
+        logging.debug("Skipping use-case-library integration test: this is not a pull request")
         return
 
     # We are only interested in PRs that are
@@ -59,6 +61,9 @@ def process_payload(payload,meta,config):
     if payload['action'] not in ['opened','synchronize']:
         logging.debug("Skipping use-case-library integration test: this is not opening/updating a PR")
         return
+
+
+
 
     # Keep it simple:
     # get the head commit
@@ -77,6 +82,11 @@ def process_payload(payload,meta,config):
 
 
     logging.info("Starting use case library build test")
+
+
+    unique = datetime.now().strftime("%Y%m%d%H%M%S")
+    unique_filename = "ucl_snakemake_test_%s"%(unique)
+
 
     ######################
     # logic. noise.
@@ -123,7 +133,7 @@ def process_payload(payload,meta,config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    status_failed, status_file = record_and_check_output(buildproc,"git clone",unique_filename)
+    status_failed, status_file = record_and_check_output(cloneproc,"git clone",unique_filename)
     if status_failed:
         build_status = "fail"
         abort = True
@@ -139,7 +149,7 @@ def process_payload(payload,meta,config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        status_failed, status_file = record_and_check_output(buildproc,"git checkout",unique_filename)
+        status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
         if status_failed:
             build_status = "fail"
             abort = True
@@ -226,8 +236,11 @@ def record_and_check_output(proc,label,unique_filename):
     output_path = os.path.join(HTDOCS,'output')
     output_file = os.path.join(output_path,unique_filename)
 
-    out = proc.stdout.read().decode('utf-8').lower()
-    err = proc.stderr.read().decode('utf-8').lower()
+    out = proc.stdout.read().decode('utf-8')
+    err = proc.stderr.read().decode('utf-8')
+
+    lout = out.lower()
+    lerr = err.lower()
 
     lines = [ "======================\n",
               "======= STDOUT =======\n",
@@ -246,10 +259,10 @@ def record_and_check_output(proc,label,unique_filename):
     logging.info("%s"%(err))
     logging.info("Recorded in file %s"%(output_file))
 
-    if "exception" in out or "exception" in err:
+    if "exception" in lout or "exception" in lerr:
         return True, unique_filename
 
-    if "error" in out or "error" in err:
+    if "error" in lout or "error" in lerr:
         return True, unique_filename
 
     return False, unique_filename
@@ -274,9 +287,6 @@ def check_for_errors(proc,label):
         return True
 
     return False
-
-
-
 
 
 if __name__=="__main__":
