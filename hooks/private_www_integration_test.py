@@ -48,13 +48,6 @@ def process_payload(payload, meta, config):
         logging.debug("Skipping private-www integration test: this is not a whitelisted repo")
         return
 
-    # We are only interested in PRs that have the label
-    # ""Run private-www integration test"
-    pr_labels = [d['name'] for d in payload['pull_request']['labels']]
-    if 'Run private-www integration test' not in pr_labels:
-        logging.debug("Skipping private-www integration test: this PR is not labeled with \"Run private-www integration test\"")
-        return
-
     # We are only interested in PRs that are
     # being opened or updated
     if payload['action'] not in ['opened','synchronize']:
