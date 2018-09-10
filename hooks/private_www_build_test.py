@@ -52,6 +52,10 @@ def process_payload(payload, meta, config):
         logging.debug("Skipping private-www build test: this is not opening/updating a PR")
         return
 
+    if payload['master_branch']=='heroku-pages':
+        logging.debug("Skipping private-www build test because PR is based on heroku-pages branch")
+        return
+
     # Keep it simple:
     # get the head commit
     head_commit = payload['pull_request']['head']['sha']
