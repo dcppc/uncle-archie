@@ -52,7 +52,7 @@ def process_payload(payload, meta, config):
         logging.debug("Skipping private-www build test: this is not opening/updating a PR")
         return
 
-    if payload['master_branch']=='heroku-pages':
+    if payload['pull_request']['base']['ref']=='heroku-pages':
         logging.debug("Skipping private-www build test because PR is based on heroku-pages branch")
         return
 
