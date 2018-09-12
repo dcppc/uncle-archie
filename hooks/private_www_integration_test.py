@@ -31,7 +31,7 @@ def process_payload(payload, meta, config):
     """
     # Set parameters for the PR builder
     params = {
-            'repo_whitelist' : ['dcppc/internal','dcppc/organize','dcppc/nih-demo-meetings'],
+            'repo_whitelist' : ['dcppc/internal','dcppc/organize','dcppc/nih-demo-meetings','dcppc/dcppc-workshops'],
             'task_name' : 'Uncle Archie private-www Integration Test',
             'pass_msg' : 'The private-www integration test passed!',
             'fail_msg' : 'The private-www integration test failed.',
@@ -150,6 +150,20 @@ def process_payload(payload, meta, config):
                 cwd=submodule_dir
         )
         status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
+        if status_failed:
+            build_status = "fail"
+            abort = True
+
+    # In case of new submodule
+    if not abort:
+        sucmd = ['git','submodule','update','--init']
+        suproc = subprocess.Popen(
+                sucmd,
+                stdout=PIPE, 
+                stderr=PIPE, 
+                cwd=repo_dir
+        )
+        status_failed, status_file = record_and_check_output(suproc,"submodule update",unique_filename)
         if status_failed:
             build_status = "fail"
             abort = True
