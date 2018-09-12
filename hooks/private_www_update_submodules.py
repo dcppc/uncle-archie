@@ -189,6 +189,19 @@ def process_payload(payload, meta, config):
             build_status = "fail"
             abort = True
 
+    if not abort:
+        sucmd = ['git','submodule','update','--init']
+        suproc = subprocess.Popen(
+                sucmd,
+                stdout=PIPE, 
+                stderr=PIPE, 
+                cwd=repo_dir
+        )
+        status_failed, status_file = record_and_check_output(suproc,"submodule update",unique_filename)
+        if status_failed:
+            build_status = "fail"
+            abort = True
+
 
     ######################
     # Check out the master branch of the submodule
