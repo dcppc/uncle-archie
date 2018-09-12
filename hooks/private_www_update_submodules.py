@@ -70,7 +70,7 @@ def process_payload(payload, meta, config):
     """
     # Set parameters for the submodule update PR opener
     params = {
-            'repo_whitelist' : ['dcppc/internal','dcppc/organize','dcppc/nih-demo-meetings'],
+            'repo_whitelist' : ['dcppc/internal','dcppc/organize','dcppc/nih-demo-meetings','dcppc/dcppc-workshops'],
             'task_name' : 'Uncle Archie private-www Submodules Update PR',
             'pass_msg' : 'The private-www submodules update PR passed!',
             'fail_msg' : 'The private-www submodules update PR failed.',
