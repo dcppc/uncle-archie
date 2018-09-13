@@ -211,7 +211,11 @@ def process_payload(payload, meta, config):
 
     if not abort:
 
-        submodule_dir_relative = os.path.join('docs', repo_name)
+        if repo_name == 'dcppc-workshops':
+            submodule_dir_relative = os.path.join('docs','workshops')
+        else:
+            submodule_dir_relative = os.path.join('docs', repo_name)
+
         submodule_dir = os.path.join(repo_dir, submodule_dir_relative)
 
         subcocmd = ['git','checkout','master']
