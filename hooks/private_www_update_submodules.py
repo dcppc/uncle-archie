@@ -70,7 +70,7 @@ def process_payload(payload, meta, config):
     """
     # Set parameters for the submodule update PR opener
     params = {
-            'repo_whitelist' : ['dcppc/internal','dcppc/organize','dcppc/nih-demo-meetings'],
+            'repo_whitelist' : ['dcppc/internal','dcppc/organize','dcppc/nih-demo-meetings','dcppc/dcppc-workshops'],
             'task_name' : 'Uncle Archie private-www Submodules Update PR',
             'pass_msg' : 'The private-www submodules update PR passed!',
             'fail_msg' : 'The private-www submodules update PR failed.',
@@ -189,6 +189,20 @@ def process_payload(payload, meta, config):
             build_status = "fail"
             abort = True
 
+    # In case of new submodule
+    if not abort:
+        sucmd = ['git','submodule','update','--init']
+        suproc = subprocess.Popen(
+                sucmd,
+                stdout=PIPE, 
+                stderr=PIPE, 
+                cwd=repo_dir
+        )
+        status_failed, status_file = record_and_check_output(suproc,"submodule update",unique_filename)
+        if status_failed:
+            build_status = "fail"
+            abort = True
+
 
     ######################
     # Check out the master branch of the submodule
@@ -197,7 +211,11 @@ def process_payload(payload, meta, config):
 
     if not abort:
 
-        submodule_dir_relative = os.path.join('docs', repo_name)
+        if repo_name == 'dcppc-workshops':
+            submodule_dir_relative = os.path.join('docs','workshops')
+        else:
+            submodule_dir_relative = os.path.join('docs', repo_name)
+
         submodule_dir = os.path.join(repo_dir, submodule_dir_relative)
 
         subcocmd = ['git','checkout','master']

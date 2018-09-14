@@ -149,6 +149,7 @@ def process_payload(payload, meta, config):
             build_status = "fail"
             abort = True
 
+    # In case of new submodule
     if not abort:
         sucmd = ['git','submodule','update','--init']
         suproc = subprocess.Popen(
