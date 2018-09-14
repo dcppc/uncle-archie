@@ -242,8 +242,11 @@ def record_and_check_output(proc,label,unique_filename):
     output_path = os.path.join(HTDOCS,'output')
     output_file = os.path.join(output_path,unique_filename)
 
-    out = proc.stdout.read().decode('utf-8').lower()
-    err = proc.stderr.read().decode('utf-8').lower()
+    out = proc.stdout.read().decode('utf-8')
+    err = proc.stderr.read().decode('utf-8')
+
+    lout = out.lower()
+    lerr = err.lower()
 
     lines = [ "======================\n",
               "======= STDOUT =======\n",
@@ -262,10 +265,10 @@ def record_and_check_output(proc,label,unique_filename):
     logging.info("%s"%(err))
     logging.info("Recorded in file %s"%(output_file))
 
-    if "exception" in out or "exception" in err:
+    if "exception" in lout or "exception" in lerr:
         return True, unique_filename
 
-    if "error" in out or "error" in err:
+    if "error" in lout or "error" in lerr:
         return True, unique_filename
 
     return False, unique_filename

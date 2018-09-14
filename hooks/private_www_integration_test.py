@@ -99,7 +99,7 @@ def process_payload(payload, meta, config):
 
 
     ######################
-    # build.
+    # clone.
     ######################
 
     # Remember: you can only read() the output
@@ -110,7 +110,7 @@ def process_payload(payload, meta, config):
     # This is always the repo we clone
     ghurl = "git@github.com:dcppc/private-www"
 
-    clonecmd = ['git','clone','--recursive',ghurl]
+    clonecmd = ['git','clone','--recursive','-b','master',ghurl]
     logging.debug("Running clone cmd %s"%(' '.join(clonecmd)))
     cloneproc = subprocess.Popen(
             clonecmd, 
@@ -126,20 +126,30 @@ def process_payload(payload, meta, config):
 
     if not abort:
 
-        # We are always using the latest version of private-www,
-        # of the default branch, so no need to check out any version.
+        # We are always using the latest version of 
+        # master branch of private-www,
+        # no need to check out any version of
+        # private-www.
 
-        # However, we do want to check out the correct submodule commit
-        # in the docs/ folder before we test the mkdocs build command.
-        # That's what triggered this test in the first place - one of the 
-        # submodules was updated in a PR. Make the submodule point
-        # to the head commit of that PR.
+        # However, we do need to check out
+        # a version of the submodule PR that 
+        # gtriggered this test.
+
+        # Get the head commit of the PR that
+        # triggered this test, and update the
+        # appropriate submodule before running
+        # snakemake build_docs
 
         # Assemble submodule directory by determining which submdule
         # was updated from the payload (repo_name)
         repo_dir = os.path.join(scratch_dir, "private-www")
-        docs_dir = os.path.join(repo_dir,'docs')
-        submodule_dir = os.path.join(docs_dir,repo_name)
+
+        if repo_name == 'dcppc-workshops':
+            submodule_dir_relative = os.path.join('docs','workshops')
+        else:
+            submodule_dir_relative = os.path.join('docs', repo_name)
+
+        submodule_dir = os.path.join(repo_dir, submodule_dir_relative)
 
         cocmd = ['git','checkout',head_commit]
         logging.debug("Running checkout cmd %s from %s"%(' '.join(cocmd), submodule_dir))
@@ -248,8 +258,11 @@ def record_and_check_output(proc,label,unique_filename):
     output_path = os.path.join(HTDOCS,'output')
     output_file = os.path.join(output_path,unique_filename)
 
-    out = proc.stdout.read().decode('utf-8').lower()
-    err = proc.stderr.read().decode('utf-8').lower()
+    out = proc.stdout.read().decode('utf-8')
+    err = proc.stderr.read().decode('utf-8')
+
+    lout = out.lower()
+    lerr = err.lower()
 
     lines = [ "======================\n",
               "======= STDOUT =======\n",
@@ -260,7 +273,7 @@ def record_and_check_output(proc,label,unique_filename):
               err,
               "\n\n"]
 
-    with open(output_file,'a') as f:
+    with open(output_file,'w') as f:
         [f.write(j) for j in lines]
 
     logging.info("Results from process %s:"%(label))
@@ -268,10 +281,10 @@ def record_and_check_output(proc,label,unique_filename):
     logging.info("%s"%(err))
     logging.info("Recorded in file %s"%(output_file))
 
-    if "exception" in out or "exception" in err:
+    if "exception" in lout or "exception" in lerr:
         return True, unique_filename
 
-    if "error" in out or "error" in err:
+    if "error" in lout or "error" in lerr:
         return True, unique_filename
 
     return False, unique_filename
