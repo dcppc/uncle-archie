@@ -109,7 +109,7 @@ def process_payload(payload, meta, config):
 
 
     # -----------------------------------------------
-    # start private-www submodule update PR 
+    # Begin private-www submodule update PR 
 
     logging.info("Starting private-www submodule update pull request for %s"%(full_repo_name))
 
@@ -121,7 +121,7 @@ def process_payload(payload, meta, config):
 
 
     ######################
-    # make space.
+    # Make space.
     ######################
 
     scratch_dir = tempfile.mkdtemp()
@@ -129,7 +129,7 @@ def process_payload(payload, meta, config):
 
 
     ######################
-    # clone.
+    # Clone.
     ######################
 
     # Remember: you can only read() the output
@@ -159,180 +159,361 @@ def process_payload(payload, meta, config):
         abort = True
 
 
-    ######################
-    # unique branch name
-    ######################
-
-    now = datetime.now().strftime("%Y%m%d_%H%M%S")
-    branch_name = "update_submodules_%s"%(now)
-
-
-    ######################
-    # Create new branch
-    # from master branch HEAD
-    ######################
-
-    if not abort:
-
-        repo_dir = os.path.join(scratch_dir, parent_repo_name)
-
-        cocmd = ['git','checkout','-b',branch_name]
-        logging.debug("Running cmd: %s"%(' '.join(cocmd)))
-        coproc = subprocess.Popen(
-                cocmd,
-                stdout=PIPE, 
-                stderr=PIPE, 
-                cwd=repo_dir
-        )
-        status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
-        if status_failed:
-            build_status = "fail"
-            abort = True
-
-    # In case of new submodule
-    if not abort:
-        sucmd = ['git','submodule','update','--init']
-        suproc = subprocess.Popen(
-                sucmd,
-                stdout=PIPE, 
-                stderr=PIPE, 
-                cwd=repo_dir
-        )
-        status_failed, status_file = record_and_check_output(suproc,"submodule update",unique_filename)
-        if status_failed:
-            build_status = "fail"
-            abort = True
+    # Two entirely different workflows,
+    # depending on whether a PR is already open
+    token = config['github_access_token']
+    g = Github(token)
+    r = g.get_repo(full_repo_name)
 
 
-    ######################
-    # Check out the master branch of the submodule
-    # and pull the latest changes from upstream
-    ######################
+    # We need to add which submodule head commit 
+    # we're updating to this commit message
+    # 
+    # The merge_pr_event.json sample payload
+    # includes this in the payload at
+    # 
+    #   payload['pull_request']['merge_commit_sha']
 
-    if not abort:
+    new_sha = payload['pull_request']['merge_commit_sha']
 
-        if repo_name == 'dcppc-workshops':
-            submodule_dir_relative = os.path.join('docs','workshops')
-        else:
-            submodule_dir_relative = os.path.join('docs', repo_name)
+    commit_prefix = '[Uncle Archie] Updating submodule %s'%full_sub_name
 
-        submodule_dir = os.path.join(repo_dir, submodule_dir_relative)
-
-        subcocmd = ['git','checkout','master']
-        logging.debug("Running cmd: %s"%(' '.join(subcocmd)))
-        subcoproc = subprocess.Popen(
-                subcocmd,
-                stdout=PIPE, 
-                stderr=PIPE, 
-                cwd=submodule_dir
-        )
-        status_failed, status_file = record_and_check_output(subcoproc,"git checkout submodule",unique_filename)
-        if status_failed:
-            build_status = "fail"
-            abort = True
-
-        pullcmd = ['git','pull','origin','master']
-        logging.debug("Running cmd: %s"%(' '.join(pullcmd)))
-        pullproc = subprocess.Popen(
-                pullcmd,
-                stdout=PIPE, 
-                stderr=PIPE, 
-                cwd=submodule_dir
-        )
-        status_failed, status_file = record_and_check_output(pullproc,"git pull submodule",unique_filename)
-        if status_failed:
-            build_status = "fail"
-            abort = True
-
-
-    ######################
-    # Add commit push the new submodule
-    ######################
-
-    commit_msg = '[Uncle Archie] Updating submodule %s'%(full_sub_name)
+    commit_msg = '[Uncle Archie] Updating submodule %s to commit %s'%(full_sub_name,new_sha[0:7])
     pr_msg = commit_msg 
 
-    if not abort:
+    # Look for a PR containing commit_prefix
+    # If we find one, do a commit and a push
+    # If we don't find one, do a branch and a PR
+    existing_pr_head = None
+    for pr in r.get_pulls(state='open',base='master'):
+        if commit_prefix in pr.title:
+            # Get the branch name
+            head = existing_pr_head
+            # Update the title with the new commit
+            pr.title = commit_msg
+            break
 
-        # Add the submodule
-        addcmd = ['git','add',submodule_dir_relative]
-        logging.debug("Running cmd: %s"%(' '.join(addcmd)))
-        addproc = subprocess.Popen(
-                addcmd,
-                stdout=PIPE,
-                stderr=PIPE,
-                cwd=repo_dir
-        )
-        status_failed, status_file = record_and_check_output(addproc,"git add submodule",unique_filename)
-        if status_failed:
-            build_status = "fail"
-            abort = True
+    if existing_pr_head is not None:
+
+        # ------------------------------------
+        # Begin sync PR workflow 
+
+        ######################
+        # Unique branch name
+        ######################
+
+        # We know this is a branch in the same repo
+        # b/c, eyyy, it's me, Uncle Archie
+        branch_name = existing_pr_head
+
+        ######################
+        # Check out branch 
+        ######################
+
+        if not abort:
+
+            repo_dir = os.path.join(scratch_dir, parent_repo_name)
+
+            cocmd = ['git','checkout','-b',branch_name,'origin/%s'%(branch_name)]
+            logging.debug("Running cmd: %s"%(' '.join(cocmd)))
+            coproc = subprocess.Popen(
+                    cocmd,
+                    stdout=PIPE, 
+                    stderr=PIPE, 
+                    cwd=repo_dir
+            )
+            status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
+
+        # In case of new submodule
+        if not abort:
+            sucmd = ['git','submodule','update','--init']
+            suproc = subprocess.Popen(
+                    sucmd,
+                    stdout=PIPE, 
+                    stderr=PIPE, 
+                    cwd=repo_dir
+            )
+            status_failed, status_file = record_and_check_output(suproc,"submodule update",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
+
+        ######################
+        # Check out the master branch of the submodule
+        # and pull the latest changes from upstream
+        ######################
+
+        if not abort:
+
+            if repo_name == 'dcppc-workshops':
+                submodule_dir_relative = os.path.join('docs','workshops')
+            else:
+                submodule_dir_relative = os.path.join('docs', repo_name)
+
+            submodule_dir = os.path.join(repo_dir, submodule_dir_relative)
+
+            subcocmd = ['git','checkout','master']
+            logging.debug("Running cmd: %s"%(' '.join(subcocmd)))
+            subcoproc = subprocess.Popen(
+                    subcocmd,
+                    stdout=PIPE, 
+                    stderr=PIPE, 
+                    cwd=submodule_dir
+            )
+            status_failed, status_file = record_and_check_output(subcoproc,"git checkout submodule",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
+
+            pullcmd = ['git','pull','origin','master']
+            logging.debug("Running cmd: %s"%(' '.join(pullcmd)))
+            pullproc = subprocess.Popen(
+                    pullcmd,
+                    stdout=PIPE, 
+                    stderr=PIPE, 
+                    cwd=submodule_dir
+            )
+            status_failed, status_file = record_and_check_output(pullproc,"git pull submodule",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
+
+        ######################
+        # Add commit push the new submodule
+        ######################
+
+        if not abort:
+
+            # Add the submodule
+            addcmd = ['git','add',submodule_dir_relative]
+            logging.debug("Running cmd: %s"%(' '.join(addcmd)))
+            addproc = subprocess.Popen(
+                    addcmd,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    cwd=repo_dir
+            )
+            status_failed, status_file = record_and_check_output(addproc,"git add submodule",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
 
 
-        # Commit the new submodule
+            # Commit the new submodule
 
-        commitcmd = ['git','commit',submodule_dir_relative,'-m',commit_msg]
-        logging.debug("Running cmd: %s"%(' '.join(commitcmd)))
-        commitproc = subprocess.Popen(
-                commitcmd,
-                stdout=PIPE,
-                stderr=PIPE,
-                cwd=repo_dir
-        )
-        status_failed, status_file = record_and_check_output(commitproc,"git commit submodule",unique_filename)
-        if status_failed:
-            build_status = "fail"
-            abort = True
-
-
-
-        pushcmd = ['git','push','origin',branch_name]
-        logging.debug("Running cmd: %s"%(' '.join(pushcmd)))
-        pushproc = subprocess.Popen(
-                pushcmd,
-                stdout=PIPE,
-                stderr=PIPE,
-                cwd=repo_dir
-        )
-        status_failed, status_file = record_and_check_output(pushproc,"git push origin branch",unique_filename)
-        if status_failed:
-            build_status = "fail"
-            abort = True
+            commitcmd = ['git','commit',submodule_dir_relative,'-m',commit_msg]
+            logging.debug("Running cmd: %s"%(' '.join(commitcmd)))
+            commitproc = subprocess.Popen(
+                    commitcmd,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    cwd=repo_dir
+            )
+            status_failed, status_file = record_and_check_output(commitproc,"git commit submodule",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
 
 
-    ######################
-    # New pull request
-    ######################
 
-    if not abort:
+            pushcmd = ['git','push','origin',branch_name]
+            logging.debug("Running cmd: %s"%(' '.join(pushcmd)))
+            pushproc = subprocess.Popen(
+                    pushcmd,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    cwd=repo_dir
+            )
+            status_failed, status_file = record_and_check_output(pushproc,"git push origin branch",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
 
-        # Store the github token in an environment var for hub
-        os.environ['GITHUB_TOKEN'] = token
+        # End sync PR workflow 
+        # ------------------------------------
 
-        hubcmd = ['hub','pull-request',
-                '-b','dcppc:master',
-                '-h',branch_name,
-                '-m',pr_msg]
-        logging.debug("Running cmd: %s"%(' '.join(hubcmd)))
-        hubproc = subprocess.Popen(
-                hubcmd,
-                stdout=PIPE,
-                stderr=PIPE,
-                cwd=repo_dir
-        )
-        status_failed, status_file = record_and_check_output(hubproc,"create pull request",unique_filename)
-        if status_failed:
-            build_status = "fail"
-            abort = True
+    else:
+
+        # ------------------------------------
+        # Begin open new PR workflow 
+
+        ######################
+        # Unique branch name
+        ######################
+
+        now = datetime.now().strftime("%Y%m%d_%H%M%S")
+        branch_name = "update_submodules_%s"%(now)
 
 
-    ######################
-    # Clean up github token
-    ######################
+        ######################
+        # Create new branch
+        # from master branch HEAD
+        ######################
 
-    os.environ['GITHUB_TOKEN'] = ""
+        if not abort:
 
-    # end private-www submodule update PR 
+            repo_dir = os.path.join(scratch_dir, parent_repo_name)
+
+            cocmd = ['git','checkout','-b',branch_name]
+            logging.debug("Running cmd: %s"%(' '.join(cocmd)))
+            coproc = subprocess.Popen(
+                    cocmd,
+                    stdout=PIPE, 
+                    stderr=PIPE, 
+                    cwd=repo_dir
+            )
+            status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
+
+        # In case of new submodule
+        if not abort:
+            sucmd = ['git','submodule','update','--init']
+            suproc = subprocess.Popen(
+                    sucmd,
+                    stdout=PIPE, 
+                    stderr=PIPE, 
+                    cwd=repo_dir
+            )
+            status_failed, status_file = record_and_check_output(suproc,"submodule update",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
+
+
+        ######################
+        # Check out the master branch of the submodule
+        # and pull the latest changes from upstream
+        ######################
+
+        if not abort:
+
+            if repo_name == 'dcppc-workshops':
+                submodule_dir_relative = os.path.join('docs','workshops')
+            else:
+                submodule_dir_relative = os.path.join('docs', repo_name)
+
+            submodule_dir = os.path.join(repo_dir, submodule_dir_relative)
+
+            subcocmd = ['git','checkout','master']
+            logging.debug("Running cmd: %s"%(' '.join(subcocmd)))
+            subcoproc = subprocess.Popen(
+                    subcocmd,
+                    stdout=PIPE, 
+                    stderr=PIPE, 
+                    cwd=submodule_dir
+            )
+            status_failed, status_file = record_and_check_output(subcoproc,"git checkout submodule",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
+
+            pullcmd = ['git','pull','origin','master']
+            logging.debug("Running cmd: %s"%(' '.join(pullcmd)))
+            pullproc = subprocess.Popen(
+                    pullcmd,
+                    stdout=PIPE, 
+                    stderr=PIPE, 
+                    cwd=submodule_dir
+            )
+            status_failed, status_file = record_and_check_output(pullproc,"git pull submodule",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
+
+
+        ######################
+        # Add commit push the new submodule
+        ######################
+
+        if not abort:
+
+            # Add the submodule
+            addcmd = ['git','add',submodule_dir_relative]
+            logging.debug("Running cmd: %s"%(' '.join(addcmd)))
+            addproc = subprocess.Popen(
+                    addcmd,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    cwd=repo_dir
+            )
+            status_failed, status_file = record_and_check_output(addproc,"git add submodule",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
+
+
+            # Commit the new submodule
+
+            commitcmd = ['git','commit',submodule_dir_relative,'-m',commit_msg]
+            logging.debug("Running cmd: %s"%(' '.join(commitcmd)))
+            commitproc = subprocess.Popen(
+                    commitcmd,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    cwd=repo_dir
+            )
+            status_failed, status_file = record_and_check_output(commitproc,"git commit submodule",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
+
+
+
+            pushcmd = ['git','push','origin',branch_name]
+            logging.debug("Running cmd: %s"%(' '.join(pushcmd)))
+            pushproc = subprocess.Popen(
+                    pushcmd,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    cwd=repo_dir
+            )
+            status_failed, status_file = record_and_check_output(pushproc,"git push origin branch",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
+
+
+        ######################
+        # New pull request
+        ######################
+
+        if not abort:
+
+            # Store the github token in an environment var for hub
+            os.environ['GITHUB_TOKEN'] = token
+
+            hubcmd = ['hub','pull-request',
+                    '-b','dcppc:master',
+                    '-h',branch_name,
+                    '-m',pr_msg]
+            logging.debug("Running cmd: %s"%(' '.join(hubcmd)))
+            hubproc = subprocess.Popen(
+                    hubcmd,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    cwd=repo_dir
+            )
+            status_failed, status_file = record_and_check_output(hubproc,"create pull request",unique_filename)
+            if status_failed:
+                build_status = "fail"
+                abort = True
+
+
+        ######################
+        # Clean up github token
+        ######################
+
+        os.environ['GITHUB_TOKEN'] = ""
+
+        # End open new PR workflow 
+        # ------------------------------------
+
+    # End private-www submodule update
     # -----------------------------------------------
 
 
