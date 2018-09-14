@@ -14,8 +14,8 @@
 # This is reliant on having pyenv set up already
 # on beavo, the server that runs archie.
 
-ARCHIE_DIR="/home/flowrence/uncle-archie"
-PYENV_BIN="/home/flowrence/.pyenv/bin"
+ARCHIE_DIR="/home/florence/uncle-archie"
+PYENV_BIN="/home/florence/.pyenv/bin"
 
 echo "Preparing python"
 eval "$(${PYENV_BIN}/pyenv init -)"
