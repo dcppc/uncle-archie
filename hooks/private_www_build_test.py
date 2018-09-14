@@ -181,6 +181,10 @@ def process_payload(payload, meta, config):
     # end snakemake build
     # -----------------------------------------------
 
+
+    # This is where we add a second status update 
+    # and copy the mkdocs output to the htdocs dir
+
     status_url = "https://archie.nihdatacommons.us/output/%s"%(status_file)
 
     if build_status == "pass":
