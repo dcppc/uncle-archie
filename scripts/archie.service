@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Restart=always
-ExecStart=/usr/bin/sudo -H -u florence /usr/bin/bash /home/florence/uncle-archie/scripts/start_archie.sh
+ExecStart=/usr/bin/sudo -H -u florence /bin/bash /home/florence/uncle-archie/scripts/start_archie.sh
 ExecStop=/usr/bin/sudo pkill -f uncle_archie
 
 [Install]
