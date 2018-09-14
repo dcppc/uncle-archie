@@ -138,6 +138,7 @@ def process_payload(payload, meta, config):
     abort = False
 
     parent_repo_name = "private-www"
+    parent_full_repo_name = "dcppc/private-www"
 
     # This is always the repo we clone
     parent_repo_url = "git@github.com:dcppc/%s"%(parent_repo_name)
@@ -164,6 +165,7 @@ def process_payload(payload, meta, config):
     token = config['github_access_token']
     g = Github(token)
     r = g.get_repo(full_repo_name)
+    parent_r = g.get_repo(parent_full_repo_name)
 
 
     # We need to add which submodule head commit 
@@ -185,7 +187,7 @@ def process_payload(payload, meta, config):
     # If we find one, do a commit and a push
     # If we don't find one, do a branch and a PR
     existing_pr_head = None
-    for pr in r.get_pulls(state='open',base='master'):
+    for pr in parent_r.get_pulls(state='open',base='master'):
         if commit_prefix in pr.title:
             # Get the branch name
             head = existing_pr_head
