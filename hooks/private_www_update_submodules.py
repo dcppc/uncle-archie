@@ -192,7 +192,7 @@ def process_payload(payload, meta, config):
             # Get the branch name
             head = existing_pr_head
             # Update the title with the new commit
-            pr.title = commit_msg
+            pr.edit(title = commit_msg)
             break
 
     if existing_pr_head is not None:
