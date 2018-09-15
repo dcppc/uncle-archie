@@ -45,6 +45,11 @@ def webhook():
 # meanwhile...
 
 app = archie.webapp.app
+config = archie.webapp.app.config
+# optional modification of tests
+config['private_www_build_test'] = {
+        'repo_whitelist' : ['dcppc/private-www','charlesreid1/private-www']
+}
 app.set_payload_handler('dcppc')
 app.run()
 
