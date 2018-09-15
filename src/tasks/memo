@@ -47,17 +47,16 @@ we have lots of tasks:
 
 list of tasks:
 
-private-www PR mkdocs build test 
-private-www submodule integration PR mkdocs build test 
-private-www submodule update PR creator 
-private-www commit to master heroku deployer 
-use-case-library PR mkdocs build test 
-use-case-library commit to master gh-pages deployer 
-centillion tests 
-uncle-archie tests 
-private-www tests 
-use-case-library tests
-
+private www pull request builder
+private www submodule integration builder
+private www submodule update pull request opener
+private www heroku deployer
+use case library pull request builder
+use case library gh-pages deployer
+centillion continuous integration tester
+uncle-archie continuous integration tester
+private-www continuous integration tester
+use case library continuous integration tester
 
 
 where do task parameters go?
