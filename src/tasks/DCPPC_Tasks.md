@@ -1,11 +1,22 @@
 # DCPPC Task Classes
 
-All of these tasks take a common parameter,
-htdocs dir and status url.
+The base Task class handles processing of parameters
+common to all tasks:
 
-The remaining settings are all test-specific:
+- htdocs dir
+- status url
+- log dir
 
+Each DCPPC test must look in the config dictionary for
+any of the following (and define default values for them):
+
+- name
+- label
+- temp dir
 - repo whitelist
+
+Some DCPPC tests take additional parameters:
+
 - base branch
 - submodule remap
 
@@ -20,8 +31,8 @@ import archie
 app = archie.webapp.app
 config = app.config
 
-config['htdocs_dir'] = '/www/archie.example.com/htdocs/output'
-config['status_url'] = 'https://archie.example.com/output'
+config['htdocs_dir'] = '/path/to/htdocs'
+config['status_url'] = 'https://archie.example.com'
 
 config['name_of_task'] = {
     'param_1' : 'value_1',
@@ -39,6 +50,9 @@ import archie
 
 app = archie.webapp.app
 config = app.config
+
+config['htdocs_dir'] = '/www/archie.example.com/htdocs/output'
+config['status_url'] = 'https://archie.example.com/output'
 
 config['private_www_PR_builder'] = {
     'repo_whitelist' : ['dcppc/private-www'],
