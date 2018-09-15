@@ -1,11 +1,11 @@
 from .handlers import \
         BasePayloadHandler, \
-        DefaultPayloadHandler, \
+        DumpPayloadHandler, \
         DCPPCPayloadHandler
 
 class PayloadHandlerFactory(object):
     payload_handlers = {
-            'default': DefaultPayloadHandler,
+            'default': DumpPayloadHandler,
             'dcppc':   DCPPCPayloadHandler
     }
     def __init__(self,handler_type,**kwargs):
