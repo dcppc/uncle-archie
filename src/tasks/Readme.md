@@ -103,6 +103,8 @@ There is nothing else required for Task objects.
 
 ## Task Classes
 
+See [`base.py`](base.py)
+
 For a list of DCPPC task classes, see [DCPPC_Tasks.md](DCPPC_Tasks.md)
 
 ### `UncleArchieTask` base class
@@ -111,6 +113,23 @@ This is the base `Task` class.
 
 This class tries to stay as general as possible.
 It only defines one virtual method, `run()`.
+
+### `GithubTask` base class
+
+The Github Task base class defines convenience methods
+for tasks that are performing actions on Github. This
+base class can perform actions with the payload like 
+checking if the payload is opening or syncing a pull 
+request, getting the head commit of a pull request, or
+setting the status of a commit.
+
+### `PyGithubTask` base class
+
+The PyGithub Task base class extends the Github Task
+class. It adds a setup and tear down step to the constructor
+and destructor, respectively. These setup and tear down
+methods manage a virtual Python environment, in which all 
+Python commands for this Task will be run.
 
 ### DCPPC-Inspired Base Classes
 
