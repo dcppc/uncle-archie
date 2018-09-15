@@ -8,14 +8,9 @@ All Task classes define a `run()`
 method that is called by the Payload Handler's
 `process_payload()` method.
 
-The Test subclass extends the Task class.
-All Test classes define a `run()` method,
-as well as a `test()` method that actually
-runs the test (everything else in the `run()`
-method is setup or cleanup for the test).
-
-The `test()` method can do things like mark
-a Github commit as pass/fail.
+All Task classes also define `setup()`
+and `teardown()` methods that are called
+before and after the task is run.
 
 ## Using a Task
 
@@ -103,18 +98,38 @@ There is nothing else required for Task objects.
 
 ## Task Classes
 
-See [`base.py`](base.py)
-
 For a list of DCPPC task classes, see [DCPPC_Tasks.md](DCPPC_Tasks.md)
 
 ### `UncleArchieTask` base class
 
-This is the base `Task` class.
+See [`base.py`](base.py)
+
+This is the base Task class.
+
+The base Task class checks for any required input parameters
+in the config variable:
+
+- `htdocs_dir`
+- `status_url`
+- `log_dir`
+
+Default values for these are set in the base Task class.
+
+It does not process a name or label for the Task,
+or any config variables that are task-specific.
+
+This is because Tasks know their own name and label.
+All Task config variables can be set in config,
+but Tasks must know their own name to know where
+to look! So, leave task-specific parameter handling
+to the Task itself.
 
 This class tries to stay as general as possible.
 It only defines one virtual method, `run()`.
 
 ### `GithubTask` base class
+
+See [`base.py`](base.py)
 
 The Github Task base class defines convenience methods
 for tasks that are performing actions on Github. This
@@ -125,25 +140,11 @@ setting the status of a commit.
 
 ### `PyGithubTask` base class
 
+See [`base.py`](base.py)
+
 The PyGithub Task base class extends the Github Task
 class. It adds a setup and tear down step to the constructor
 and destructor, respectively. These setup and tear down
 methods manage a virtual Python environment, in which all 
 Python commands for this Task will be run.
-
-### DCPPC-Inspired Base Classes
-
-Based on the DCPPC-specific tasks, we have created
-a number of base task classes that do the following:
-
-* Pull request builder - runs a build() function on
-  a given pull request in a given repo
-
-* <s>Pull request opener</s> - too complicated to generalize
-
-* Deployer - when a commit happens on a particular branch
-  of a particular repo, run the deploy() function
-
-* Continuous integration tester - run continuous integration
-  tests on every commit to a given branch of a given repo
 
