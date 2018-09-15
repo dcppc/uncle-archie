@@ -1,6 +1,6 @@
 # Uncle Archie: Payload Handlers
 
-The payload handler class is a high-level class
+The Payload Handler class is a high-level class
 that adds tasks to a task list at an abstract level.
 Payload handlers do not run any commands and only 
 know what tasks to create and run.
