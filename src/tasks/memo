@@ -1,0 +1,7 @@
+tasks are lower-level objects
+that define a sequence of actions
+to take based on the contents
+of a payload.
+
+tasks are usually running commands.
+

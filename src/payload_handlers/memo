@@ -1,0 +1,31 @@
+payload handler factory:
+this return an object
+that defines a process_payload()
+method, called by uncle archie's
+flask server.
+
+uncle archie uses the factory to
+create a payload handler object
+(from a string provided by the user).
+
+the payload handler receives the
+payload and performs a task on it.
+
+payload handlers are high-level objects
+that add tasks at an abstract level.
+
+
+
+DCPPC Payload Handler:
+
+def process_payload():
+
+    task1 = private_www_build_test()
+    task1.run(payload)
+
+    task2 = private_www_integration_test() 
+    task2.run(payload)
+
+    # ...
+
+
