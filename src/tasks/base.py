@@ -11,10 +11,6 @@ as base classes only. None of them define a
 process_payload() method, which is a virtual
 method that must be defined by a Task class
 to use that Task with Uncle Archie.
-
-Derived classes are in:
-    simple_classes.py
-    pr_classes.py
 """
 
 
@@ -42,13 +38,16 @@ class UncleArchieTask(object):
         so process_payload() is where we decide whether to
         actually run tests.
 
-        kwargs:
-            name :          Print-friendly name of this task
-            label :         Filename-friendly short label for this task
-            temp_dir :      Directory where the mess will be made and then cleaned up
-            log_dir :       Directory where output logs should go
-            htdocs_dir :    Directory where web-hosted output goes
-            base_url :      Base URL for content hosted at htdocs_dir
+        kwargs common to all tests:
+            htdocs_dir
+            status_url
+            log_dir
+
+        kwargs specific to a test (therefore handled elsewhere):
+            name :           Print-friendly name of this task
+            label :          Filename-friendly short label for this task
+            temp_dir :       Directory where the mess will be made and then cleaned up
+            repo_whitelist : What repos to run this test on
         """
         self.dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
