@@ -1,6 +1,70 @@
 # DCPPC Task Classes
 
-## private www pull request builder
+All of these tasks take a common parameter,
+htdocs dir and status url.
+
+The remaining settings are all test-specific:
+
+- repo whitelist
+- base branch
+- submodule remap
+
+## DCPPC Task Class Parameters
+
+The general pattern for setting parameters
+is as follows:
+
+```
+import archie
+
+app = archie.webapp.app
+config = app.config
+
+config['htdocs_dir'] = '/www/archie.example.com/htdocs/output'
+config['status_url'] = 'https://archie.example.com/output'
+
+config['name_of_task'] = {
+    'param_1' : 'value_1',
+    'param_2' : 'value_2',
+    'param_3' : 'value_3',
+}
+
+app.run()
+```
+
+Full example:
+
+```
+import archie
+
+app = archie.webapp.app
+config = app.config
+
+config['private_www_PR_builder'] = {
+    'repo_whitelist' : ['dcppc/private-www'],
+    'base_branch' : 'master'
+}
+
+config['private_www_submodule_integration_PR_builder'] = {
+    'repo_whitelist' : [
+            'dcppc/internal',
+            'dcppc/organize',
+            'dcppc/nih-demo-meetings',
+            'dcppc/dcppc-workshops',
+    ],
+    'base_branch' : 'master',
+    'submodule_map' : {
+            'dcppc/dcppc-workshops' : 'workshops',
+    }
+}
+
+app.run()
+```
+
+
+### DCPPC Task Classes
+
+## private www PR builder
 
 When a pull request is opened in the `private-www` repo,
 run a build test.
@@ -11,40 +75,40 @@ When a pull request is opened or synced in a repository that is
 a submodule of `private-www`, run a build test on the 
 `private-www` repo using that branch of the submodule.
 
-## private www submodule update pull request opener
+## private www submodule update PR opener
 
 When a pull request is merged into master in a repository that is
 a submodule of `private-www`, open a pull request in `private-www`
 to update the submodule pointer.
 
-## private www heroku deployer
+## private www (heroku) deployer
 
 When a pull request is merged into master in the `private-www`
 repo, build the site and deploy it to Heroku.
 
-## use case library pull request builder
+## use case library PR builder
 
 When a pull request is opened or synced in the use case library
 repository, run a build test on the repository.
 
-## use case library gh-pages deployer
+## use case library (gh-pages) deployer
 
 When a pull request is merged into master in the use case library
 repo, build the site and deploy it to Github Pages.
 
-## centillion continuous integration tester
+## centillion CI tester
 
 Run continous integration tests on master and on pull requests.
 
-## uncle-archie continuous integration tester
+## uncle-archie CI tester
 
 Run continous integration tests on master and on pull requests.
 
-## private-www continuous integration tester
+## private-www CI tester
 
 Run continous integration tests on master and on pull requests.
 
-## use case library continuous integration tester
+## use case library CI tester
 
 Run continous integration tests on master and on pull requests.
 

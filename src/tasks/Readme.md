@@ -50,8 +50,51 @@ class MyPayloadHandler(BasePayloadHandler):
         task2.run(payload,meta,config)
 ```
 
+## Passing Parameters to Tasks
+
 Parameters for the Tasks are set using the config variable,
 which contains the Uncle Archie Flask configuration.
+
+For example, a task can utilize a parameter from
+the Flask config to decide how to run a task:
+
+```
+class Task1(UncleArchieTask):
+    def run(self, payload, meta, config):
+
+        # Set the value of the sad flag
+        sad = False
+        if 'Task1' in config.keys():
+            if 'sad' in config['Task1'].keys():
+                sad = config['Task1']['sad']
+
+        if sad:
+            subprocess.call(['touch','/tmp/goodbye_world'])
+        else:
+            subprocess.call(['touch','/tmp/hello_world'])
+```
+
+The `sad` flag can then be set by the Uncle Archie user
+when they create the Uncle Archie Flask app:
+
+```
+import archie
+
+app = archie.webapp.app
+config = app.config
+config['Task1'] = {
+    'sad' : True
+}
+
+...set payload handler using Task1...
+
+app.run()
+```
+
+Now, when the webhook is received by the Flask app, 
+it calls the Payload Handler, which calls Task1,
+which checks the Flask config for a `sad` key and
+controls the beahvior of the task.
 
 ## Defining a Task
 
@@ -69,14 +112,19 @@ This is the base `Task` class.
 This class tries to stay as general as possible.
 It only defines one virtual method, `run()`.
 
+### DCPPC-Inspired Base Classes
 
+Based on the DCPPC-specific tasks, we have created
+a number of base task classes that do the following:
 
+* Pull request builder - runs a build() function on
+  a given pull request in a given repo
 
+* <s>Pull request opener</s> - too complicated to generalize
 
+* Deployer - when a commit happens on a particular branch
+  of a particular repo, run the deploy() function
 
-
-
-
-
-
+* Continuous integration tester - run continuous integration
+  tests on every commit to a given branch of a given repo
 

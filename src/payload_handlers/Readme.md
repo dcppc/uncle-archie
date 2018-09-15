@@ -18,7 +18,7 @@ import archie
 
 app = archie.webapp.app
 app.set_payload_handler('default')
-app.run(port=5005)
+app.run()
 ```
 
 This uses the default payload handler, which dumps
@@ -36,7 +36,7 @@ config['payload_handler'] = {
     'param_2' : 'value_2'
 }
 app.set_payload_handler('default')
-app.run(port=5005)
+app.run()
 ```
 
 The respective Payload Handler class should look
