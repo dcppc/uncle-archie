@@ -140,7 +140,7 @@ class UncleArchieTask(object):
         e = proc.stderr.read().decode('utf-8')
 
         elines = ["=====================================\n",
-                  "======= CMD: %s\n"%(" ".join(cmd))
+                  "======= CMD: %s\n"%(" ".join(cmd)),
                   "======= STDOUT\n",
                   "=====================================\n",
                   o,
@@ -148,7 +148,7 @@ class UncleArchieTask(object):
         ]
 
         elines = ["=====================================\n",
-                  "======= CMD: %s\n"%(" ".join(cmd))
+                  "======= CMD: %s\n"%(" ".join(cmd)),
                   "======= STDERR\n",
                   "=====================================\n",
                   e,
@@ -161,13 +161,13 @@ class UncleArchieTask(object):
         msg = "UncleArchieTask: run_cmd(): Finished running command"
         logging.debug(msg)
 
-        if "exception" in o.lower
+        if "exception" in o.lower \
         or "exception" in e.lower:
             err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected exception [X]"
             logging.error(err)
             return True
 
-        if "error" in o.lower
+        if "error" in o.lower \
         or "error" in e.lower:
             err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected error [X]"
             logging.error(err)

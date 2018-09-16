@@ -19,7 +19,7 @@ class GithubTask(UncleArchieTask):
             github_access_token :   (string) API access token
             repo_whitelist :        (list) whitelisted Github repositories
         """
-        self.super(config,**kwargs)
+        super.__init__(config,**kwargs)
 
         # Get API key and save it
         if 'github_access_token' in kwargs:

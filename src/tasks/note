@@ -1,0 +1,11 @@
+github type takes an access token
+anything requiring an access token
+
+ther is a second class of github tasks
+that want to be able to extract details
+but don't need an api token
+
+actually functionality we define is for class 2
+api token param is for class 1
+
+

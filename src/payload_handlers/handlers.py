@@ -76,7 +76,7 @@ class DCPPCPayloadHandler(DumpPayloadHandler):
         then run all the DCPPC tasks.
         """
         # Dump payload
-        self.super(payload,meta,config)
+        super().process_payload(payload,meta,config)
         for t in self.tests:
             t.run(payload,meta,config)
 

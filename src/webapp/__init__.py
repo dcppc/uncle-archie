@@ -5,8 +5,8 @@ import os
 base = os.path.split(os.path.abspath(__file__))[0]
 
 class UAFlask(Flask):
-    def __init__(self,**kwargs):
-        self.super(**kwargs)
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
         self.payload_handler = None
         self.FactoryClass = PayloadHandlerFactory
 
