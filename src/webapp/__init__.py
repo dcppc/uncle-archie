@@ -1,7 +1,6 @@
 from ..payload_handlers import PayloadHandlerFactory
 from flask import Flask, render_template
 import os
-import .util
 
 CONFIG_FILE = 'config.json'
 
