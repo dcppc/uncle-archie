@@ -10,6 +10,6 @@ class PayloadHandlerFactory(object):
             'dcppc':   DCPPCPayloadHandler
     }
     def __init__(self,handler_type,config,**kwargs):
-        return payload_handlers[handler_type](config,**kwargs)
+        return self.payload_handlers[handler_type](config,**kwargs)
 
 
