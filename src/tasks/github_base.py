@@ -49,7 +49,7 @@ class GithubTask(UncleArchieTask):
 
 
     #######################################
-    # Payload processing methods
+    # Github payload info extraction 
 
 
     def get_clone_url(self,payload):
@@ -186,7 +186,7 @@ class GithubTask(UncleArchieTask):
         with description (description)
         and context (context)
         """
-        g = self.get_api
+        g = self.get_api_instance()
         r = g.get_repo(full_repo_name)
         c = r.get_commit(head_commit)
 
