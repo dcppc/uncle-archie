@@ -11,7 +11,6 @@ Each DCPPC test must look in the config dictionary for
 any of the following (and define default values for them):
 
 - name
-- label
 - temp dir
 - repo whitelist
 
