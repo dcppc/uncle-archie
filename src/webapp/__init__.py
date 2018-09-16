@@ -11,7 +11,7 @@ class UAFlask(Flask):
         super().__init__(*args,**kwargs)
         self.payload_handler = None
 
-    def set_payload_handler(self,handler_id):
+    def set_payload_handler(self,handler_id,**kwargs):
         """
         Given a (string) payload handler ID,
         pass it to the factory to get a
@@ -24,7 +24,7 @@ class UAFlask(Flask):
                 **kwargs
         )
 
-    def get_payload_handler(self,):
+    def get_payload_handler(self):
         """
         Get the payload handler that we have set
         """
