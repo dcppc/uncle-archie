@@ -38,7 +38,8 @@ class UncleArchieTask(object):
             name            Name of this task
             repo_whitelist  Whitelist of repositories to run this task on
         """
-        logging.debug("UncleArchieTask: __init__(): Starting constructor")
+        msg = "UncleArchieTask: __init__(): Starting constructor"
+        logging.debug(msg)
 
         # Get the log dir
         self.get_log_dir(config)
@@ -48,6 +49,9 @@ class UncleArchieTask(object):
 
         # Get the base url
         self.get_base_url(config)
+
+        # Get the value of the debug variable
+        self.get_debug(config)
 
         # The following require a LABEL
         # to be defined by the parent class.
@@ -126,6 +130,18 @@ class UncleArchieTask(object):
 
         msg = "  - Base url: %s"%(self.base_url)
         logging.debug(msg)
+
+
+    def get_debug(self,config):
+        """
+        Get a boolean indicating whether 
+        Uncle Archie is running in debug
+        mode (default: no)
+        """
+        self.debug = False
+        if 'debug' in config.keys():
+            if config['debug'] is True:
+                self.debug = True
 
 
     def get_name(self,config,task_label):
@@ -340,4 +356,5 @@ class UncleArchieTask(object):
             f.write(json.dumps(payload, indent=4))
         msg = "UncleArchieTask: save_payload(): Finished saving payload to file %s"%(self.payload_log)
         logging.debug(msg)
+
 
