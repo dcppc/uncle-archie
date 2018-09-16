@@ -17,6 +17,7 @@ class BasePayloadHandler(object):
         err += "PayloadHandler object that defines process_payload()."
         raise Exception(err)
 
+
 class DumpPayloadHandler(BasePayloadHandler):
     def __init__(self,config,**kwargs):
         pass
@@ -27,6 +28,7 @@ class DumpPayloadHandler(BasePayloadHandler):
         to a file.
         """
         pass
+
 
 class DCPPCPayloadHandler(DumpPayloadHandler):
     """
@@ -43,20 +45,20 @@ class DCPPCPayloadHandler(DumpPayloadHandler):
         ## private www PR builder
         tests.append(private_www_pr_builder(config))
 
-        ## private www submodule integration PR builder
-        tests.append(private_www_submodule_integration_PR_builder(config))
+        ### private www submodule integration PR builder
+        #tests.append(private_www_submodule_integration_PR_builder(config))
 
-        ## private www submodule update PR opener
-        tests.append(private_www_submodule_update_PR_opener(config))
+        ### private www submodule update PR opener
+        #tests.append(private_www_submodule_update_PR_opener(config))
 
-        ## private www (heroku) deployer
-        tests.append(private_www_deployer(config))
+        ### private www (heroku) deployer
+        #tests.append(private_www_deployer(config))
 
-        ## use case library PR builder
-        tests.append(use_case_library_PR_builder(config))
+        ### use case library PR builder
+        #tests.append(use_case_library_PR_builder(config))
 
-        ## use case library (gh-pages) deployer
-        tests.append(use_case_library_deployer(config))
+        ### use case library (gh-pages) deployer
+        #tests.append(use_case_library_deployer(config))
 
         # centillion CI tests
         # 
