@@ -31,18 +31,20 @@ class private_www_PR_builder(PyGithubTask):
         # Internal flag used to stop on errors
         self.abort = False
 
+
+        # ---------------------
+        # The following is in a giant 
+        # try/except/finally block to ensure
+        # that whatever happens, we always
+        # clean up the temporary directory.
+
+        # Create a temporary working directory
         self.make_temp_dir()
 
         msg = "%s: run(): Made temporary directory at %s"%(self.temp_dir)
         logging.debug(msg)
 
-        # This entire thing is wrapped in a 
-        # try/except/finally block to ensure
-        # that whatever happens, we always
-        # clean up the temporary directory.
-
-        # Each of these commands should take 
-        # care of logging on its own
+        # Each command below takes care of its own logging
         
         try:
 
@@ -60,17 +62,20 @@ class private_www_PR_builder(PyGithubTask):
             # submodules update
             self.submodules_update(payload)
 
+            # adjust base_url in mkdocs.yml
+            self.modify_mkdocs_yml()
+
             # ---------
             # Test:
 
             # virtualenv setup
             self.virtualenv_setup()
 
-            # adjust base_url in mkdocs.yml
-            self.modify_mkdocs_yml()
-
             # snakemake
             outcome = self.snakemake(payload)
+
+            # virtualenv teardown
+            self.virtualenv_teardown()
 
             # build test: outcome of the snakemake build test
             # move results to htdocs dir
@@ -84,13 +89,8 @@ class private_www_PR_builder(PyGithubTask):
             # set commit status
             self.serve_test_status_update(payload)
 
-            # virtualenv teardown
-            self.virtualenv_teardown()
-
         except:
-
-            # how to log traceback with logging?
-            logging.error("Exception in the run() method!")
+            logging.exception("Exception in the run() method!")
 
         finally:
 
