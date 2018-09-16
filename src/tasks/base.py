@@ -1,4 +1,5 @@
 import tempfile
+import subprocess
 import datetime
 import logging
 
@@ -35,7 +36,6 @@ class UncleArchieTask(object):
         here, but called from derived classes when we know the 
         task's label):
             name            Name of this task
-            temp_dir        Temporary directory where we will do any work
             repo_whitelist  Whitelist of repositories to run this task on
         """
         logging.debug("UncleArchieTask: __init__(): Starting constructor")
@@ -59,9 +59,6 @@ class UncleArchieTask(object):
 
         # Get the name of this task, using self.LABEL as default
         self.get_name(config,self.LABEL)
-
-        # Get the temporary directory for this task
-        self.get_temp_dir(config,self.LABEL)
 
         # Get the repo whitelist for this task
         self.get_repo_whitelist(config,self.LABEL)
@@ -149,34 +146,94 @@ class UncleArchieTask(object):
         logging.debug(msg)
 
 
-    def get_temp_dir(self,config,task_label):
+    def get_repo_whitelist(self,config,task_label):
         """
-        Use the task label to get the temp dir name.
-        Make sure it exists or has been created.
+        Use the task label to get the repo whitelist.
+        This is the list of repos to run this Task on.
+        If the user has not specified any, set it to
+        an empty list.
         """
+        self.repo_whitelist = []
+        if task_label in config.keys():
+            if 'repo_whitelist' in config[task_label].keys():
+                self.repo_whitelist = config[task_label]['repo_whitelist']
 
+                # listify
+                if type(self.repo_whitelist)==type(""):
+                    self.repo_whitelist = [self.repo_whitelist]
+
+        msg = "  - Repo whitelist: %s"%(", ".join(self.repo_whitelist))
+        logging.debug(msg)
 
 
     ######################################
-    # Heavy lifting run functions
+    # Passive run() function
 
 
     def run(self,payload,meta,config):
         """
-        Perform any actions common to all Tasks here
+        This does not perform ANY actions,
+        it only sets up variables that will
+        probably be used by all tasks.
         """
         self.dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
         # We have a unique datetime stamp for this payload
         # Use it to assemble an output file name
 
-        # Create a file to record logs:
+        # Name of log file unique to this test
         out_name = make_unique_label("output")
         self.log_file = os.path.join(self.log_dir,out_name)
 
         # Lists of strings to accumulate stdout and stderr
         self.log = [] 
 
+        # No temporary directory
+        # created here, that's up
+        # to the task. See the
+        # make_temp_dir() method
+        # defined below.
+        # 
+        # (This is b/c tempfile
+        #  module lets you create
+        #  temp folders, but not
+        #  create a temp folder name
+        #  only. Stupid.)
+
+
+    def make_temp_dir(self):
+        """
+        Creates a temporary dir with
+        a unique name just for this
+        task.
+
+        Returns a string with the
+        path to the temporary dir.
+
+        Called by child classes.
+        """
+        self.temp_dir = tempfile.mkdtemp()
+        return scratch_dir
+
+
+    def rm_temp_dir(self):
+        """
+        Creates a temporary dir with
+        a unique name just for this
+        task.
+
+        Returns a string with the
+        path to the temporary dir.
+
+        Called by child classes.
+        """
+        subprocess.call(['rm','-fr',self.temp_dir])
+
+
+    ######################################
+    # Function to run a command 
+    # and log stdout/stderr to 
+    # a log file
 
 
     def run_cmd(self, cmd, descr, cwd, **kwargs):
@@ -283,5 +340,4 @@ class UncleArchieTask(object):
             f.write(json.dumps(payload, indent=4))
         msg = "UncleArchieTask: save_payload(): Finished saving payload to file %s"%(self.payload_log)
         logging.debug(msg)
-
 
