@@ -80,10 +80,14 @@ app.run()
 
 ## private www PR builder
 
+See [`private_www_PR_builder.py`](private_www_PR_builder.py)
+
 When a pull request is opened in the `private-www` repo,
 run a build test.
 
 ## private www submodule integration PR builder
+
+See [`private_www_submodule_integration_PR_builder.py`](private_www_submodule_integration_PR_builder.py)
 
 When a pull request is opened or synced in a repository that is
 a submodule of `private-www`, run a build test on the 
@@ -91,21 +95,29 @@ a submodule of `private-www`, run a build test on the
 
 ## private www submodule update PR opener
 
+See [`private_www_submodule_update_PR_opener.py`](private_www_submodule_update_PR_opener.py)
+
 When a pull request is merged into master in a repository that is
 a submodule of `private-www`, open a pull request in `private-www`
 to update the submodule pointer.
 
 ## private www (heroku) deployer
 
+See [`private_www_deployer.py`](private_www_deployer.py)
+
 When a pull request is merged into master in the `private-www`
 repo, build the site and deploy it to Heroku.
 
 ## use case library PR builder
 
+See [`use_case_library_PR_builder.py`](use_case_library_PR_builder.py)
+
 When a pull request is opened or synced in the use case library
 repository, run a build test on the repository.
 
 ## use case library (gh-pages) deployer
+
+See [`use_case_library_deployer.py`](use_case_library_deployer.py)
 
 When a pull request is merged into master in the use case library
 repo, build the site and deploy it to Github Pages.
