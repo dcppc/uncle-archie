@@ -17,9 +17,6 @@ class private_www_PR_builder(PyGithubTask):
         if not self.validate(payload):
             return
 
-        # Get api instance
-        g = self.get_api_instance()
-
         # We don't need to share info or pass lots of params.
         # Rather, each method is passed the payload and uses
         # this class's utility methods to get the info it needs.
