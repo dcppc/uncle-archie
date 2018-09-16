@@ -1,0 +1,57 @@
+{% if ABOUT_SHORT %}
+{% else %}
+    {% set ABOUT_SHORT = 'About' %}
+{% endif %}
+
+{% if LINKS_SHORT %}
+{% else %}
+    {% set LINKS_SHORT = 'Links' %}
+{% endif %}
+
+{% if CONTACT_SHORT %}
+{% else %}
+    {% set CONTACT_SHORT = 'Contact' %}
+{% endif %}
+
+<!-- Navigation -->
+<nav class="navbar navbar-custom navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-main-collapse">
+                Menu <i class="fa fa-bars"></i>
+            </button>
+
+            {% if GIHUB_URL %}
+                <a class="navbar-brand page-scroll" href="{{ GITHUB_URL }}">
+                    <i class="fa fa-code-fork"></i> <span class="light">fork me on</span> github
+                </a>
+            {% elif GITEA_URL %}
+                <a class="navbar-brand page-scroll" href="{{ GITEA_URL }}">
+                    <i class="fa fa-code-fork"></i> <span class="light">clone from</span> git.charlesreid1.com
+                </a>
+            {% endif %}
+
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-right navbar-main-collapse">
+            <ul class="nav navbar-nav">
+                <!-- Hidden li included to remove active class from about link when scrolled up past about section -->
+                <li class="hidden">
+                    <a href="#page-top"></a>
+                </li>
+                <li>
+                    <a class="page-scroll" href="#about">{{ ABOUT_SHORT }}</a>
+                </li>
+                <li>
+                    <a class="page-scroll" href="#links">{{ LINKS_SHORT }}</a>
+                </li>
+                <li>
+                    <a class="page-scroll" href="#contact">{{ CONTACT_SHORT }}</a>
+                </li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
