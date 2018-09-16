@@ -1,10 +1,14 @@
 from ..payload_handlers import PayloadHandlerFactory
-from flask import Flask, render_template
-import os
+from flask import Flask, request, abort, render_template
+import os, sys
+import json
+import logging
 
 CONFIG_FILE = 'config.json'
 
 base = os.path.split(os.path.abspath(__file__))[0]
+
+call = os.getcwd()
 
 class UAFlask(Flask):
     def __init__(self,*args,**kwargs):
@@ -42,11 +46,31 @@ app = UAFlask(
         #static_folder = os.path.join(base,'static')
 )
 
+
 @app.route('/')
 def index():
 
     # Load config
-    config = util.get_config(CONFIG_FILE)
+    loaded_config = False
+    if 'UNCLE_ARCHIE_CONFIG' in os.environ:
+        if os.path.isfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG'])):
+            #print("Loading from pyfile %s"%(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG'])))
+            app.config.from_pyfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
+            loaded_config = True
+    else:
+        err = "ERROR: No $UNCLE_ARCHIE_CONFIG environment variable defined, "
+        err += "could not load config file."
+        logging.error(err)
+        raise Exception(err)
+
+    if not loaded_config:
+        err = "ERROR: Problem setting config file with $UNCLE_ARCHIE_CONFIG environment variable:\n"
+        err += "UNCLE_ARCHIE_CONFIG value : %s\n"%(os.environ['UNCLE_ARCHIE_CONFIG'])
+        err += "Missing config file : %s\n"%(os.path.join(call, os.environ['UNCLE_ARCHIE_CONFIG']))
+        logging.error(err)
+        raise Exception(err)
+
+    config = app.config
 
     # Verify webhooks are from github
     verify_github_source(config)
@@ -85,18 +109,6 @@ def index():
 
 ##############################################
 # Flask utility functions
-
-def load_config(json_file):
-    """
-    Load the Uncle Archie config file
-    """
-    try:
-        pth = os.path.join(path, 'config.json')
-        with open(pth, 'r') as cfg:
-            return json.loads(cfg.read())
-    except FileNotFoundError:
-        logging.error("ERROR: No config file found at %s"%(pth))
-        abort(501)
 
 def verify_github_source(config):
     """
