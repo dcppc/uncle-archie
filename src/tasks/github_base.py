@@ -229,7 +229,7 @@ class PyGithubTask(UncleArchieTask):
     """
     Base class for a Python + Github test.
     """
-    def __init__(self,**kwargs):
+    def __init__(self,config,**kwargs):
         """
         This performs the initialization procedure
         common to all Uncle Archie tests that use
@@ -240,53 +240,54 @@ class PyGithubTask(UncleArchieTask):
             vp_dir :    (cwd = curr. working dir) the location 
                         of the virtual environment
         """
-        super().__init__(**kwargs)
-        self.setup_virtualenv(**kwargs)
+        super().__init__(config,**kwargs)
 
+        VENV_LABEL = 'vp'
 
-    def __del__(self,**kwargs):
-        """
-        Destructor
-        """
-        msg = "PyGithubTask: __del__(): Tearing down virtual environment"
+        # Get virtual environment label 
+        # from config or use default
+        if 'venv_label' in config.keys():
+            self.venv_label = config['venv_label']
+        else:
+            self.venv_label = VENV_LABEL
+
+        msg = "PyGithubTask: __init__(): New virtual environment will be named \"%s\""%(self.venv_label)
         logging.debug(msg)
-        self.teardown_virtualenv(**kwargs)
+
+    # NOTE:
+    # We need to add a run_python method
+    # that tacks on the venv path in front
+    # of any binary that's passed 
+    # (use with mkdocs, pelican, pip, python, etc.)
 
 
-    def setup_virtualenv(self,**kwargs):
+    def virtualenv_setup(self,**kwargs):
         """
         Set up a virtual environment.
-        Called by the constructor.
-
-        kwargs:
-            vp_label :  What to call the virtual environment
-            vp_dir :    (cwd = curr. working dir) the location 
-                        of the virtual environment
+        This is called once per task,
+        right before Python commands are 
+        run by the task.
         """
-        # Get the name of the virtual environment
-        if 'vp_label' in kwargs:
-            self.vp_label = kwargs.pop('vp_label')
+        if self.temp_dir is None:
+            err = "ERROR: PyGithubTask: virtualenv_setup(): "
+            err += "No temporary directory has been created yet!"
+            logging.error(err)
+            raise Exception(err)
         else:
-            self.vp_label = 'vp'
+            self.venv_dir = self.temp_dir
 
-        # Get the directory of the virtual environment
-        if 'vp_dir' in kwargs:
-            self.vp_dir = kwargs.pop('vp_dir')
-        else:
-            self.vp_dir = self.temp_dir
-
-        msg = "PyGithubTask: setup_virtualenv(): Creating new virtual environment named \"%s\" "%(self.name)
-        msg += "in location \"%s\""%(self.vp_dir)
+        msg = "PyGithubTask: virtualenv_setup(): Creating new virtual environment named \"%s\" "%(self.venv_label)
+        msg += "in directory %s"%(self.venv_dir)
         logging.debug(msg)
 
         # Create the virtual environment
-        subprocess.call(['virtualenv',vp_label],cwd=self.vp_dir)
+        subprocess.call(['virtualenv',self.venv_label],cwd=self.vp_dir)
 
-        msg = "PyGithubTask: setup_virtualenv(): Success!"
+        msg = "PyGithubTask: virtualenv_setup(): Success!"
         logging.debug(msg)
 
 
-    def teardown_virtualenv(self,**kwargs):
+    def virtualenv_teardown(self,**kwargs):
         """
         Tear down a virtual environment.
         Called by the destructor.
@@ -294,12 +295,12 @@ class PyGithubTask(UncleArchieTask):
         kwargs:
             None
         """
-        msg = "PyGithubTask: teardown_virtualenv(): Removing virtual environment at \"%s\" "%(self.vp_dir)
+        msg = "PyGithubTask: virtualenv_teardown(): Removing virtual environment at \"%s\" "%(self.vp_dir)
         logging.debug(msg)
 
         # Run the command ourselves, no logging needed
         subprocess.call(['rm','-fr',self.vp_dir])
 
-        msg = "PyGithubTask: setup_virtualenv(): Success!"
+        msg = "PyGithubTask: virtualenv_setup(): Success!"
         logging.debug(msg)
 

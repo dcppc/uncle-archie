@@ -1,30 +1,35 @@
 from ..payload_handlers import PayloadHandlerFactory
-from flask import Flask, render_template
-import os
+from flask import Flask, request, abort, render_template
+import os, sys
+import json
+import logging
 
 CONFIG_FILE = 'config.json'
 
 base = os.path.split(os.path.abspath(__file__))[0]
+
+call = os.getcwd()
 
 class UAFlask(Flask):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.payload_handler = None
 
-    def set_payload_handler(self,handler_id):
+    def set_payload_handler(self,handler_id,**kwargs):
         """
         Given a (string) payload handler ID,
         pass it to the factory to get a
         corresponding Payload Handler object
         of the correct type.
         """
-        self.payload_handler = PayloadHandlerFactory(
+        phf = PayloadHandlerFactory()
+        self.payload_handler = phf.factory(
                 handler_id,
                 self.config,
                 **kwargs
         )
 
-    def get_payload_handler(self,):
+    def get_payload_handler(self):
         """
         Get the payload handler that we have set
         """
@@ -37,21 +42,59 @@ class UAFlask(Flask):
 
 app = UAFlask(
         __name__,
-        #template_folder = os.path.join(base,'templates'),
-        #static_folder = os.path.join(base,'static')
+        template_folder = os.path.join(base,'templates'),
+        static_folder = os.path.join(base,'static')
 )
+
+# Load config
+loaded_config = False
+if 'UNCLE_ARCHIE_CONFIG' in os.environ:
+    if os.path.isfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG'])):
+        # relative path
+        app.config.from_pyfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
+        loaded_config = True
+        msg = "archie.webapp: Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
+        msg += "Loaded config file at %s"%(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
+        logging.info(msg)
+
+    elif os.path.isfile(os.environ['UNCLE_ARCHIE_CONFIG']):
+        # absolute path
+        app.config.from_pyfile(os.environ['UNCLE_ARCHIE_CONFIG'])
+        loaded_config = True
+        msg = "archie.webapp: Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
+        msg += "Loaded config file at %s"%(os.environ['UNCLE_ARCHIE_CONFIG'])
+        logging.info(msg)
+
+else:
+    err = "ERROR: No UNCLE_ARCHIE_CONFIG environment variable defined, "
+    err += "could not load config file."
+    logging.error(err)
+    raise Exception(err)
+
+if not loaded_config:
+    err = "ERROR: Problem setting config file with UNCLE_ARCHIE_CONFIG environment variable:\n"
+    err += "UNCLE_ARCHIE_CONFIG value : %s\n"%(os.environ['UNCLE_ARCHIE_CONFIG'])
+    err += "Missing config file : %s\n"%(os.environ['UNCLE_ARCHIE_CONFIG'])
+    err += "Missing config file : %s\n"%(os.path.join(call, os.environ['UNCLE_ARCHIE_CONFIG']))
+    logging.error(err)
+    raise Exception(err)
+
+
 
 @app.route('/')
 def index():
 
-    # Load config
-    config = util.get_config(CONFIG_FILE)
+    # forgot to add the dang render template handler
+    if request.method=='GET':
+        return render_template("index.html")
+
+    config = app.config
 
     # Verify webhooks are from github
     verify_github_source(config)
 
     # Play ping/pong with github
-    event = request.headers.get('X-GitHub-Event', 'ping')
+    event = request.headers.get('X-GitHub-Event')
     if event == 'ping':
         return json.dumps({'msg': 'pong'})
 
@@ -84,18 +127,6 @@ def index():
 
 ##############################################
 # Flask utility functions
-
-def load_config(json_file):
-    """
-    Load the Uncle Archie config file
-    """
-    try:
-        pth = os.path.join(path, 'config.json')
-        with open(pth, 'r') as cfg:
-            return json.loads(cfg.read())
-    except FileNotFoundError:
-        logging.error("ERROR: No config file found at %s"%(pth))
-        abort(501)
 
 def verify_github_source(config):
     """

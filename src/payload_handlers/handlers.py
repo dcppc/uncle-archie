@@ -43,7 +43,7 @@ class DCPPCPayloadHandler(DumpPayloadHandler):
         tests = []
 
         ## private www PR builder
-        tests.append(private_www_pr_builder(config))
+        tests.append(private_www_PR_builder(config,**kwargs))
 
         ### private www submodule integration PR builder
         #tests.append(private_www_submodule_integration_PR_builder(config))
