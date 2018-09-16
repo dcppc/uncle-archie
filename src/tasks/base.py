@@ -76,7 +76,23 @@ class UncleArchieTask(object):
         logging.debug(msg)
 
 
-    def process_payload(self,payload,meta,config):
+    def _setup_and_teardown(foo,*args,**kwargs):
+        def magic(self):
+            self.setup()
+            foo(*args,**kwargs)
+            self.teardown()
+
+
+    def setup(self):
+        print("setup")
+
+
+    def teardown(self):
+        print("teardown")
+
+
+    @_setup_and_teardown
+    def run(self,payload,meta,config):
         """
         Perform any actions common to all Tasks here
         """
