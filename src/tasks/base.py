@@ -26,138 +26,41 @@ class UncleArchieTask(object):
 
     def __init__(self,**kwargs):
         """
-        This performs the initialization procedure
-        common to all Uncle Archie tasks: 
-         - get name
-         - get temporary directory
-         - get log dir/log file
-         - get htdocs outupt directory
-         - get htdocs output url 
-         
-        Remember that we run every hook with every payload,
-        so process_payload() is where we decide whether to
-        actually run tests.
+        We don't do much in the Task initialization,
+        except make placeholders for all the variables
+        we will eventually set and use in process_payload(),
+        when we actually have the Flask config
 
-        kwargs common to all tests:
-            htdocs_dir
-            status_url
+        parameters common to all tests:
             log_dir
-
-        kwargs specific to a test (therefore handled elsewhere):
-            name :           Print-friendly name of this task
-            label :          Filename-friendly short label for this task
-            temp_dir :       Directory where the mess will be made and then cleaned up
-            repo_whitelist : What repos to run this test on
+            htdocs_dir
+            base_url
         """
+        logging.debug("UncleArchieTask: __init__(): Starting constructor")
         self.dt = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.log_dir    = None
+        self.htdocs_dir = None
+        self.base_url   = None
+        logging.debug("UncleArchieTask: __init__(): Finishing constructor")
 
-        # Get the name of the task
-        if 'name' in kwargs:
-            self.name = kwargs.pop('name')
-        else:
-            err = "ERROR: UncleArchieTask: __init__(): name kwarg: "
-            err += "No name kwarg was provided to the constructor."
-            logging.error(err)
-            raise Exception(err)
 
-        # Get the name of the task
-        if 'label' in kwargs:
-            self.label = kwargs.pop('label')
-        else:
-            err = "ERROR: UncleArchieTask: __init__(): label kwarg: "
-            err += "No label kwarg was provided to the constructor."
-            logging.error(err)
-            raise Exception(err)
+    def process_payload(self,payload,meta,config):
+        """
+        """
+        err = "ERROR: UncleArchieTask: process_payload(): "
+        err += "This is a virtual method and must be overridden "
+        err += "by a child class."
+        logging.error(err)
+        raise Exception(err)
 
-        msg = "UncleArchieTask: __init__(): Creating new Uncle Archie Task\n"
-        msg += "Name: %s\n"%(self.name)
-        msg += "Label: %s\n"%(self.label)
-        logging.debug(msg)
 
-        # Get the temporary directory
-        if 'temp_dir' in kwargs:
-            self.temp_dir = kwargs.pop('temp_dir')
-        else:
-            rand = hashlib.md5(self.dt.encode()).hexdigest()
-            self.temp_dir = os.path.join('/tmp',rand)
-
-        # If it doesn't exist, make it
-        if not os.path.isdir(self.temp_dir):
-            result = subprocess.call(['mkdir','-p',self.temp_dir])
-            if result==1:
-                err = "ERROR: UncleArchieTask: __init__(): temp_dir kwarg: "
-                err += "Could not create temp dir %s"%(self.temp_dir)
-                logging.error(err)
-                raise Exception(err)
-
-        msg = "  - Temporary dir: %s"%(self.temp_dir)
-        logging.debug(msg)
-
-        # Get the output log directory
-        if 'log_dir' in kwargs:
-            self.log_dir = kwargs.pop('log_dir')
-        else:
-            self.log_dir = DEFAULT_LOG_DIR
-
-        # If it doesn't exist, make it
-        if not os.path.isdir(self.log_dir):
-            result = subprocess.call(['mkdir','-p',self.log_dir])
-            if result==1:
-                err = "ERROR: UncleArchieTask: __init__(): log_dir kwarg: "
-                err += "Could not create log dir %s"%(self.log_dir)
-                logging.error(err)
-                raise Exception(err)
-
-        msg = "  - Log dir: %s"%(self.log_dir)
-        logging.debug(msg)
-
-        # Get the htdocs directory
-        if 'htdocs_dir' in kwargs:
-            self.htdocs_dir = kwargs.pop('htdocs_dir')
-        else:
-            self.htdocs_dir = DEFAULT_HTDOCS_DIR
-
-        # If it doesn't exist, throw a tantrum
-        if not os.path.isdir(self.htdocs_dir):
-            err = "ERROR: UncleArchieTask: __init__(): htdocs_dir kwarg: "
-            err += "Specified htdocs directory \"%s\" "%(self.htdocs_dir)
-            err += "does not exist."
-            logging.error(err)
-            raise Exception(err)
-
-        msg = "  - Htdocs dir: %s"%(self.htdocs_dir)
-        logging.debug(msg)
-
-        # Get the base url
-        if 'base_url' in kwargs:
-            self.base_url = kwargs.pop('base_url')
-        else:
-            self.base_url = DEFAULT_BASE_URL
-
-        msg = "  - Base url: %s"%(self.base_url)
-        logging.debug(msg)
-
-        # Make log file names - 
-        # these log files are the ones
-        # linked to in the final UA report.
-        out_name = make_unique_label("stdout")
-        self.out_log = os.path.join(self.log_dir,out_name)
-        self.out = [] # list of strings
-
-        err_name = make_unique_label("stderr")
-        self.err_log = os.path.join(self.log_dir,err_name)
-        self.err = [] # list of strings
-
-        payload_name = make_unique_label("payload")
-        self.payload_log = os.path.join(self.log_dir,payload_name)
-
-        msg = "UncleArchieTask: __init__(): Log locations have been set:\n"
-        msg += "  - Stdout log: %s\n"%(self.out_log)
-        msg += "  - Stderr log: %s\n"%(self.err_log)
-        msg += "  - Payload log: %s\n"%(self.payload_log)
-        logging.debug(msg)
-
-        msg = "UncleArchieTask: __init__(): Success!"
+    def save_payload(self,payload):
+        """
+        Save the webhook payload to a file
+        """
+        with open(self.payload_log,'w') as f:
+            f.write(json.dumps(payload, indent=4))
+        msg = "UncleArchieTask: save_payload(): Finished saving payload to file %s"%(self.payload_log)
         logging.debug(msg)
 
 
@@ -167,6 +70,7 @@ class UncleArchieTask(object):
         Useful for getting consistent filenames
         for output files.
         """
+        assert label!=None
         return "%s_%s"%(label,dt)
 
 
@@ -234,26 +138,6 @@ class UncleArchieTask(object):
 
         return False
 
-
-    def save_payload(self,payload):
-        """
-        Save the webhook payload to a file
-        """
-        with open(self.payload_log,'w') as f:
-            f.write(json.dumps(payload, indent=4))
-        msg = "UncleArchieTask: save_payload(): Finished saving payload to file %s"%(self.payload_log)
-        logging.debug(msg)
-
-
-    def process_payload(self,payload):
-        """
-        Virtual method: process the webhook payload
-        """
-        err = "ERROR: UncleArchieTask: process_payload(): "
-        err += "This is a virtual method and must be overridden "
-        err += "by a child class."
-        logging.error(err)
-        raise Exception(err)
 
 
 class GithubTask(UncleArchieTask):

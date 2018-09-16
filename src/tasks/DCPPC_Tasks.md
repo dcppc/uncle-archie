@@ -32,7 +32,7 @@ app = archie.webapp.app
 config = app.config
 
 config['htdocs_dir'] = '/path/to/htdocs'
-config['status_url'] = 'https://archie.example.com'
+config['base_url'] = 'https://archie.example.com'
 
 config['name_of_task'] = {
     'param_1' : 'value_1',
@@ -52,7 +52,7 @@ app = archie.webapp.app
 config = app.config
 
 config['htdocs_dir'] = '/www/archie.example.com/htdocs/output'
-config['status_url'] = 'https://archie.example.com/output'
+config['base_url'] = 'https://archie.example.com/output'
 
 config['private_www_PR_builder'] = {
     'repo_whitelist' : ['dcppc/private-www'],
@@ -83,7 +83,7 @@ app.run()
 When a pull request is opened in the `private-www` repo,
 run a build test.
 
-## private www submodule integration builder
+## private www submodule integration PR builder
 
 When a pull request is opened or synced in a repository that is
 a submodule of `private-www`, run a build test on the 

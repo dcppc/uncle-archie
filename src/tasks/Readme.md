@@ -110,7 +110,7 @@ The base Task class checks for any required input parameters
 in the config variable:
 
 - `htdocs_dir`
-- `status_url`
+- `base_url`
 - `log_dir`
 
 Default values for these are set in the base Task class.
