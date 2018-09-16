@@ -22,10 +22,16 @@ def create_payload_handler(self,handler_type):
 class UAFlask(Flask):
     def __init__(self,**kwargs):
         self.super(**kwargs)
-        self.payload_handler = PayloadHandlerFactory('default',**kwargs)
+        config = self.config
+        self.payload_handler = None
 
     def set_payload_handler(self,handler_id,**kwargs):
-        self.payload_handler = PayloadHandlerFactory(handler_id,**kwargs)
+        config = self.config
+        self.payload_handler = PayloadHandlerFactory(
+                handler_id,
+                config,
+                **kwargs
+        )
 
     def get_payload_handler(self,):
         return self.payload_handler
