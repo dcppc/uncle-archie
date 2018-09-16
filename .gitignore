@@ -1,6 +1,11 @@
-site/
-config.json
+# ignore uncle archie config file
+config.py
+
+# ignore virtualenv
 vp
+
+# mkdocs
+site/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
