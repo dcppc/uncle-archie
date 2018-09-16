@@ -8,6 +8,6 @@ class PayloadHandlerFactory(object):
             'default': DumpPayloadHandler,
             'dcppc':   DCPPCPayloadHandler
     }
-    def __init__(self,handler_type,**kwargs):
-        return payload_handlers[handler_type](**kwargs)
+    def __init__(self,handler_type,config,**kwargs):
+        return payload_handlers[handler_type](config,**kwargs)
 
