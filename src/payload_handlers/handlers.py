@@ -1,4 +1,4 @@
-from ..tasks import 
+from ..tasks import *
 
 class BasePayloadHandler(object):
     """
@@ -29,6 +29,11 @@ class DumpPayloadHandler(BasePayloadHandler):
         pass
 
 class DCPPCPayloadHandler(DumpPayloadHandler):
+    """
+    The DCPPC Payload Handler handles payloads
+    by running all available DCPPC Tasks on 
+    each payload it receives.
+    """
     def __init__(self,config,**kwargs):
         """
         Create all tests and store them in a container
@@ -61,6 +66,9 @@ class DCPPCPayloadHandler(DumpPayloadHandler):
         # 
         # use-case-library CI tests
 
+        # save 
+        self.tests = tests
+
 
     def process_payload(self, payload, meta, config):
         """
@@ -69,15 +77,6 @@ class DCPPCPayloadHandler(DumpPayloadHandler):
         """
         # Dump payload
         self.super(payload,meta,config)
-
-        t.run(payload,meta,config)
-
-        t.run(payload,meta,config)
-
-        t.run(payload,meta,config)
-
-
-
-
-
+        for t in self.tests:
+            t.run(payload,meta,config)
 

@@ -3,6 +3,7 @@ from .handlers import \
         DumpPayloadHandler, \
         DCPPCPayloadHandler
 
+
 class PayloadHandlerFactory(object):
     payload_handlers = {
             'default': DumpPayloadHandler,
@@ -10,4 +11,5 @@ class PayloadHandlerFactory(object):
     }
     def __init__(self,handler_type,config,**kwargs):
         return payload_handlers[handler_type](config,**kwargs)
+
 
