@@ -18,7 +18,8 @@ class UAFlask(Flask):
         corresponding Payload Handler object
         of the correct type.
         """
-        self.payload_handler = PayloadHandlerFactory(
+        phf = PayloadHandlerFactory()
+        self.payload_handler = phf.factory(
                 handler_id,
                 self.config,
                 **kwargs
