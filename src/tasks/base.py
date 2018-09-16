@@ -49,6 +49,23 @@ class UncleArchieTask(object):
         # Get the base url
         self.get_base_url(config)
 
+        # The following require a LABEL
+        # to be defined by the parent class.
+        if self.LABEL is None:
+            err = "ERROR: UncleArchieTask: __init__(): Tried to extract "
+            err += "test-specific config parametrers, but failed because "
+            err += "no LABEL was defined for this test!"
+            raise Exception(err)
+
+        # Get the name of this task, using self.LABEL as default
+        self.get_name(config,self.LABEL)
+
+        # Get the temporary directory for this task
+        self.get_temp_dir(config,self.LABEL)
+
+        # Get the repo whitelist for this task
+        self.get_repo_whitelist(config,self.LABEL)
+
         msg = "UncleArchieTask: __init__(): Success!"
         logging.debug(msg)
 
