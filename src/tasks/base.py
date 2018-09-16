@@ -30,11 +30,38 @@ class UncleArchieTask(object):
             log_dir:        Directory where logs for this task are stored
             htdocs_dir:     Directory where hosted web content goes
             base_url:       URL where hosted web content is available
+
+        Parameters specific to tasks (extracted in methods defined
+        here, but called from derived classes when we know the 
+        task's label):
+            name            Name of this task
+            temp_dir        Temporary directory where we will do any work
+            repo_whitelist  Whitelist of repositories to run this task on
         """
         logging.debug("UncleArchieTask: __init__(): Starting constructor")
 
-        # ---------------------------
         # Get the log dir
+        self.get_log_dir(config)
+
+        # Get the htdocs dir
+        self.get_htdocs_dir(config)
+
+        # Get the base url
+        self.get_base_url(config)
+
+        msg = "UncleArchieTask: __init__(): Success!"
+        logging.debug(msg)
+
+
+    ######################################
+    # Get config functions
+
+
+    def get_log_dir(self,config):
+        """
+        Get the log directory from the Flask
+        config, and create it if needed.
+        """
         if 'log_dir' in config.keys():
             self.log_dir = config['log_dir']
         else:
@@ -52,19 +79,33 @@ class UncleArchieTask(object):
         msg = "  - Log dir: %s"%(self.log_dir)
         logging.debug(msg)
 
-        # ---------------------------
-        # Get the htdocs dir
-        if 'htdocs_dir' in kwargs:
+
+    def get_htdocs_dir(self,config):
+        """
+        Get the htdocs directory from the Flask
+        config, and check that it exists
+        """
+        if 'htdocs_dir' in config.keys():
             self.htdocs_dir = config['htdocs_dir']
         else:
             self.htdocs_dir = DEFAULT_HTDOCS_DIR
 
+        # If it doesn't exist, make it
+        if not os.path.isdir(self.log_dir):
+            err = "ERROR: UncleArchieTask: get_htdocs_dir(): htdocs_dir kwarg: "
+            err += "Could not find htdocs dir %s"%(self.htdocs_dir)
+            logging.error(err)
+            raise Exception(err)
+
         msg = "  - Htdocs dir: %s"%(self.htdocs_dir)
         logging.debug(msg)
 
-        # ---------------------------
-        # Get the base url
-        if 'base_url' in kwargs:
+
+    def get_base_url(self,config):
+        """
+        Get the base url from the Flask config
+        """
+        if 'base_url' in config.keys():
             self.base_url = config['base_url']
         else:
             self.base_url = DEFAULT_BASE_URL
@@ -72,26 +113,37 @@ class UncleArchieTask(object):
         msg = "  - Base url: %s"%(self.base_url)
         logging.debug(msg)
 
-        msg = "UncleArchieTask: __init__(): Success!"
+
+    def get_name(self,config,task_label):
+        """
+        Use the task label to get the task name.
+        If the user has not specified one in the 
+        config file, use the task label by default.
+        """
+        self.name = None
+        if task_label in config.keys():
+            if 'name' in config[task_label].keys():
+                self.name = config[task_label]['name']
+
+        if self.name==None:
+            self.name = task_label
+
+        msg = "  - Task name: %s"%(self.name)
         logging.debug(msg)
 
 
-    def _setup_and_teardown(foo,*args,**kwargs):
-        def magic(self):
-            self.setup()
-            foo(*args,**kwargs)
-            self.teardown()
+    def get_temp_dir(self,config,task_label):
+        """
+        Use the task label to get the temp dir name.
+        Make sure it exists or has been created.
+        """
 
 
-    def setup(self):
-        print("setup")
+
+    ######################################
+    # Heavy lifting run functions
 
 
-    def teardown(self):
-        print("teardown")
-
-
-    @_setup_and_teardown
     def run(self,payload,meta,config):
         """
         Perform any actions common to all Tasks here
@@ -190,6 +242,10 @@ class UncleArchieTask(object):
             return True
 
         return False
+
+
+    ######################################
+    # More utility functions
 
 
     def make_unique_label(self, label):
