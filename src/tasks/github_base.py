@@ -105,7 +105,7 @@ class GithubTask(UncleArchieTask):
         return None
 
 
-    def get_pull_request_head(self,payload):
+    def get_pull_request_head_commit(self,payload):
         """
         String: head commit of this pull request
         """
