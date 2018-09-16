@@ -1,3 +1,5 @@
+import os
+import shutil
 import tempfile
 import subprocess
 import datetime
@@ -27,6 +29,13 @@ class UncleArchieTask(object):
 
     def __init__(self,config,**kwargs):
         """
+        Constructor for Uncle Archie tasks, performing
+        setup and parameter extraction common to all
+        Uncle Archie tasks.
+
+        kwargs:
+            None
+
         Extract parameters common to all tasks from the Flask config:
             log_dir:        Directory where logs for this task are stored
             htdocs_dir:     Directory where hosted web content goes
@@ -67,6 +76,10 @@ class UncleArchieTask(object):
         # Get the repo whitelist for this task
         self.get_repo_whitelist(config,self.LABEL)
 
+        # This is not set until a temp dir is
+        # actually created (done for each payload)
+        self.temp_dir = None
+
         msg = "UncleArchieTask: __init__(): Success!"
         logging.debug(msg)
 
@@ -83,7 +96,7 @@ class UncleArchieTask(object):
         if 'log_dir' in config.keys():
             self.log_dir = config['log_dir']
         else:
-            self.log_dir = DEFAULT_LOG_DIR
+            self.log_dir = self.DEFAULT_LOG_DIR
 
         # If it doesn't exist, make it
         if not os.path.isdir(self.log_dir):
@@ -106,7 +119,7 @@ class UncleArchieTask(object):
         if 'htdocs_dir' in config.keys():
             self.htdocs_dir = config['htdocs_dir']
         else:
-            self.htdocs_dir = DEFAULT_HTDOCS_DIR
+            self.htdocs_dir = self.DEFAULT_HTDOCS_DIR
 
         # If it doesn't exist, make it
         if not os.path.isdir(self.log_dir):
@@ -126,7 +139,7 @@ class UncleArchieTask(object):
         if 'base_url' in config.keys():
             self.base_url = config['base_url']
         else:
-            self.base_url = DEFAULT_BASE_URL
+            self.base_url = self.DEFAULT_BASE_URL
 
         msg = "  - Base url: %s"%(self.base_url)
         logging.debug(msg)
@@ -243,7 +256,8 @@ class UncleArchieTask(object):
 
         Called by child classes.
         """
-        subprocess.call(['rm','-fr',self.temp_dir])
+        shutil.rmtree(self.temp_dir)
+        self.temp_dir = None
 
 
     ######################################
