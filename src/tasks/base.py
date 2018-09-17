@@ -60,8 +60,9 @@ class UncleArchieTask(object):
         # Get the base url
         self.get_base_url(config)
 
-        # Get the value of the debug variable
+        # Get the value of the debug/testing variable
         self.get_debug(config)
+        self.get_testing(config)
 
         # The following require a LABEL
         # to be defined by the parent class.
@@ -95,8 +96,8 @@ class UncleArchieTask(object):
         Get the log directory from the Flask
         config, and create it if needed.
         """
-        if 'log_dir' in config.keys():
-            self.log_dir = config['log_dir']
+        if 'LOG_DIR' in config.keys():
+            self.log_dir = config['LOG_DIR']
         else:
             self.log_dir = self.DEFAULT_LOG_DIR
 
@@ -118,8 +119,8 @@ class UncleArchieTask(object):
         Get the htdocs directory from the Flask
         config, and check that it exists
         """
-        if 'htdocs_dir' in config.keys():
-            self.htdocs_dir = config['htdocs_dir']
+        if 'HTDOCS_DIR' in config.keys():
+            self.htdocs_dir = config['HTDOCS_DIR']
         else:
             self.htdocs_dir = self.DEFAULT_HTDOCS_DIR
 
@@ -138,13 +139,26 @@ class UncleArchieTask(object):
         """
         Get the base url from the Flask config
         """
-        if 'base_url' in config.keys():
-            self.base_url = config['base_url']
+        if 'BASE_URL' in config.keys():
+            self.base_url = config['BASE_URL']
         else:
             self.base_url = self.DEFAULT_BASE_URL
 
         msg = "  - Base url: %s"%(self.base_url)
         logging.debug(msg)
+
+
+
+    def get_testing(self,config):
+        """
+        Get a boolean indicating whether 
+        Uncle Archie is running in testing
+        mode (default: no)
+        """
+        self.debug = False
+        if 'TESTING' in config.keys():
+            if config['TESTING'] is True:
+                self.testing = True
 
 
     def get_debug(self,config):
@@ -154,8 +168,8 @@ class UncleArchieTask(object):
         mode (default: no)
         """
         self.debug = False
-        if 'debug' in config.keys():
-            if config['debug'] is True:
+        if 'DEBUG' in config.keys():
+            if config['DEBUG'] is True:
                 self.debug = True
 
 
