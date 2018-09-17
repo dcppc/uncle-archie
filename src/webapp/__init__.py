@@ -225,6 +225,7 @@ def get_branch(payload):
     Determine the branch this webhook is about
     """
     branch = ''
+    event = request.headers.get('X-GitHub-Event')
     try:
         # Case 1: a ref_type indicates the type of ref.
         # This true for create and delete events.
