@@ -15,37 +15,68 @@ class UAFlask(Flask):
         super().__init__(*args,**kwargs)
         self.payload_handler = None
 
+
     def set_payload_handler(self,handler_id,**kwargs):
         """
         Given a (string) payload handler ID,
-        pass it to the factory to get a
-        corresponding Payload Handler object
-        of the correct type.
+        save it for later.
+        
+        Eventually we will pass it to the factory 
+        to get a corresponding Payload Handler 
+        object of the correct type.
         """
+        self.payload_handler_id = handler_id
+
+
+    def init_payload_handler(self):
+        """
+        Initialize the Payload Handler object using
+        the Payload Handler factory
+        """
+        if self.payload_handler_id is None:
+            err = "ERROR: UAFlask: init_payload_handler(): "
+            err += "No payload handler has been set!"
+            logging.error(err)
+            raise Exception(err)
+
         phf = PayloadHandlerFactory()
         self.payload_handler = phf.factory(
-                handler_id,
+                self.payload_handler_id,
                 self.config,
-                **kwargs
         )
+
 
     def get_payload_handler(self):
         """
         Get the payload handler that we have set
         """
         if self.payload_handler is None:
-            err = "ERROR: UAFlask: get_payload_handler(): "
-            err += "No payload handler has been set!"
-            raise Exception(err)
+            if self.payload_handler_id is None:
+                err = "ERROR: UAFlask: get_payload_handler(): "
+                err += "No payload handler has been set!"
+                logging.error(err)
+                raise Exception(err)
+            else:
+                self.init_payload_handler()
+
         return self.payload_handler
 
+
     def run(self,*args,**kwargs):
+        """
+        Extend the run method of the original
+        Flask object to include two additional
+        actions: load config, and instantiate
+        the payload handler (and thus the task)
+        object(s).
+        """
+        # ----------------------------
         # Load config
         loaded_config = False
         if 'UNCLE_ARCHIE_CONFIG' in os.environ:
             if os.path.isfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG'])):
                 # relative path
-                app.config.from_pyfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
+                self.config.from_pyfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
                 loaded_config = True
                 msg = "UAFlask: run(): Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
                 msg += "Loaded config file at %s"%(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
@@ -53,7 +84,7 @@ class UAFlask(Flask):
         
             elif os.path.isfile(os.environ['UNCLE_ARCHIE_CONFIG']):
                 # absolute path
-                app.config.from_pyfile(os.environ['UNCLE_ARCHIE_CONFIG'])
+                self.config.from_pyfile(os.environ['UNCLE_ARCHIE_CONFIG'])
                 loaded_config = True
                 msg = "UAFlask: run(): Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
                 msg += "Loaded config file at %s"%(os.environ['UNCLE_ARCHIE_CONFIG'])
@@ -61,13 +92,13 @@ class UAFlask(Flask):
         
         else:
             err = "UAFlask: run(): Warning: No UNCLE_ARCHIE_CONFIG environment variable defined, "
-            err += "looking for 'config.py'"
+            err += "looking for 'config.py' in current directory."
             logging.info(err)
 
             # hail mary: look for config.py in the current directory
             default_name = 'config.py'
             if os.path.isfile(os.path.join(call,default_name)):
-                app.config.from_pyfile(os.path.join(call,default_name))
+                self.config.from_pyfile(os.path.join(call,default_name))
                 loaded_config = True
                 msg = "UAFlask: run(): Succesfuly loaded webapp config file with a hail mary.\n"
                 msg += "Loaded config file at %s"%(os.path.join(call,'config.py'))
@@ -81,6 +112,8 @@ class UAFlask(Flask):
             logging.error(err)
             raise Exception(err)
 
+        # ----------------------------
+        # Run app
         super().run(*args,**kwargs)
 
 
