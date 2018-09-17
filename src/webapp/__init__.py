@@ -47,7 +47,7 @@ class UAFlask(Flask):
                 # relative path
                 app.config.from_pyfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
                 loaded_config = True
-                msg = "archie.webapp: Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
+                msg = "UAFlask: run(): Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
                 msg += "Loaded config file at %s"%(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
                 logging.info(msg)
         
@@ -55,18 +55,26 @@ class UAFlask(Flask):
                 # absolute path
                 app.config.from_pyfile(os.environ['UNCLE_ARCHIE_CONFIG'])
                 loaded_config = True
-                msg = "archie.webapp: Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
+                msg = "UAFlask: run(): Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
                 msg += "Loaded config file at %s"%(os.environ['UNCLE_ARCHIE_CONFIG'])
                 logging.info(msg)
         
         else:
-            err = "ERROR: No UNCLE_ARCHIE_CONFIG environment variable defined, "
-            err += "could not load config file."
-            logging.error(err)
-            raise Exception(err)
-        
+            err = "UAFlask: run(): Warning: No UNCLE_ARCHIE_CONFIG environment variable defined, "
+            err += "looking for 'config.py'"
+            logging.info(err)
+
+            # hail mary: look for config.py in the current directory
+            default_name = 'config.py'
+            if os.path.isfile(os.path.join(call,default_name)):
+                app.config.from_pyfile(os.path.join(call,default_name))
+                loaded_config = True
+                msg = "UAFlask: run(): Succesfuly loaded webapp config file with a hail mary.\n"
+                msg += "Loaded config file at %s"%(os.path.join(call,'config.py'))
+                logging.info(msg)
+
         if not loaded_config:
-            err = "ERROR: Problem setting config file with UNCLE_ARCHIE_CONFIG environment variable:\n"
+            err = "ERROR: UAFlask: run(): Problem setting config file with UNCLE_ARCHIE_CONFIG environment variable:\n"
             err += "UNCLE_ARCHIE_CONFIG value : %s\n"%(os.environ['UNCLE_ARCHIE_CONFIG'])
             err += "Missing config file : %s\n"%(os.environ['UNCLE_ARCHIE_CONFIG'])
             err += "Missing config file : %s\n"%(os.path.join(call, os.environ['UNCLE_ARCHIE_CONFIG']))
