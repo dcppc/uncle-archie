@@ -35,14 +35,13 @@ class GithubTask(UncleArchieTask):
         """
         Get the API key for the Github API instance
         """
-        logging.info(pprint.pformat(config))
         if 'GITHUB_ACCESS_TOKEN' in config:
             self.token = config['GITHUB_ACCESS_TOKEN']
         else:
             err = "ERROR: GithubTask: __init__(): 'GITHUB_ACCESS_TOKEN' config variable: "
             err += "No Github API access token defined with 'GITHUB_ACCESS_TOKEN'"
             logging.error(err)
-            logging.error(pprint.pformat(config))
+            logging.error("Config keys: %s"%(", ".join(config.keys())))
             raise Exception(err)
 
         msg = "  - Github API key: (FOUND) (hidden)"
