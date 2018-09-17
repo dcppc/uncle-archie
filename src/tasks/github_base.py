@@ -73,9 +73,9 @@ class GithubTask(UncleArchieTask):
         for the repository in this payload
         (Tested)
         """
-        if 'repository' in payloads.keys():
+        if 'repository' in payload.keys():
             if 'clone_url' in payload['repository'].keys():
-                return payloads['repository']['clone_url']
+                return payload['repository']['clone_url']
         return None
 
 
@@ -85,9 +85,9 @@ class GithubTask(UncleArchieTask):
         for the repository in this payload
         (Tested)
         """
-        if 'repository' in payloads.keys():
+        if 'repository' in payload.keys():
             if 'ssh_url' in payload['repository'].keys():
-                return payloads['repository']['ssh_url']
+                return payload['repository']['ssh_url']
         return None
 
 
@@ -97,9 +97,9 @@ class GithubTask(UncleArchieTask):
         for the repository in this payload
         (Tested)
         """
-        if 'repository' in payloads.keys():
+        if 'repository' in payload.keys():
             if 'html_url' in payload['repository'].keys():
-                return payloads['repository']['html_url']
+                return payload['repository']['html_url']
         return None
 
 
