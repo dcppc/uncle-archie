@@ -39,46 +39,48 @@ class UAFlask(Flask):
             raise Exception(err)
         return self.payload_handler
 
+    def run(self,*args,**kwargs):
+        # Load config
+        loaded_config = False
+        if 'UNCLE_ARCHIE_CONFIG' in os.environ:
+            if os.path.isfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG'])):
+                # relative path
+                app.config.from_pyfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
+                loaded_config = True
+                msg = "archie.webapp: Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
+                msg += "Loaded config file at %s"%(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
+                logging.info(msg)
+        
+            elif os.path.isfile(os.environ['UNCLE_ARCHIE_CONFIG']):
+                # absolute path
+                app.config.from_pyfile(os.environ['UNCLE_ARCHIE_CONFIG'])
+                loaded_config = True
+                msg = "archie.webapp: Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
+                msg += "Loaded config file at %s"%(os.environ['UNCLE_ARCHIE_CONFIG'])
+                logging.info(msg)
+        
+        else:
+            err = "ERROR: No UNCLE_ARCHIE_CONFIG environment variable defined, "
+            err += "could not load config file."
+            logging.error(err)
+            raise Exception(err)
+        
+        if not loaded_config:
+            err = "ERROR: Problem setting config file with UNCLE_ARCHIE_CONFIG environment variable:\n"
+            err += "UNCLE_ARCHIE_CONFIG value : %s\n"%(os.environ['UNCLE_ARCHIE_CONFIG'])
+            err += "Missing config file : %s\n"%(os.environ['UNCLE_ARCHIE_CONFIG'])
+            err += "Missing config file : %s\n"%(os.path.join(call, os.environ['UNCLE_ARCHIE_CONFIG']))
+            logging.error(err)
+            raise Exception(err)
+
+        super().run(*args,**kwargs)
+
 
 app = UAFlask(
         __name__,
         template_folder = os.path.join(base,'templates'),
         static_folder = os.path.join(base,'static')
 )
-
-# Load config
-loaded_config = False
-if 'UNCLE_ARCHIE_CONFIG' in os.environ:
-    if os.path.isfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG'])):
-        # relative path
-        app.config.from_pyfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
-        loaded_config = True
-        msg = "archie.webapp: Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
-        msg += "Loaded config file at %s"%(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
-        logging.info(msg)
-
-    elif os.path.isfile(os.environ['UNCLE_ARCHIE_CONFIG']):
-        # absolute path
-        app.config.from_pyfile(os.environ['UNCLE_ARCHIE_CONFIG'])
-        loaded_config = True
-        msg = "archie.webapp: Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
-        msg += "Loaded config file at %s"%(os.environ['UNCLE_ARCHIE_CONFIG'])
-        logging.info(msg)
-
-else:
-    err = "ERROR: No UNCLE_ARCHIE_CONFIG environment variable defined, "
-    err += "could not load config file."
-    logging.error(err)
-    raise Exception(err)
-
-if not loaded_config:
-    err = "ERROR: Problem setting config file with UNCLE_ARCHIE_CONFIG environment variable:\n"
-    err += "UNCLE_ARCHIE_CONFIG value : %s\n"%(os.environ['UNCLE_ARCHIE_CONFIG'])
-    err += "Missing config file : %s\n"%(os.environ['UNCLE_ARCHIE_CONFIG'])
-    err += "Missing config file : %s\n"%(os.path.join(call, os.environ['UNCLE_ARCHIE_CONFIG']))
-    logging.error(err)
-    raise Exception(err)
-
 
 
 @app.route('/', methods=['GET', 'POST'])
