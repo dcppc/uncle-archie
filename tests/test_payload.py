@@ -1,40 +1,25 @@
+from .utils import post_pingpong_webhook, post_pr_webhook
 import archie
-import json
-import os, sys
-import tempfile
 import logging
+import os, sys
 
-base = os.path.split(os.path.abspath(__file__))[0]
-
-root = logging.getLogger()
-ch = logging.StreamHandler(sys.stdout)
-ch.setLevel(logging.DEBUG)
-root.addHandler(ch)
-
-def post_webhook(client):
-
-    fname = os.path.join(base,'..','museum','pr_sync.json')
-
-    print("Opening file %s"%(fname))
-    d = {}
-    with open(fname,'r') as f:
-        d = json.load(f)
-
-    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-
-    return client.post(
-            '/',
-            json=d,
-            headers=headers,
-    )
-
-def test_visit_homepage():
+def test_webhooks_ok():
     archie.webapp.app.config['debug'] = True
     archie.webapp.app.config['DEBUG'] = True
     archie.webapp.app.config['TESTING'] = True
     client = archie.webapp.app.test_client()
     archie.webapp.app.set_payload_handler('')
-    r = post_webhook(client)
+    r = post_pr_webhook(client)
+    logging.info(r)
+    assert r.status_code==200
+
+def test_ping_webhook():
+    archie.webapp.app.config['debug'] = True
+    archie.webapp.app.config['DEBUG'] = True
+    archie.webapp.app.config['TESTING'] = True
+    client = archie.webapp.app.test_client()
+    archie.webapp.app.set_payload_handler('')
+    r = post_pingpong_webhook(client)
     logging.info(r)
     assert r.status_code==200
 
