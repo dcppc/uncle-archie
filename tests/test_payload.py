@@ -1,4 +1,4 @@
-from .utils import post_pingpong_webhook, post_pr_webhook
+from .utils import post_pingpong_webhook, post_pr_webhook, extract_payload
 import archie
 import logging
 import os, sys
