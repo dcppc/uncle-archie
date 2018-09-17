@@ -25,17 +25,17 @@ def test_import_payload_handler():
     Payload Handler class
     """
     phf = archie.payload_handlers.PayloadHandlerFactory()
-    assert isinstance(phf.factory('default',archie.webapp.app.config), archie.payload_handlers.DumpPayloadHandler)
+    assert isinstance(phf.factory('default',archie.webapp.app.config), archie.payload_handlers.LoggingPayloadHandler)
     assert isinstance(phf.factory('dcppc',archie.webapp.app.config),   archie.payload_handlers.DCPPCPayloadHandler)
 
     # import method 2
     from archie.payload_handlers import PayloadHandlerFactory
-    from archie.payload_handlers import DumpPayloadHandler
+    from archie.payload_handlers import LoggingPayloadHandler
     from archie.payload_handlers import DCPPCPayloadHandler
     from archie.webapp import app
     config = app.config
     phf = PayloadHandlerFactory()
-    assert isinstance(phf.factory('default',config),DumpPayloadHandler)
+    assert isinstance(phf.factory('default',config),LoggingPayloadHandler)
     assert isinstance(phf.factory('dcppc',config),DCPPCPayloadHandler)
     
 
