@@ -2,6 +2,9 @@
 from .base import UncleArchieTask, LoggingTask
 from .github_base import GithubTask, PyGithubTask
 
+# test Task types
+from .test_tasks import TestPRTask
+
 # dcppc Task types
 from .private_www_PR_builder import private_www_PR_builder
 from .private_www_deployer import private_www_deployer 
@@ -15,6 +18,9 @@ __all__ = [
         'LoggingTask',
         'GithubTask',
         'PyGithubTask',
+
+        'TestPRTask',
+
         'private_www_PR_builder',
         'private_www_deployer',
         'private_www_submodule_integration_PR_builder',

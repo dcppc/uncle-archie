@@ -104,7 +104,7 @@ class UncleArchieTask(object):
         if not os.path.isdir(self.log_dir):
             result = subprocess.call(['mkdir','-p',self.log_dir])
             if result==1:
-                err = "ERROR: UncleArchieTask: __init__(): log_dir kwarg: "
+                err = "ERROR: UncleArchieTask: __init__(): log_dir config variable: "
                 err += "Could not create log dir %s"%(self.log_dir)
                 logging.error(err)
                 raise Exception(err)
@@ -125,7 +125,7 @@ class UncleArchieTask(object):
 
         # If it doesn't exist, make it
         if not os.path.isdir(self.log_dir):
-            err = "ERROR: UncleArchieTask: get_htdocs_dir(): htdocs_dir kwarg: "
+            err = "ERROR: UncleArchieTask: get_htdocs_dir(): htdocs_dir config variable: "
             err += "Could not find htdocs dir %s"%(self.htdocs_dir)
             logging.error(err)
             raise Exception(err)

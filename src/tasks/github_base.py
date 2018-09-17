@@ -19,25 +19,28 @@ class GithubTask(UncleArchieTask):
             github_access_token :   (string) API access token
             repo_whitelist :        (list) whitelisted Github repositories
         """
-        super.__init__(config,**kwargs)
+        super().__init__(config,**kwargs)
 
-        # Get API key and save it
-        if 'github_access_token' in kwargs:
-            self.token = kwargs.pop('github_access_token')
+        msg = "GithubTask: __init__(): Starting constructor"
+        logging.debug(msg)
+
+        self.get_api_key(config)
+
+
+    def get_api_key(self,config):
+        """
+        Get the API key for the Github API instance
+        """
+        if 'github_access_token' in config:
+            self.token = config['github_access_token']
         else:
-            err = "ERROR: GithubTask: __init__(): kwarg github_access_token: "
-            err += "No Github API access token defined with 'github_access_token' kwarg"
+            err = "ERROR: GithubTask: __init__(): github_access_token config variable: "
+            err += "No Github API access token defined with 'github_access_token'"
             logging.error(err)
             raise Exception(err)
 
-        # Get repo whitelist and save it
-        if 'repo_whitelist' in kwargs:
-            self.repo_whitelist = kwargs.pop('repo_whitelist')
-        else:
-            err = "ERROR: GithubTask: __init__(): kwarg repo_whitelist: "
-            err += "No Github whitelist defined with 'repo_whitelist' kwarg"
-            logging.error(err)
-            raise Exception(err)
+        msg = "  - Github API key: (FOUND) (hidden)"
+        logging.debug(msg)
 
 
     def get_api_instance(self):
@@ -56,6 +59,7 @@ class GithubTask(UncleArchieTask):
         """
         String: get a clone-able Github URL 
         for the repository in this payload
+        (Tested)
         """
         if 'repository' in payloads.keys():
             if 'clone_url' in payload['repository'].keys():
@@ -67,6 +71,7 @@ class GithubTask(UncleArchieTask):
         """
         String: get a clone-able SSH Github URL 
         for the repository in this payload
+        (Tested)
         """
         if 'repository' in payloads.keys():
             if 'ssh_url' in payload['repository'].keys():
@@ -78,6 +83,7 @@ class GithubTask(UncleArchieTask):
         """
         String: get an HTML url to the Github repo
         for the repository in this payload
+        (Tested)
         """
         if 'repository' in payloads.keys():
             if 'html_url' in payload['repository'].keys():
@@ -88,6 +94,7 @@ class GithubTask(UncleArchieTask):
     def get_full_repo_name(self,payload):
         """
         String: full repo name: organization/reponame
+        (Tested)
         """
         if 'repository' in payload.keys():
             if 'full_name' in payload['repository'].keys():
@@ -98,6 +105,7 @@ class GithubTask(UncleArchieTask):
     def get_short_repo_name(self,payload):
         """
         String: short repo name
+        (Tested)
         """
         if 'repository' in payload.keys():
             if 'name' in payload['repository'].keys():
@@ -108,6 +116,7 @@ class GithubTask(UncleArchieTask):
     def get_pull_request_head_commit(self,payload):
         """
         String: head commit of this pull request
+        (Tested)
         """
         if self.is_pull_request(payload):
             return payload['pull_request']['head']['sha']
@@ -117,6 +126,7 @@ class GithubTask(UncleArchieTask):
     def get_pull_request_number(self,payload):
         """
         String: get id number of pull request
+        (Tested)
         """
         if self.is_pull_request(payload):
             return payload['number']
@@ -126,6 +136,7 @@ class GithubTask(UncleArchieTask):
     def is_pull_request(self,payload):
         """
         Boolean: is this webhook a PR?
+        (Tested)
         """
         if 'pull_request' in payload.keys():
             return True
@@ -135,6 +146,7 @@ class GithubTask(UncleArchieTask):
     def is_pull_request_open(self,payload):
         """
         Boolean: is this webhook opening a PR?
+        (Tested)
         """
         if 'action' in payload.keys():
             if payload['action']=='opened':
@@ -145,6 +157,7 @@ class GithubTask(UncleArchieTask):
     def is_pull_request_sync(self,payload):
         """
         Boolean: is this webhook syncing a PR?
+        (Tested)
         """
         if 'action' in payload.keys():
             if payload['action']=='synchronize':
@@ -155,6 +168,7 @@ class GithubTask(UncleArchieTask):
     def is_pull_request_close(self,payload):
         """
         Boolean: is this webhook closing a PR?
+        (Tested)
         """
         if 'action' in payload.keys():
             if payload['action']=='closed':
@@ -165,6 +179,7 @@ class GithubTask(UncleArchieTask):
     def is_pull_request_merge_commit(self,payload):
         """
         Boolean: does this webhook have a PR merge commit?
+        (Tested)
         """
         if self.is_pull_request(payload):
             if 'merge_commit_sha' in payload['pull_request']:

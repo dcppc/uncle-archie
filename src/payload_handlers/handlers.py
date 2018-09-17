@@ -48,6 +48,15 @@ class LoggingPayloadHandler(TaskPayloadHandler):
         self.tasks.append(LoggingTask(config,**kwargs))
 
 
+class PRTestingPayloadHandler(TaskPayloadHandler):
+    def __init__(self,config,**kwargs):
+        """
+        Create a logging task and store it in the task container
+        """
+        super().__init__(config,**kwargs)
+
+        self.tasks.append(TestPRTask(config,**kwargs))
+
 
 class DCPPCPayloadHandler(LoggingPayloadHandler):
     """
