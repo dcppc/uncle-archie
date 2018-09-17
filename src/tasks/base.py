@@ -303,51 +303,67 @@ class UncleArchieTask(object):
         msg += "    %s\n"%(" ".join(cmd))
         logging.debug(msg)
 
-        proc = subprocess.Popen(
-                cmd,
-                stdout=PIPE,
-                stderr=PIPE,
-                cwd=cwd
-        )
+        # if testing,
+        # btw where is self.debug defined
+        # base? where?
+        # task?
+        # use the config, you tasks
+        # this is the base task
+        # use the config
+        # config'TESTING']
+        if config['TESTING']:
+            # print
+            msg = "UncleArchieTask: run_cmd(): Found TESSTING variable set.\n"
+            msg += "Command: %s"%(" ".join(cmd))
+            logging.info(msg)
+            return False
+        else:
 
-        o = proc.stdout.read().decode('utf-8')
-        e = proc.stderr.read().decode('utf-8')
+            proc = subprocess.Popen(
+                    cmd,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    cwd=cwd
+            )
 
-        elines = ["=====================================\n",
-                  "======= CMD: %s\n"%(" ".join(cmd)),
-                  "======= STDOUT\n",
-                  "=====================================\n",
-                  o,
-                  "\n\n"
-        ]
+            o = proc.stdout.read().decode('utf-8')
+            e = proc.stderr.read().decode('utf-8')
 
-        elines = ["=====================================\n",
-                  "======= CMD: %s\n"%(" ".join(cmd)),
-                  "======= STDERR\n",
-                  "=====================================\n",
-                  e,
-                  "\n\n"
-        ]
+            elines = ["=====================================\n",
+                      "======= CMD: %s\n"%(" ".join(cmd)),
+                      "======= STDOUT\n",
+                      "=====================================\n",
+                      o,
+                      "\n\n"
+            ]
 
-        self.log += olines
-        self.log += elines
+            elines = ["=====================================\n",
+                      "======= CMD: %s\n"%(" ".join(cmd)),
+                      "======= STDERR\n",
+                      "=====================================\n",
+                      e,
+                      "\n\n"
+            ]
 
-        msg = "UncleArchieTask: run_cmd(): Finished running command"
-        logging.debug(msg)
+            self.log += olines
+            self.log += elines
 
-        if "exception" in o.lower \
-        or "exception" in e.lower:
-            err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected exception [X]"
-            logging.error(err)
-            return True
+            msg = "UncleArchieTask: run_cmd(): Finished running command"
+            logging.debug(msg)
 
-        if "error" in o.lower \
-        or "error" in e.lower:
-            err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected error [X]"
-            logging.error(err)
-            return True
+            if "exception" in o.lower \
+            or "exception" in e.lower:
+                err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected exception [X]"
+                logging.error(err)
+                return True
 
-        return False
+            if "error" in o.lower \
+            or "error" in e.lower:
+                err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected error [X]"
+                logging.error(err)
+                return True
+
+            return False
 
 
     ######################################
