@@ -11,13 +11,11 @@ class GithubTask(UncleArchieTask):
         This performs the initialization procedure
         for Github-related Uncle Archie tasks.
 
-        Remember, we run every hook with every payload,
-        so process_payload() is where we have to decide
-        whether to run this test (i.e. check if the repo in
-        this payload is on the whitelist).
+        Remember, we run every Task with every payload,
+        so Task.run() is where we validate the payload 
+        to ensure we should be running that Task.
 
         config vars:
-            github_access_token :   (string) API access token
             repo_whitelist :        (list) whitelisted Github repositories
         """
         super().__init__(config,**kwargs)
@@ -27,16 +25,22 @@ class GithubTask(UncleArchieTask):
 
         self.get_api_key(config)
 
+        # Get the API token when you actually need it, which
+        # is to say, in the run() function, which has the config
+        # variable avaiable. 
+        self.token = None
+
 
     def get_api_key(self,config):
         """
         Get the API key for the Github API instance
         """
+        logging.info(pprint.pformat(config))
         if 'GITHUB_ACCESS_TOKEN' in config:
             self.token = config['GITHUB_ACCESS_TOKEN']
         else:
-            err = "ERROR: GithubTask: __init__(): github_access_token config variable: "
-            err += "No Github API access token defined with 'github_access_token'"
+            err = "ERROR: GithubTask: __init__(): 'GITHUB_ACCESS_TOKEN' config variable: "
+            err += "No Github API access token defined with 'GITHUB_ACCESS_TOKEN'"
             logging.error(err)
             logging.error(pprint.pformat(config))
             raise Exception(err)
@@ -48,9 +52,15 @@ class GithubTask(UncleArchieTask):
     def get_api_instance(self):
         """
         Return a Github API instance (PyGithub object)
+            github_access_token :   (string) API access token
         """
-        g = Github(self.token)
-        return g
+        if self.token is None:
+            err = "ERROR: GithubTask: get_api_instance(): This method was "
+            err += "called before an API key was available via self.token\n"
+            err += "You are likely missing a call to GithubTask.get_api_key()"
+        else:
+            g = Github(self.token)
+            return g
 
 
     #######################################
