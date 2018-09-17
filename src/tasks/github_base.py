@@ -1,5 +1,6 @@
 from .base import UncleArchieTask
 import logging
+import pprint
 
 class GithubTask(UncleArchieTask):
     """
@@ -15,7 +16,7 @@ class GithubTask(UncleArchieTask):
         whether to run this test (i.e. check if the repo in
         this payload is on the whitelist).
 
-        kwargs:
+        config vars:
             github_access_token :   (string) API access token
             repo_whitelist :        (list) whitelisted Github repositories
         """
@@ -31,12 +32,13 @@ class GithubTask(UncleArchieTask):
         """
         Get the API key for the Github API instance
         """
-        if 'github_access_token' in config:
-            self.token = config['github_access_token']
+        if 'GITHUB_ACCESS_TOKEN' in config:
+            self.token = config['GITHUB_ACCESS_TOKEN']
         else:
             err = "ERROR: GithubTask: __init__(): github_access_token config variable: "
             err += "No Github API access token defined with 'github_access_token'"
             logging.error(err)
+            logging.error(pprint.pformat(config))
             raise Exception(err)
 
         msg = "  - Github API key: (FOUND) (hidden)"
@@ -250,7 +252,7 @@ class PyGithubTask(UncleArchieTask):
         common to all Uncle Archie tests that use
         Python in their task.
 
-        kwargs:
+        config vars:
             vp_label :  What to call the virtual environment
             vp_dir :    (cwd = curr. working dir) the location 
                         of the virtual environment
@@ -261,8 +263,8 @@ class PyGithubTask(UncleArchieTask):
 
         # Get virtual environment label 
         # from config or use default
-        if 'venv_label' in config.keys():
-            self.venv_label = config['venv_label']
+        if 'VENV_LABEL' in config.keys():
+            self.venv_label = config['VENV_LABEL']
         else:
             self.venv_label = VENV_LABEL
 
@@ -307,7 +309,7 @@ class PyGithubTask(UncleArchieTask):
         Tear down a virtual environment.
         Called by the destructor.
         
-        kwargs:
+        config vars:
             None
         """
         msg = "PyGithubTask: virtualenv_teardown(): Removing virtual environment at \"%s\" "%(self.vp_dir)
