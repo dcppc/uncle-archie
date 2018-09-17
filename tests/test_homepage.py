@@ -7,7 +7,6 @@ def visit_homepage(client):
     return client.get('/')
 
 def test_visit_homepage():
-    archie.webapp.app.config['debug'] = True
     archie.webapp.app.config['DEBUG'] = True
     archie.webapp.app.config['TESTING'] = True
     client = archie.webapp.app.test_client()
