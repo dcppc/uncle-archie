@@ -46,13 +46,19 @@ class TestPayload(unittest.TestCase):
         client = archie.webapp.app.test_client()
         archie.webapp.app.set_payload_handler('pr_test')
     
-        with self.assertLogs() as cm:
-            r = post_pr_webhook(client)
-            self.assertEqual(r.status_code,200)
+        r = post_pr_webhook(client)
+        self.assertEqual(r.status_code,200)
     
-        self.assertIn(cm.output,'Pull Request')
-        
-
-
+        self.assertLogs('Is pull request open? False')
+        self.assertLogs('Is pull request sync? True')
+        self.assertLogs('Is pull request close? False')
+        self.assertLogs('Is this a merge commit? True')
+        self.assertLogs('Pull request number 81')
+        self.assertLogs('Pull request head commit: 48480b8022182a487e27c5f54ac1726da8e654e1')
+        self.assertLogs('Short repo name: private-www')
+        self.assertLogs('Full repo name: dcppc/private-www')
+        self.assertLogs('Repo clone url: https://github.com/dcppc/private-www.git')
+        self.assertLogs('Repo ssh url: git@github.com:dcppc/private-www.git')
+        self.assertLogs('Repo html url: https://github.com/dcppc/private-www')
 
 
