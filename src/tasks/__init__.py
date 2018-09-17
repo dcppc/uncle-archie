@@ -3,7 +3,7 @@ from .base import UncleArchieTask, LoggingTask
 from .github_base import GithubTask, PyGithubTask
 
 # test Task types
-from .test_tasks import TestPRTask
+from .gitub_test import TestPRTask
 
 # dcppc Task types
 from .private_www_PR_builder import private_www_PR_builder
