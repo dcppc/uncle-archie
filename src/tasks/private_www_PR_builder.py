@@ -164,14 +164,11 @@ class private_www_PR_builder(PyGithubTask):
 
         # run git clone command
         clonecmd = ['git','clone','--recursive',ghurl]
-        if self.debug:
-            self.abort = False
-        else:
-            self.abort = run_cmd(
-                    clonecmd,
-                    "git clone",
-                    self.temp_dir
-            )
+        self.abort = run_cmd(
+                clonecmd,
+                "git clone",
+                self.temp_dir
+        )
 
 
     def git_checkout_pr(self,payload):
@@ -185,14 +182,11 @@ class private_www_PR_builder(PyGithubTask):
 
             # checkout head pr
             cocmd = ['git','checkout',head_commit]
-            if self.debug:
-                self.abort = False
-            else:
-                self.abort = run_cmd(
-                        cocmd,
-                        "git checkout",
-                        repo_dir
-                )
+            self.abort = run_cmd(
+                    cocmd,
+                    "git checkout",
+                    repo_dir
+            )
 
 
     def submodules_update(self,payload):
@@ -204,14 +198,11 @@ class private_www_PR_builder(PyGithubTask):
 
             # checkout head pr
             sucmd = ['git','submodule','update','--init']
-            if self.debug:
-                self.abort = False
-            else:
-                self.abort = run_cmd(
-                        sucmd,
-                        "submodule update",
-                        repo_dir
-                )
+            self.abort = run_cmd(
+                    sucmd,
+                    "submodule update",
+                    repo_dir
+            )
 
 
     #############################################
@@ -247,7 +238,10 @@ class private_www_PR_builder(PyGithubTask):
     def snakemake(self,payload):
         """
         Run the snakemake build command
-        (this is the money shot)
+        (this is the money shot).
+
+        Return true if command succeeds,
+        otherwise return false.
         """
         if not self.abort:
             # get repo dir
@@ -255,15 +249,14 @@ class private_www_PR_builder(PyGithubTask):
             repo_dir = os.path.join(self.temp_dir,repo_short_name)
 
             buildcmd = ['snakemake','--nocolor','build_docs']
-            if self.debug:
-                self.abort = False
-                return True
-            else:
-                self.abort = run_cmd(
-                        buildcmd,
-                        "snakemake build",
-                        repo_dir
-                )
+            self.abort = run_cmd(
+                    buildcmd,
+                    "snakemake build",
+                    repo_dir
+            )
+
+            if not self.abort:
+                # passed the test
                 return True
 
         return False
