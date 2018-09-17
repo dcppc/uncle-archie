@@ -81,7 +81,7 @@ if not loaded_config:
 
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
 
     # forgot to add the dang render template handler

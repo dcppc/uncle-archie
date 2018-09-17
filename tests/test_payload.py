@@ -33,7 +33,8 @@ def test_visit_homepage():
     archie.webapp.app.config['DEBUG'] = True
     archie.webapp.app.config['TESTING'] = True
     client = archie.webapp.app.test_client()
+    archie.webapp.app.set_payload_handler('')
     r = post_webhook(client)
-    print(r.data)
-    assert True
+    logging.info(r)
+    assert r.status_code==200
 

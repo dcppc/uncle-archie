@@ -1,3 +1,4 @@
+import pprint
 import os
 import shutil
 import tempfile
@@ -376,7 +377,7 @@ class UncleArchieTask(object):
 class LoggingTask(UncleArchieTask):
     LABEL = "logging task"
     def run(self,payload,meta,config):
-        msg += "LoggingTask: run(): Received a payload:\n"
-        msg += pprint.pform(payload,indent=4)
+        msg = "LoggingTask: run(): Received a payload:\n"
+        msg += pprint.pformat(payload,indent=4)
         logging.debug(msg)
 
