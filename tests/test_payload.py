@@ -24,8 +24,7 @@ def test_ping_webhook():
     r = post_pingpong_webhook(client)
     assert r.status_code==200
 
-    result = r.data.decode('utf-8')
-    d = json.loads(result)
+    d = extract_payload(r)
     assert 'msg' in d.keys()
     assert d['msg']=='pong'
 

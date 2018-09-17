@@ -10,6 +10,16 @@ HEADERS = {
 base = os.path.split(os.path.abspath(__file__))[0]
 
 
+def extract_payload(request):
+    """
+    Given the reult of a flask client request,
+    extract payload as JSON and return as dict
+    """
+    result = request.data.decode('utf-8')
+    d = json.loads(result)
+    return d
+
+
 def post_pingpong_webhook(client):
     """
     Post a ping webhook
