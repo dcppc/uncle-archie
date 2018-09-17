@@ -4,11 +4,10 @@ from urllib.parse import urljoin
 import yaml
 
 class private_www_PR_builder(PyGithubTask):
-    # Once this is defined, the parent constructor
-    # will be able to extract task-specific config
-    # parameters for us. Nice!
+    """
+    Builds pull requests on the private-www repo.
+    """
     LABEL = "private_www_PR_builder"
-
 
     def run(self,payload,meta,config):
         """

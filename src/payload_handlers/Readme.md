@@ -93,13 +93,12 @@ The `BasePayloadHandler` class defines one virtual method,
 payload and Flask configuration and creates and runs 
 high-level Task objects.
 
-### `DumpPayloadHandler` class
+### `LoggingPayloadHandler` class
 
-The `DumpPayloadHandler` does just what it says - it dumps
-the payloads it receives (this is like a hello world program
-for webhook servers). It does this by creating a high-level
-Task object. Options like directory are passed in via the
-Flask configuration.
+The `LoggingPayloadHandler` class logs the payloads it receives 
+using the `logging` framework (logs at `DEBUG` level).
+
+It does this using a Task object, rather than logging directly.
 
 ### `DCPPCPayloadHandler` class
 

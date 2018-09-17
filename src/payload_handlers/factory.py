@@ -1,12 +1,12 @@
 from .handlers import \
         BasePayloadHandler, \
-        DumpPayloadHandler, \
+        LoggingPayloadHandler, \
         DCPPCPayloadHandler
 
 
 class PayloadHandlerFactory(object):
     payload_handlers = {
-            'default': DumpPayloadHandler,
+            'default': LoggingPayloadHandler,
             'dcppc':   DCPPCPayloadHandler
     }
     def factory(self,handler_type,config,**kwargs):

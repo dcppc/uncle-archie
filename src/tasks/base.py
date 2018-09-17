@@ -7,7 +7,7 @@ import logging
 
 
 """
-Uncle Archie: Base Classes
+Uncle Archie: Base Task Classes
 
 The classes in this file are intended to be used
 as base classes only. None of them define a 
@@ -68,6 +68,7 @@ class UncleArchieTask(object):
             err = "ERROR: UncleArchieTask: __init__(): Tried to extract "
             err += "test-specific config parametrers, but failed because "
             err += "no LABEL was defined for this test!"
+            logging.error(err)
             raise Exception(err)
 
         # Get the name of this task, using self.LABEL as default
@@ -371,4 +372,11 @@ class UncleArchieTask(object):
         msg = "UncleArchieTask: save_payload(): Finished saving payload to file %s"%(self.payload_log)
         logging.debug(msg)
 
+
+class LoggingTask(UncleArchieTask):
+    LABEL = "logging task"
+    def run(self,payload,meta,config):
+        msg += "LoggingTask: run(): Received a payload:\n"
+        msg += pprint.pform(payload,indent=4)
+        logging.debug(msg)
 
