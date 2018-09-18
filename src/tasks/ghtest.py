@@ -63,7 +63,7 @@ class TestPRTask(GithubTestTask):
             super().run(payload,meta,config)
 
 class TestMergeCommitTask(GithubTestTask):
-    LABEL = "PR test task"
+    LABEL = "merge commit test task"
     def run(self,payload,meta,config):
         # This test checks PR webhooks only
         if not self.is_pull_request_merge_commit(payload):
@@ -73,4 +73,14 @@ class TestMergeCommitTask(GithubTestTask):
         else:
             super().run(payload,meta,config)
 
+class TestNewBranchTask(GithubTestTask):
+    LABEL = "new branch test task"
+    def run(self,payload,meta,config):
+        # This test checks PR webhooks only
+        if not self.is_pull_request_merge_commit(payload):
+            msg = "TestNewBranchTask: run(): This is not a new branch commit payload"
+            logging.debug(msg)
+            return
+        else:
+            super().run(payload,meta,config)
 

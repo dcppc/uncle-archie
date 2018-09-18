@@ -3,7 +3,10 @@ from .base import UncleArchieTask, LoggingTask
 from .github_base import GithubTask, PyGithubTask
 
 # test Task types
-from .ghtest import TestPRTask, TestMergeCommitTask
+from .ghtest import TestPRTask
+from .ghtest import TestMergeCommitTask
+from .ghtest import TestNewBranchTask
+
 
 # dcppc Task types
 from .private_www_PR_builder import private_www_PR_builder
@@ -21,6 +24,7 @@ __all__ = [
 
         'TestPRTask',
         'TestMergeCommitTask',
+        'TestNewBranchTask',
 
         'private_www_PR_builder',
         'private_www_deployer',
