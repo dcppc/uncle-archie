@@ -6,47 +6,47 @@ import logging
 class GithubTestTask(GithubTask):
     def run(self,payload,meta,config):
         pr_is_open = self.is_pull_request_open(payload)
-        msg = "%s: run(): Is pull request open? %s"%(self.__name__,pr_is_open)
+        msg = "%s: run(): Is pull request open? %s"%(self.__class__.__name__,pr_is_open)
         logging.debug(msg)
 
         pr_is_sync = self.is_pull_request_sync(payload)
-        msg = "%s: run(): Is pull request sync? %s"%(self.__name__,pr_is_sync)
+        msg = "%s: run(): Is pull request sync? %s"%(self.__class__.__name__,pr_is_sync)
         logging.debug(msg)
 
         pr_is_close = self.is_pull_request_close(payload)
-        msg = "%s: run(): Is pull request close? %s"%(self.__name__,pr_is_close)
+        msg = "%s: run(): Is pull request close? %s"%(self.__class__.__name__,pr_is_close)
         logging.debug(msg)
 
         is_merge = self.is_pull_request_merge_commit(payload)
-        msg = "%s: run(): Is this a merge commit? %s"%(self.__name__,is_merge)
+        msg = "%s: run(): Is this a merge commit? %s"%(self.__class__.__name__,is_merge)
         logging.debug(msg)
 
         pr_number = self.get_pull_request_number(payload)
-        msg = "%s: run(): Pull request number %s"%(self.__name__,pr_number)
+        msg = "%s: run(): Pull request number %s"%(self.__class__.__name__,pr_number)
         logging.debug(msg)
 
         pr_head_commit = self.get_pull_request_head_commit(payload)
-        msg = "%s: run(): Pull request head commit: %s"%(self.__name__,pr_head_commit)
+        msg = "%s: run(): Pull request head commit: %s"%(self.__class__.__name__,pr_head_commit)
         logging.debug(msg)
 
         short_repo_name = self.get_short_repo_name(payload)
-        msg = "%s: run(): Short repo name: %s"%(self.__name__,short_repo_name)
+        msg = "%s: run(): Short repo name: %s"%(self.__class__.__name__,short_repo_name)
         logging.debug(msg)
 
         full_repo_name = self.get_full_repo_name(payload)
-        msg = "%s: run(): Full repo name: %s"%(self.__name__,full_repo_name)
+        msg = "%s: run(): Full repo name: %s"%(self.__class__.__name__,full_repo_name)
         logging.debug(msg)
 
         clone_url = self.get_clone_url(payload)
-        msg = "%s: run(): Repo clone url: %s"%(self.__name__,clone_url)
+        msg = "%s: run(): Repo clone url: %s"%(self.__class__.__name__,clone_url)
         logging.debug(msg)
 
         ssh_url = self.get_ssh_url(payload)
-        msg = "%s: run(): Repo ssh url: %s"%(self.__name__,ssh_url)
+        msg = "%s: run(): Repo ssh url: %s"%(self.__class__.__name__,ssh_url)
         logging.debug(msg)
 
         html_url = self.get_html_url(payload)
-        msg = "%s: run(): Repo html url: %s"%(self.__name__,html_url)
+        msg = "%s: run(): Repo html url: %s"%(self.__class__.__name__,html_url)
         logging.debug(msg)
 
 
