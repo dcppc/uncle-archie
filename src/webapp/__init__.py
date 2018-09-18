@@ -22,7 +22,7 @@ class UAFlask(Flask):
         logging.debug("="*40)
 
 
-    def set_payload_handler_id(self,handler_id,**kwargs):
+    def set_payload_handler(self,handler_id,**kwargs):
         """
         Given a (string) payload handler ID,
         save it for later.
@@ -34,19 +34,6 @@ class UAFlask(Flask):
         self.payload_handler = None
         self.payload_handler_id = handler_id
 
-
-    def get_payload_handler_id(self):
-        """
-        Return string with payload handler name/id,
-        self.payload_handler_id 
-        """
-        return self.payload_handler_id
-
-    def get_payload_handler(self):
-        """
-        Return the payload handler object
-        """
-        return self.payload_handler_id
 
     def init_payload_handler(self):
         """
@@ -176,8 +163,9 @@ def index():
         'event': event
     }
 
-    payload_handler = app.get_payload_handler()
-    payload_handler.process_payload(payload, meta, config)
+    self.payload_handler.process_payload(payload, meta, config)
+
+    del self.payload_handler
 
     # Clean up
     return json.dumps({'status':'done'})
