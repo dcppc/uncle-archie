@@ -33,11 +33,6 @@ class test_pr_payload_handler(payload_handler_base):
         """
         Test that the webhook server correctly processes PR webhooks
         """
-        app = archie.webapp.get_flask_app()
-        app.config['DEBUG'] = True
-        app.config['TESTING'] = True
-        app.set_payload_handler('pr_test')
-        client = app.test_client()
         log_statements = [
                 'Is pull request open? False',
                 'Is pull request sync? True',
@@ -51,31 +46,29 @@ class test_pr_payload_handler(payload_handler_base):
                 'Repo ssh url: git@github.com:dcppc/private-www.git',
                 'Repo html url: https://github.com/dcppc/private-www',
         ]
-        self.verify_in_logs(client,post_pr_webhook,log_statements)
+        self.doit(
+                'pr_test',
+                post_pr_webhook,
+                log_statements
+        )
 
     def test_new_branch(self):
         """
         Test that the webhook server correctly processes new branch webhooks
         """
-        app = archie.webapp.get_flask_app()
-        app.config['DEBUG'] = True
-        app.config['TESTING'] = True
-        app.set_payload_handler('pr_test')
-        client = app.test_client()
         log_statements = [
                 "This is not a pull request payload",
         ]
-        self.verify_in_logs(client,post_new_branch_webhook,log_statements)
+        self.doit(
+                'pr_test',
+                post_new_branch_webhook,
+                log_statements
+        )
 
     def test_close_pr(self):
         """
         Test that the webhook server correctly processes close PR webhooks
         """
-        app = archie.webapp.get_flask_app()
-        app.config['DEBUG'] = True
-        app.config['TESTING'] = True
-        app.set_payload_handler('pr_test')
-        client = app.test_client()
         log_statements = [
                 "Is pull request open? False",
                 "Is pull request sync? False",
@@ -89,31 +82,29 @@ class test_pr_payload_handler(payload_handler_base):
                 "Repo ssh url: git@github.com:charlesreid1/search-demo-mkdocs-material.git",
                 "Repo html url: https://github.com/charlesreid1/search-demo-mkdocs-material",
         ]
-        self.verify_in_logs(client,post_close_pr_webhook,log_statements)
+        self.doit(
+                'pr_test',
+                post_close_pr_webhook,
+                log_statements
+        )
 
     def test_pr_commit_to_master(self):
         """
         Test that the webhook server correctly processes commit to master webhooks
         """
-        app = archie.webapp.get_flask_app()
-        app.config['DEBUG'] = True
-        app.config['TESTING'] = True
-        app.set_payload_handler('pr_test')
-        client = app.test_client()
         log_statements = [
                 "This is not a pull request payload",
         ]
-        self.verify_in_logs(client,post_pr_commit_to_master_webhook,log_statements)
+        self.doit(
+                'pr_test',
+                post_pr_commit_to_master_webhook,
+                log_statements
+        )
     
     def test_pr_sync(self):
         """
         Test that the webhook server correctly processes PR sync webhooks
         """
-        app = archie.webapp.get_flask_app()
-        app.config['DEBUG'] = True
-        app.config['TESTING'] = True
-        app.set_payload_handler('pr_test')
-        client = app.test_client()
         log_statements = [
                 "Is pull request open? False",
                 "Is pull request sync? True",
@@ -127,5 +118,9 @@ class test_pr_payload_handler(payload_handler_base):
                 "Repo ssh url: git@github.com:dcppc/private-www.git",
                 "Repo html url: https://github.com/dcppc/private-www",
         ]
-        self.verify_in_logs(client,post_pr_sync_webhook,log_statements)
+        self.doit(
+                'pr_test',
+                post_pr_sync_webhook,
+                log_statements
+        )
 
