@@ -35,6 +35,22 @@ class UAFlask(Flask):
         self.payload_handler_id = handler_id
 
 
+    def get_payload_handler(self):
+        if self.payload_handler is None:
+            err = "ERROR: UAFlask: get_payload_handler(): "
+            err += "No payload handler has been set!"
+            logging.error(err)
+            raise Exception(err)
+        return self.payload_handler
+
+
+    def del_payload_handler(self):
+        """
+        Delete the payload handler when we're done with the webhook
+        """
+        del self.payload_handler
+
+
     def init_payload_handler(self):
         """
         Use the PayloadHandler factory to initialize
@@ -163,9 +179,10 @@ def index():
         'event': event
     }
 
-    self.payload_handler.process_payload(payload, meta, config)
+    payload_handler = get_payload_handler()
+    payload_handler.process_payload(payload, meta, config)
 
-    del self.payload_handler
+    del_payload_handler()
 
     # Clean up
     return json.dumps({'status':'done'})
