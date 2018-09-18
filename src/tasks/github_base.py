@@ -30,6 +30,10 @@ class GithubTask(UncleArchieTask):
         self.token = None
 
 
+        self.get_api_key(config)
+
+
+
     def get_api_key(self,config):
         """
         Get the API key for the Github API instance
