@@ -2,6 +2,7 @@ from .handlers import \
         BasePayloadHandler, \
         PRTestingPayloadHandler, \
         MCTestingPayloadHandler, \
+        NBTestingPayloadHandler, \
         LoggingPayloadHandler, \
         DCPPCPayloadHandler
 
@@ -11,6 +12,7 @@ class PayloadHandlerFactory(object):
             'default': LoggingPayloadHandler,
             'pr_test': PRTestingPayloadHandler,
             'mc_test': MCTestingPayloadHandler,
+            'nb_test': NBTestingPayloadHandler,
             'dcppc':   DCPPCPayloadHandler
     }
     def factory(self,handler_type,config,**kwargs):

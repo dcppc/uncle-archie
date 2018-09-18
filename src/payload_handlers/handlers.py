@@ -1,6 +1,7 @@
 from ..tasks import *
 import pprint
 
+
 class BasePayloadHandler(object):
     """
     we need a constructor
@@ -19,7 +20,6 @@ class BasePayloadHandler(object):
         raise Exception(err)
 
 
-
 class TaskPayloadHandler(BasePayloadHandler):
     def __init__(self,config,**kwargs):
         """
@@ -35,7 +35,6 @@ class TaskPayloadHandler(BasePayloadHandler):
         # Run all tasks on the payload
         for t in self.tasks:
             t.run(payload,meta,config)
-
 
 
 class LoggingPayloadHandler(TaskPayloadHandler):
@@ -66,6 +65,16 @@ class MCTestingPayloadHandler(TaskPayloadHandler):
         super().__init__(config,**kwargs)
 
         self.tasks.append(TestMergeCommitTask(config,**kwargs))
+
+
+class NBTestingPayloadHandler(TaskPayloadHandler):
+    def __init__(self,config,**kwargs):
+        """
+        Create a new branch test task and store it in the task container
+        """
+        super().__init__(config,**kwargs)
+
+        self.tasks.append(TestNewBranchTask(config,**kwargs))
 
 
 class DCPPCPayloadHandler(LoggingPayloadHandler):
