@@ -1,4 +1,5 @@
 from .base import UncleArchieTask
+import re
 import logging
 import pprint
 
@@ -145,6 +146,28 @@ class GithubTask(UncleArchieTask):
         if self.is_pull_request(payload):
             return payload['number']
         return None
+
+
+    def is_push(self,payload):
+        """
+        Boolean: is this a push event?
+        """
+        keys = ['ref','before','after','pusher']
+        for key in keys:
+            if key not in payload.keys():
+                return False
+        return True
+
+
+    def is_push_to_branch(self,payload,branch_name):
+        """
+        Boolean: is this a push event to the branch branch_name?
+        """
+        if is_push(payload):
+            ref = payload['ref']
+            if re.match(r'%s$'%branch_name,ref):
+                return True
+        return False
 
 
     def is_pull_request(self,payload):
