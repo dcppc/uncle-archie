@@ -26,7 +26,9 @@ https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertLogs
 """
 
 class test_new_branch_payload_handler(payload_handler_base):
-    pass
+    """
+    Test that new branch webhooks are handled correctly
+    """
 
 
 
