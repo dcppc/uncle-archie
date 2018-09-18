@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 
 
 HEADERS = {
@@ -19,7 +20,7 @@ def load_from_museum(fname):
     Load a payload named fname from ../museum
     """
     fname = os.path.join(base,'..','museum',fname)
-    print("Opening file %s"%(fname))
+    logging.info("Opening file %s"%(fname))
     d = {}
     with open(fname,'r') as f:
         d = json.load(f)
@@ -60,17 +61,9 @@ def post_pingpong_webhook(client):
 
 def post_pr_webhook(client):
     """
-    Fake pull request webhook
+    Fake pull request webhook (sync event)
     """
-    # Get webhook from file
-    d = load_from_museum('pr_sync.json')
-
-    # Post the webhook
-    return client.post(
-            '/',
-            json=d,
-            headers=HEADERS,
-    )
+    return post_pr_sync_webhook(client)
 
 
 def post_new_branch_webhook(client):
