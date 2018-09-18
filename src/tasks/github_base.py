@@ -23,7 +23,6 @@ class GithubTask(UncleArchieTask):
         msg = "GithubTask: __init__(): Starting constructor"
         logging.debug(msg)
 
-        self.get_api_key(config)
 
         # Get the API token when you actually need it, which
         # is to say, in the run() function, which has the config
@@ -41,7 +40,7 @@ class GithubTask(UncleArchieTask):
             err = "ERROR: GithubTask: __init__(): 'GITHUB_ACCESS_TOKEN' config variable: "
             err += "No Github API access token defined with 'GITHUB_ACCESS_TOKEN'"
             logging.error(err)
-            logging.error("Config keys: %s"%(", ".join(config.keys())))
+            logging.error("Config keys: %s"%(", ".join(sorted(list(config.keys())))))
             raise Exception(err)
 
         msg = "  - Github API key: (FOUND) (hidden)"

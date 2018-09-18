@@ -212,7 +212,7 @@ class UncleArchieTask(object):
 
 
     ######################################
-    # Passive run() function
+    # run() function
 
 
     def run(self,payload,meta,config):
