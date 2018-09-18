@@ -227,7 +227,7 @@ class UncleArchieTask(object):
         # Use it to assemble an output file name
 
         # Name of log file unique to this test
-        out_name = make_unique_label("output")
+        out_name = self.make_unique_label("output")
         self.log_file = os.path.join(self.log_dir,out_name)
 
         # Lists of strings to accumulate stdout and stderr
@@ -391,7 +391,7 @@ class UncleArchieTask(object):
         for output files.
         """
         assert label!=None
-        return "%s_%s"%(label,dt)
+        return "%s_%s"%(label,self.dt)
 
 
     def save_payload(self,payload):
