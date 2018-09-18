@@ -1,5 +1,14 @@
-from .utils import post_pingpong_webhook, post_pr_webhook, extract_payload
 import archie
+
+from .utils import \
+        extract_payload, \
+        post_pingpong_webhook, \
+        post_pr_webhook, \
+        post_new_branch_webhook, \
+        post_close_pr_webhook, \
+        post_pr_commit_to_master_webhook, \
+        post_pr_sync_webhook
+
 import logging
 import os, sys
 import json
@@ -10,11 +19,12 @@ class test_payload_server(unittest.TestCase):
         """
         Test that the Uncle Archie webhook server returns status 200
         """
-        archie.webapp.app.config['debug'] = True
-        archie.webapp.app.config['DEBUG'] = True
-        archie.webapp.app.config['TESTING'] = True
-        client = archie.webapp.app.test_client()
-        archie.webapp.app.set_payload_handler('')
+        app = archie.webapp.get_flask_app()
+        app.config['debug'] = True
+        app.config['DEBUG'] = True
+        app.config['TESTING'] = True
+        client = app.test_client()
+        app.set_payload_handler('')
     
         r = post_pr_webhook(client)
         self.assertEqual(r.status_code,200)
@@ -23,10 +33,11 @@ class test_payload_server(unittest.TestCase):
         """
         Test that the Uncle Archie webhook server plays ping pong
         """
-        archie.webapp.app.config['DEBUG'] = True
-        archie.webapp.app.config['TESTING'] = True
-        client = archie.webapp.app.test_client()
-        archie.webapp.app.set_payload_handler('')
+        app = archie.webapp.get_flask_app()
+        app.config['DEBUG'] = True
+        app.config['TESTING'] = True
+        client = app.test_client()
+        app.set_payload_handler('')
     
         r = post_pingpong_webhook(client)
         self.assertEqual(r.status_code,200)
