@@ -60,7 +60,10 @@ class UAFlask(Flask):
 
         if not loaded_config:
             err = "ERROR: UAFlask: __init__(): Problem setting config file with UNCLE_ARCHIE_CONFIG environment variable:\n"
-            err += "UNCLE_ARCHIE_CONFIG value : %s\n"%(os.environ['UNCLE_ARCHIE_CONFIG'])
+            try:
+                err += "UNCLE_ARCHIE_CONFIG value : %s\n"%(os.environ['UNCLE_ARCHIE_CONFIG'])
+            except:
+                pass
             err += "Missing config file : %s\n"%(os.environ['UNCLE_ARCHIE_CONFIG'])
             err += "Missing config file : %s\n"%(os.path.join(call, os.environ['UNCLE_ARCHIE_CONFIG']))
             logging.error(err)
