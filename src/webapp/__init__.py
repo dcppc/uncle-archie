@@ -1,4 +1,5 @@
 from .flask_app import UAFlask
+from .flask_routes import setup_routes
 from .const import base
 
 from flask import Flask, request, abort, render_template
@@ -17,6 +18,6 @@ def get_flask_app():
             template_folder = os.path.join(base,'templates'),
             static_folder = os.path.join(base,'static')
     )
-    import webapp.routes
+    setup_routes(app)
     return app
 
