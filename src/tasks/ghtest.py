@@ -51,7 +51,7 @@ class GithubTestTask(GithubTask):
 
 
 
-class TestPRTask(GithubTask):
+class TestPRTask(GithubTestTask):
     LABEL = "PR test task"
     def run(self,payload,meta,config):
         # This test checks PR webhooks only
@@ -59,9 +59,10 @@ class TestPRTask(GithubTask):
             msg = "TestPRTask: run(): This is not a pull request payload"
             logging.debug(msg)
             return
-        super().run(payload,meta,config)
+        else:
+            super().run(payload,meta,config)
 
-class TestMergeCommitTask(GithubTask):
+class TestMergeCommitTask(GithubTestTask):
     LABEL = "PR test task"
     def run(self,payload,meta,config):
         # This test checks PR webhooks only
@@ -69,6 +70,7 @@ class TestMergeCommitTask(GithubTask):
             msg = "TestMergeCommitTask: run(): This is not a pull request merge commit payload"
             logging.debug(msg)
             return
-        super().run(payload,meta,config)
+        else:
+            super().run(payload,meta,config)
 
 
