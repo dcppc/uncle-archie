@@ -51,11 +51,21 @@ class LoggingPayloadHandler(TaskPayloadHandler):
 class PRTestingPayloadHandler(TaskPayloadHandler):
     def __init__(self,config,**kwargs):
         """
-        Create a logging task and store it in the task container
+        Create a PR test task and store it in the task container
         """
         super().__init__(config,**kwargs)
 
         self.tasks.append(TestPRTask(config,**kwargs))
+
+
+class MCTestingPayloadHandler(TaskPayloadHandler):
+    def __init__(self,config,**kwargs):
+        """
+        Create a merge commit test task and store it in the task container
+        """
+        super().__init__(config,**kwargs)
+
+        self.tasks.append(TestMergeCommitTask(config,**kwargs))
 
 
 class DCPPCPayloadHandler(LoggingPayloadHandler):

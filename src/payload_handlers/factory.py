@@ -1,6 +1,7 @@
 from .handlers import \
         BasePayloadHandler, \
         PRTestingPayloadHandler, \
+        MCTestingPayloadHandler, \
         LoggingPayloadHandler, \
         DCPPCPayloadHandler
 
@@ -9,6 +10,7 @@ class PayloadHandlerFactory(object):
     payload_handlers = {
             'default': LoggingPayloadHandler,
             'pr_test': PRTestingPayloadHandler,
+            'mc_test': MCTestingPayloadHandler,
             'dcppc':   DCPPCPayloadHandler
     }
     def factory(self,handler_type,config,**kwargs):
