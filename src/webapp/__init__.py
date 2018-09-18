@@ -14,9 +14,15 @@ class UAFlask(Flask):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.payload_handler = None
+        self.phf = PayloadHandlerFactory()
+        logging.debug("="*40)
+        logging.debug("="*40)
+        logging.debug("flask __init__()")
+        logging.debug("="*40)
+        logging.debug("="*40)
 
 
-    def set_payload_handler(self,handler_id,**kwargs):
+    def set_payload_handler_id(self,handler_id,**kwargs):
         """
         Given a (string) payload handler ID,
         save it for later.
@@ -25,13 +31,28 @@ class UAFlask(Flask):
         to get a corresponding Payload Handler 
         object of the correct type.
         """
+        self.payload_handler = None
         self.payload_handler_id = handler_id
 
 
+    def get_payload_handler_id(self):
+        """
+        Return string with payload handler name/id,
+        self.payload_handler_id 
+        """
+        return self.payload_handler_id
+
+    def get_payload_handler(self):
+        """
+        Return the payload handler object
+        """
+        return self.payload_handler_id
+
     def init_payload_handler(self):
         """
-        Initialize the Payload Handler object using
-        the Payload Handler factory
+        Use the PayloadHandler factory to initialize
+        an instance of the payload handler that is 
+        specified with self.payload_handler_id
         """
         if self.payload_handler_id is None:
             err = "ERROR: UAFlask: init_payload_handler(): "
@@ -39,25 +60,10 @@ class UAFlask(Flask):
             logging.error(err)
             raise Exception(err)
 
-        phf = PayloadHandlerFactory()
         self.payload_handler = phf.factory(
                 self.payload_handler_id,
                 self.config,
         )
-
-
-    def get_payload_handler(self):
-        """
-        Get the payload handler that we have set
-        """
-        if self.payload_handler is None:
-            if self.payload_handler_id is None:
-                err = "ERROR: UAFlask: get_payload_handler(): "
-                err += "No payload handler has been set!"
-                logging.error(err)
-                raise Exception(err)
-            else:
-                self.init_payload_handler()
 
         return self.payload_handler
 
@@ -70,8 +76,17 @@ class UAFlask(Flask):
         the payload handler (and thus the task)
         object(s).
         """
+        logging.debug("="*40)
+        logging.debug("="*40)
+        logging.debug("flask run() ")
+        logging.debug("="*40)
+        logging.debug("="*40)
+
+        self.init_payload_handler()
+
         # ----------------------------
         # Load config
+        msg = "UAFlask: run(): Preparing to load webapp config file.\n"
         loaded_config = False
         if 'UNCLE_ARCHIE_CONFIG' in os.environ:
             if os.path.isfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG'])):
