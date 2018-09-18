@@ -1,5 +1,6 @@
 import archie
 
+from .payload_handler_base import payload_handler_base
 from .utils import \
         extract_payload, \
         post_pingpong_webhook, \
@@ -12,7 +13,6 @@ from .utils import \
 import logging
 import os, sys
 import json
-import unittest
 
 """
 Test PR Payload Handler
@@ -25,13 +25,10 @@ assertLogs:
 https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertLogs
 """
 
-class test_pr_payload_handler(unittest.TestCase):
-
-    def verify_in_logs(self,client,func,log_statements):
-        r = func(client)
-        for log_statement in log_statements:
-            self.assertLogs(log_statement)
-
+class test_pr_payload_handler(payload_handler_base):
+    """
+    Test that pull request webhooks are handled correctly
+    """
     def test_pr(self):
         """
         Test that the webhook server correctly processes PR webhooks
