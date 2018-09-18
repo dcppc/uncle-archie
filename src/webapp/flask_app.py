@@ -14,12 +14,6 @@ class UAFlask(Flask):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
 
-        logging.debug("="*40)
-        logging.debug("="*40)
-        logging.debug("flask __init__()")
-        logging.debug("="*40)
-        logging.debug("="*40)
-
         self.payload_handler = None
         self.phf = PayloadHandlerFactory()
 
