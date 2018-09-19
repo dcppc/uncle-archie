@@ -65,7 +65,7 @@ class TestPRTask(GithubTestTask):
 class TestMergeCommitTask(GithubTestTask):
     LABEL = "merge commit test task"
     def run(self,payload,meta,config):
-        # This test checks PR webhooks only
+        # This test checks merge commit webhooks only
         if not self.is_pull_request_merge_commit(payload):
             msg = "TestMergeCommitTask: run(): This is not a pull request merge commit payload"
             logging.debug(msg)

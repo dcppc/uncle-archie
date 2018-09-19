@@ -148,6 +148,15 @@ class GithubTask(UncleArchieTask):
         return None
 
 
+    def has_commits(self,payload):
+        """
+        Boolean: are there commits contained in this webhook
+        """
+        if 'commits' in payload.keys():
+            return True
+        return False
+
+
     def is_push(self,payload):
         """
         Boolean: is this a push event?
@@ -218,6 +227,7 @@ class GithubTask(UncleArchieTask):
         Boolean: does this webhook have a PR merge commit?
         (Tested)
         """
+        # WRONG WRONG WRONG
         if self.is_pull_request(payload):
             if 'merge_commit_sha' in payload['pull_request']:
                 return True
