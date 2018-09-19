@@ -6,7 +6,7 @@ from .utils import \
         post_pingpong_webhook, \
         post_pr_webhook, \
         post_new_branch_webhook, \
-        post_close_pr_webhook, \
+        post_pr_close_webhook, \
         post_pr_commit_to_master_webhook, \
         post_pr_sync_webhook
 
@@ -53,7 +53,7 @@ class test_new_branch_payload_handler(payload_handler_base):
                 log_statements
         )
 
-    def test_close_pr(self):
+    def test_pr_close(self):
         """
         Test that the webhook server correctly processes close PR webhooks
         """
@@ -61,7 +61,7 @@ class test_new_branch_payload_handler(payload_handler_base):
         ]
         self.doit(
                 'nb_test',
-                post_close_pr_webhook,
+                post_pr_close_webhook,
                 log_statements
         )
 

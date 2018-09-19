@@ -5,7 +5,7 @@ from .utils import \
         post_pingpong_webhook, \
         post_pr_webhook, \
         post_new_branch_webhook, \
-        post_close_pr_webhook, \
+        post_pr_close_webhook, \
         post_pr_commit_to_master_webhook, \
         post_pr_sync_webhook
 

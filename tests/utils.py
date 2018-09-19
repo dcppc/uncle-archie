@@ -81,7 +81,7 @@ def post_new_branch_webhook(client):
     )
 
 
-def post_close_pr_webhook(client):
+def post_pr_close_webhook(client):
     """
     Commit that closes a pull request
     """
