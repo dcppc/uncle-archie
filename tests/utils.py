@@ -66,21 +66,6 @@ def post_pr_webhook(client):
     return post_pr_sync_webhook(client)
 
 
-def post_new_branch_webhook(client):
-    """
-    Commit that creates a new branch
-    """
-    # Get webhook from file
-    d = load_from_museum('new_branch_event.json')
-
-    # Post the webhook
-    return client.post(
-            '/',
-            json=d,
-            headers=HEADERS,
-    )
-
-
 def post_pr_close_webhook(client):
     """
     Commit that closes a pull request

@@ -52,19 +52,6 @@ class test_merge_commit_payload_handler(payload_handler_base):
                 log_statements
         )
 
-    def test_new_branch(self):
-        """
-        Test that the merge commit payload handler correctly processes new branch webhooks
-        """
-        log_statements = [
-                "This is not a pull request payload",
-        ]
-        self.doit(
-                'mc_test',
-                post_new_branch_webhook,
-                log_statements
-        )
-
     def test_pr_close(self):
         """
         Test that the merge commit payload handler correctly processes close PR webhooks
