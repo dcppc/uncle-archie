@@ -1,10 +1,11 @@
 # Uncle Archie Tests
 
-Test strategy:
+This directory contains tests for Uncle Archie.
 
-Create a docker compose file with a container running uncle archie
-and another container running curl commands to fake incoming webhooks.
+Current status:
 
-May only be able to trigger events, but that's better than triggering
-commit after commit.
+* Webhook payload handlers are being tested
+* Need to clean up museum and better label/organize payloads
+* Let the end-use cases drive types of payloads
 
+Link to all payload types: <https://developer.github.com/v3/activity/events/types/>

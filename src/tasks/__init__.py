@@ -1,6 +1,11 @@
 # base Task types
-from .base import UncleArchieTask
+from .base import UncleArchieTask, LoggingTask
 from .github_base import GithubTask, PyGithubTask
+
+# test Task types
+from .ghtest import TestPRTask
+from .ghtest import TestMergeCommitTask
+
 
 # dcppc Task types
 from .private_www_PR_builder import private_www_PR_builder
@@ -11,8 +16,14 @@ from .use_case_library_PR_builder import use_case_library_PR_builder
 from .use_case_library_deployer import use_case_library_deployer 
 
 __all__ = [
-        'base',
-        'github_base',
+        'UncleArchieTask',
+        'LoggingTask',
+        'GithubTask',
+        'PyGithubTask',
+
+        'TestPRTask',
+        'TestMergeCommitTask',
+
         'private_www_PR_builder',
         'private_www_deployer',
         'private_www_submodule_integration_PR_builder',

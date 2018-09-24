@@ -1,13 +1,15 @@
+import pprint
 import os
 import shutil
 import tempfile
 import subprocess
+from subprocess import PIPE
 import datetime
 import logging
 
 
 """
-Uncle Archie: Base Classes
+Uncle Archie: Base Task Classes
 
 The classes in this file are intended to be used
 as base classes only. None of them define a 
@@ -59,8 +61,9 @@ class UncleArchieTask(object):
         # Get the base url
         self.get_base_url(config)
 
-        # Get the value of the debug variable
+        # Get the value of the debug/testing variable
         self.get_debug(config)
+        self.get_testing(config)
 
         # The following require a LABEL
         # to be defined by the parent class.
@@ -68,6 +71,7 @@ class UncleArchieTask(object):
             err = "ERROR: UncleArchieTask: __init__(): Tried to extract "
             err += "test-specific config parametrers, but failed because "
             err += "no LABEL was defined for this test!"
+            logging.error(err)
             raise Exception(err)
 
         # Get the name of this task, using self.LABEL as default
@@ -93,8 +97,8 @@ class UncleArchieTask(object):
         Get the log directory from the Flask
         config, and create it if needed.
         """
-        if 'log_dir' in config.keys():
-            self.log_dir = config['log_dir']
+        if 'LOG_DIR' in config.keys():
+            self.log_dir = config['LOG_DIR']
         else:
             self.log_dir = self.DEFAULT_LOG_DIR
 
@@ -102,7 +106,7 @@ class UncleArchieTask(object):
         if not os.path.isdir(self.log_dir):
             result = subprocess.call(['mkdir','-p',self.log_dir])
             if result==1:
-                err = "ERROR: UncleArchieTask: __init__(): log_dir kwarg: "
+                err = "ERROR: UncleArchieTask: __init__(): log_dir config variable: "
                 err += "Could not create log dir %s"%(self.log_dir)
                 logging.error(err)
                 raise Exception(err)
@@ -116,14 +120,14 @@ class UncleArchieTask(object):
         Get the htdocs directory from the Flask
         config, and check that it exists
         """
-        if 'htdocs_dir' in config.keys():
-            self.htdocs_dir = config['htdocs_dir']
+        if 'HTDOCS_DIR' in config.keys():
+            self.htdocs_dir = config['HTDOCS_DIR']
         else:
             self.htdocs_dir = self.DEFAULT_HTDOCS_DIR
 
         # If it doesn't exist, make it
         if not os.path.isdir(self.log_dir):
-            err = "ERROR: UncleArchieTask: get_htdocs_dir(): htdocs_dir kwarg: "
+            err = "ERROR: UncleArchieTask: get_htdocs_dir(): htdocs_dir config variable: "
             err += "Could not find htdocs dir %s"%(self.htdocs_dir)
             logging.error(err)
             raise Exception(err)
@@ -136,13 +140,26 @@ class UncleArchieTask(object):
         """
         Get the base url from the Flask config
         """
-        if 'base_url' in config.keys():
-            self.base_url = config['base_url']
+        if 'BASE_URL' in config.keys():
+            self.base_url = config['BASE_URL']
         else:
             self.base_url = self.DEFAULT_BASE_URL
 
         msg = "  - Base url: %s"%(self.base_url)
         logging.debug(msg)
+
+
+
+    def get_testing(self,config):
+        """
+        Get a boolean indicating whether 
+        Uncle Archie is running in testing
+        mode (default: no)
+        """
+        self.debug = False
+        if 'TESTING' in config.keys():
+            if config['TESTING'] is True:
+                self.testing = True
 
 
     def get_debug(self,config):
@@ -152,8 +169,8 @@ class UncleArchieTask(object):
         mode (default: no)
         """
         self.debug = False
-        if 'debug' in config.keys():
-            if config['debug'] is True:
+        if 'DEBUG' in config.keys():
+            if config['DEBUG'] is True:
                 self.debug = True
 
 
@@ -196,7 +213,7 @@ class UncleArchieTask(object):
 
 
     ######################################
-    # Passive run() function
+    # run() function
 
 
     def run(self,payload,meta,config):
@@ -211,7 +228,7 @@ class UncleArchieTask(object):
         # Use it to assemble an output file name
 
         # Name of log file unique to this test
-        out_name = make_unique_label("output")
+        out_name = self.make_unique_label("output")
         self.log_file = os.path.join(self.log_dir,out_name)
 
         # Lists of strings to accumulate stdout and stderr
@@ -301,51 +318,67 @@ class UncleArchieTask(object):
         msg += "    %s\n"%(" ".join(cmd))
         logging.debug(msg)
 
-        proc = subprocess.Popen(
-                cmd,
-                stdout=PIPE,
-                stderr=PIPE,
-                cwd=cwd
-        )
+        # if testing,
+        # btw where is self.debug defined
+        # base? where?
+        # task?
+        # use the config, you tasks
+        # this is the base task
+        # use the config
+        # config'TESTING']
+        if config['TESTING']:
+            # print
+            msg = "UncleArchieTask: run_cmd(): Found TESSTING variable set.\n"
+            msg += "Command: %s"%(" ".join(cmd))
+            logging.info(msg)
+            return False
+        else:
 
-        o = proc.stdout.read().decode('utf-8')
-        e = proc.stderr.read().decode('utf-8')
+            proc = subprocess.Popen(
+                    cmd,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    cwd=cwd
+            )
 
-        elines = ["=====================================\n",
-                  "======= CMD: %s\n"%(" ".join(cmd)),
-                  "======= STDOUT\n",
-                  "=====================================\n",
-                  o,
-                  "\n\n"
-        ]
+            o = proc.stdout.read().decode('utf-8')
+            e = proc.stderr.read().decode('utf-8')
 
-        elines = ["=====================================\n",
-                  "======= CMD: %s\n"%(" ".join(cmd)),
-                  "======= STDERR\n",
-                  "=====================================\n",
-                  e,
-                  "\n\n"
-        ]
+            elines = ["=====================================\n",
+                      "======= CMD: %s\n"%(" ".join(cmd)),
+                      "======= STDOUT\n",
+                      "=====================================\n",
+                      o,
+                      "\n\n"
+            ]
 
-        self.log += olines
-        self.log += elines
+            elines = ["=====================================\n",
+                      "======= CMD: %s\n"%(" ".join(cmd)),
+                      "======= STDERR\n",
+                      "=====================================\n",
+                      e,
+                      "\n\n"
+            ]
 
-        msg = "UncleArchieTask: run_cmd(): Finished running command"
-        logging.debug(msg)
+            self.log += olines
+            self.log += elines
 
-        if "exception" in o.lower \
-        or "exception" in e.lower:
-            err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected exception [X]"
-            logging.error(err)
-            return True
+            msg = "UncleArchieTask: run_cmd(): Finished running command"
+            logging.debug(msg)
 
-        if "error" in o.lower \
-        or "error" in e.lower:
-            err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected error [X]"
-            logging.error(err)
-            return True
+            if "exception" in o.lower \
+            or "exception" in e.lower:
+                err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected exception [X]"
+                logging.error(err)
+                return True
 
-        return False
+            if "error" in o.lower \
+            or "error" in e.lower:
+                err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected error [X]"
+                logging.error(err)
+                return True
+
+            return False
 
 
     ######################################
@@ -359,7 +392,7 @@ class UncleArchieTask(object):
         for output files.
         """
         assert label!=None
-        return "%s_%s"%(label,dt)
+        return "%s_%s"%(label,self.dt)
 
 
     def save_payload(self,payload):
@@ -371,4 +404,11 @@ class UncleArchieTask(object):
         msg = "UncleArchieTask: save_payload(): Finished saving payload to file %s"%(self.payload_log)
         logging.debug(msg)
 
+
+class LoggingTask(UncleArchieTask):
+    LABEL = "logging task"
+    def run(self,payload,meta,config):
+        msg = "LoggingTask: run(): Received a payload:\n"
+        msg += pprint.pformat(payload,indent=4)
+        logging.debug(msg)
 

@@ -1,5 +1,7 @@
 from .base import UncleArchieTask
+import re
 import logging
+import pprint
 
 class GithubTask(UncleArchieTask):
     """
@@ -10,42 +12,58 @@ class GithubTask(UncleArchieTask):
         This performs the initialization procedure
         for Github-related Uncle Archie tasks.
 
-        Remember, we run every hook with every payload,
-        so process_payload() is where we have to decide
-        whether to run this test (i.e. check if the repo in
-        this payload is on the whitelist).
+        Remember, we run every Task with every payload,
+        so Task.run() is where we validate the payload 
+        to ensure we should be running that Task.
 
-        kwargs:
-            github_access_token :   (string) API access token
+        config vars:
             repo_whitelist :        (list) whitelisted Github repositories
         """
-        super.__init__(config,**kwargs)
+        super().__init__(config,**kwargs)
 
-        # Get API key and save it
-        if 'github_access_token' in kwargs:
-            self.token = kwargs.pop('github_access_token')
+        msg = "GithubTask: __init__(): Starting constructor"
+        logging.debug(msg)
+
+
+        # Get the API token when you actually need it, which
+        # is to say, in the run() function, which has the config
+        # variable avaiable. 
+        self.token = None
+
+
+        self.get_api_key(config)
+
+
+
+    def get_api_key(self,config):
+        """
+        Get the API key for the Github API instance
+        """
+        if 'GITHUB_ACCESS_TOKEN' in config:
+            self.token = config['GITHUB_ACCESS_TOKEN']
         else:
-            err = "ERROR: GithubTask: __init__(): kwarg github_access_token: "
-            err += "No Github API access token defined with 'github_access_token' kwarg"
+            err = "ERROR: GithubTask: __init__(): 'GITHUB_ACCESS_TOKEN' config variable: "
+            err += "No Github API access token defined with 'GITHUB_ACCESS_TOKEN'"
             logging.error(err)
+            logging.error("Config keys: %s"%(", ".join(sorted(list(config.keys())))))
             raise Exception(err)
 
-        # Get repo whitelist and save it
-        if 'repo_whitelist' in kwargs:
-            self.repo_whitelist = kwargs.pop('repo_whitelist')
-        else:
-            err = "ERROR: GithubTask: __init__(): kwarg repo_whitelist: "
-            err += "No Github whitelist defined with 'repo_whitelist' kwarg"
-            logging.error(err)
-            raise Exception(err)
+        msg = "  - Github API key: (FOUND) (hidden)"
+        logging.debug(msg)
 
 
     def get_api_instance(self):
         """
         Return a Github API instance (PyGithub object)
+            github_access_token :   (string) API access token
         """
-        g = Github(self.token)
-        return g
+        if self.token is None:
+            err = "ERROR: GithubTask: get_api_instance(): This method was "
+            err += "called before an API key was available via self.token\n"
+            err += "You are likely missing a call to GithubTask.get_api_key()"
+        else:
+            g = Github(self.token)
+            return g
 
 
     #######################################
@@ -56,10 +74,11 @@ class GithubTask(UncleArchieTask):
         """
         String: get a clone-able Github URL 
         for the repository in this payload
+        (Tested)
         """
-        if 'repository' in payloads.keys():
+        if 'repository' in payload.keys():
             if 'clone_url' in payload['repository'].keys():
-                return payloads['repository']['clone_url']
+                return payload['repository']['clone_url']
         return None
 
 
@@ -67,10 +86,11 @@ class GithubTask(UncleArchieTask):
         """
         String: get a clone-able SSH Github URL 
         for the repository in this payload
+        (Tested)
         """
-        if 'repository' in payloads.keys():
+        if 'repository' in payload.keys():
             if 'ssh_url' in payload['repository'].keys():
-                return payloads['repository']['ssh_url']
+                return payload['repository']['ssh_url']
         return None
 
 
@@ -78,16 +98,18 @@ class GithubTask(UncleArchieTask):
         """
         String: get an HTML url to the Github repo
         for the repository in this payload
+        (Tested)
         """
-        if 'repository' in payloads.keys():
+        if 'repository' in payload.keys():
             if 'html_url' in payload['repository'].keys():
-                return payloads['repository']['html_url']
+                return payload['repository']['html_url']
         return None
 
 
     def get_full_repo_name(self,payload):
         """
         String: full repo name: organization/reponame
+        (Tested)
         """
         if 'repository' in payload.keys():
             if 'full_name' in payload['repository'].keys():
@@ -98,6 +120,7 @@ class GithubTask(UncleArchieTask):
     def get_short_repo_name(self,payload):
         """
         String: short repo name
+        (Tested)
         """
         if 'repository' in payload.keys():
             if 'name' in payload['repository'].keys():
@@ -108,6 +131,7 @@ class GithubTask(UncleArchieTask):
     def get_pull_request_head_commit(self,payload):
         """
         String: head commit of this pull request
+        (Tested)
         """
         if self.is_pull_request(payload):
             return payload['pull_request']['head']['sha']
@@ -117,15 +141,48 @@ class GithubTask(UncleArchieTask):
     def get_pull_request_number(self,payload):
         """
         String: get id number of pull request
+        (Tested)
         """
         if self.is_pull_request(payload):
             return payload['number']
         return None
 
 
+    def has_commits(self,payload):
+        """
+        Boolean: are there commits contained in this webhook
+        """
+        if 'commits' in payload.keys():
+            return True
+        return False
+
+
+    def is_push(self,payload):
+        """
+        Boolean: is this a push event?
+        """
+        keys = ['ref','before','after','pusher']
+        for key in keys:
+            if key not in payload.keys():
+                return False
+        return True
+
+
+    def is_push_to_branch(self,payload,branch_name):
+        """
+        Boolean: is this a push event to the branch branch_name?
+        """
+        if is_push(payload):
+            ref = payload['ref']
+            if re.match(r'^%s$'%branch_name,ref):
+                return True
+        return False
+
+
     def is_pull_request(self,payload):
         """
         Boolean: is this webhook a PR?
+        (Tested)
         """
         if 'pull_request' in payload.keys():
             return True
@@ -135,6 +192,7 @@ class GithubTask(UncleArchieTask):
     def is_pull_request_open(self,payload):
         """
         Boolean: is this webhook opening a PR?
+        (Tested)
         """
         if 'action' in payload.keys():
             if payload['action']=='opened':
@@ -145,6 +203,7 @@ class GithubTask(UncleArchieTask):
     def is_pull_request_sync(self,payload):
         """
         Boolean: is this webhook syncing a PR?
+        (Tested)
         """
         if 'action' in payload.keys():
             if payload['action']=='synchronize':
@@ -155,6 +214,7 @@ class GithubTask(UncleArchieTask):
     def is_pull_request_close(self,payload):
         """
         Boolean: is this webhook closing a PR?
+        (Tested)
         """
         if 'action' in payload.keys():
             if payload['action']=='closed':
@@ -165,7 +225,9 @@ class GithubTask(UncleArchieTask):
     def is_pull_request_merge_commit(self,payload):
         """
         Boolean: does this webhook have a PR merge commit?
+        (Tested)
         """
+        # WRONG WRONG WRONG
         if self.is_pull_request(payload):
             if 'merge_commit_sha' in payload['pull_request']:
                 return True
@@ -235,7 +297,7 @@ class PyGithubTask(UncleArchieTask):
         common to all Uncle Archie tests that use
         Python in their task.
 
-        kwargs:
+        config vars:
             vp_label :  What to call the virtual environment
             vp_dir :    (cwd = curr. working dir) the location 
                         of the virtual environment
@@ -246,8 +308,8 @@ class PyGithubTask(UncleArchieTask):
 
         # Get virtual environment label 
         # from config or use default
-        if 'venv_label' in config.keys():
-            self.venv_label = config['venv_label']
+        if 'VENV_LABEL' in config.keys():
+            self.venv_label = config['VENV_LABEL']
         else:
             self.venv_label = VENV_LABEL
 
@@ -292,7 +354,7 @@ class PyGithubTask(UncleArchieTask):
         Tear down a virtual environment.
         Called by the destructor.
         
-        kwargs:
+        config vars:
             None
         """
         msg = "PyGithubTask: virtualenv_teardown(): Removing virtual environment at \"%s\" "%(self.vp_dir)
