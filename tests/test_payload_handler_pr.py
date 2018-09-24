@@ -31,7 +31,7 @@ class test_pr_payload_handler(payload_handler_base):
     """
     def test_pr(self):
         """
-        Test that the webhook server correctly processes PR webhooks
+        Test that the PR payload handler correctly processes PR webhooks
         """
         log_statements = [
                 'Is pull request open? False',
@@ -54,7 +54,7 @@ class test_pr_payload_handler(payload_handler_base):
 
     def test_new_branch(self):
         """
-        Test that the webhook server correctly processes new branch webhooks
+        Test that the PR payload handler correctly processes new branch webhooks
         """
         log_statements = [
                 "This is not a pull request payload",
@@ -67,7 +67,7 @@ class test_pr_payload_handler(payload_handler_base):
 
     def test_pr_close(self):
         """
-        Test that the webhook server correctly processes close PR webhooks
+        Test that the PR payload handler correctly processes close PR webhooks
         """
         log_statements = [
                 "Is pull request open? False",
@@ -90,7 +90,7 @@ class test_pr_payload_handler(payload_handler_base):
 
     def test_pr_commit_to_master(self):
         """
-        Test that the webhook server correctly processes commit to master webhooks
+        Test that the PR payload handler correctly processes commit to master webhooks
         """
         log_statements = [
                 "This is not a pull request payload",
@@ -103,7 +103,7 @@ class test_pr_payload_handler(payload_handler_base):
     
     def test_pr_sync(self):
         """
-        Test that the webhook server correctly processes PR sync webhooks
+        Test that the PR payload handler correctly processes PR sync webhooks
         """
         log_statements = [
                 "Is pull request open? False",
