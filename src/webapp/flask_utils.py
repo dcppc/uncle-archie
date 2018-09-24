@@ -6,6 +6,7 @@ import requests
 import os, sys
 import json
 import logging
+import pprint
 
 ##############################################
 # Flask utility functions
@@ -56,6 +57,7 @@ def enforce_secret(config,request):
 
         if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
             logging.error(' XXXXXXXX A webhook with an invalid secret was received.')
+            logging.error(pprint.pformat(payload,indent=4))
             abort(403)
 
 
