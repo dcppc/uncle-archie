@@ -3,6 +3,7 @@ import os
 import shutil
 import tempfile
 import subprocess
+from subprocess import PIPE
 import datetime
 import logging
 

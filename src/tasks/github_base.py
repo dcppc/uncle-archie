@@ -174,7 +174,7 @@ class GithubTask(UncleArchieTask):
         """
         if is_push(payload):
             ref = payload['ref']
-            if re.match(r'%s$'%branch_name,ref):
+            if re.match(r'^%s$'%branch_name,ref):
                 return True
         return False
 
