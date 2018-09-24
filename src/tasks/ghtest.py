@@ -4,6 +4,9 @@ import logging
 
 
 class GithubTestTask(GithubTask):
+    """
+    This task runs a test of every Github boolean test method
+    """
     def run(self,payload,meta,config):
         pr_is_open = self.is_pull_request_open(payload)
         msg = "%s: run(): Is pull request open? %s"%(self.__class__.__name__,pr_is_open)
@@ -50,8 +53,10 @@ class GithubTestTask(GithubTask):
         logging.debug(msg)
 
 
-
 class TestPRTask(GithubTestTask):
+    """
+    This task tests if this is a pull request payload
+    """
     LABEL = "PR test task"
     def run(self,payload,meta,config):
         # This test checks PR webhooks only
@@ -62,7 +67,11 @@ class TestPRTask(GithubTestTask):
         else:
             super().run(payload,meta,config)
 
-class TestMergeCommitTask(GithubTestTask):
+
+class TestPRMCTask(GithubTestTask):
+    """
+    Task to test if this is a pull request merge commit payload
+    """
     LABEL = "merge commit test task"
     def run(self,payload,meta,config):
         # This test checks merge commit webhooks only
@@ -73,14 +82,4 @@ class TestMergeCommitTask(GithubTestTask):
         else:
             super().run(payload,meta,config)
 
-class TestNewBranchTask(GithubTestTask):
-    LABEL = "new branch test task"
-    def run(self,payload,meta,config):
-        # This test checks PR webhooks only
-        if not self.is_pull_request_merge_commit(payload):
-            msg = "TestNewBranchTask: run(): This is not a new branch commit payload"
-            logging.debug(msg)
-            return
-        else:
-            super().run(payload,meta,config)
 
