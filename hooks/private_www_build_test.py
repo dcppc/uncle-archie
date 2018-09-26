@@ -30,9 +30,14 @@ def process_payload(payload, meta, config):
     # Set parameters for the PR builder
     params = {
             'repo_whitelist' : ['dcppc/private-www'],
-            'task_name' : 'Uncle Archie private-www Build Test',
-            'pass_msg' : 'The private-www build test passed!',
-            'fail_msg' : 'The private-www build test failed.',
+
+            'build_task_name' : 'Uncle Archie private-www Build Test',
+            'build_pass_msg' : 'The private-www build test passed!',
+            'build_fail_msg' : 'The private-www build test failed.',
+
+            'htdocs_task_name' : 'Uncle Archie private-www Htdocs Serve',
+            'htdocs_pass_msg' : 'The private-www htdocs are served!',
+            'htdocs_fail_msg' : 'The private-www htdocs could not be served.',
     }
 
     # This must be a pull request
@@ -82,15 +87,20 @@ def process_payload(payload, meta, config):
 
     unique = datetime.now().strftime("%Y%m%d%H%M%S")
     unique_filename = "private_www_build_test_%s"%(unique)
+    unique_htdocs   = "private_www_build_test_%s_htdocs"%(unique)
 
 
     ######################
     # logic. noise.
     ######################
 
-    # Fail by default!
+    # Build: fail by default!
     build_status = "fail"
     build_msg = "" # if blank at the end, use the default
+
+    # Serving htdocs: fail by default!
+    htdocs_status = "fail"
+    htdocs_msg = ""
 
 
     ######################
@@ -178,26 +188,40 @@ def process_payload(payload, meta, config):
             # the only test that mattered, passed
             build_status = "pass"
 
+    if not abort:
+        htdocs_dir = serve_htdocs_output(repo_dir,unique_htdocs)
+        
     # end snakemake build
     # -----------------------------------------------
 
+    status_url_base = "https://archie.nihdatacommons.us/output/"
+    status_url_log = "https://archie.nihdatacommons.us/output/%s"%(status_file)
+    status_url_www = "https://archie.nihdatacommons.us/output/%s"%(htdocs_dir)
 
-    # This is where we add a second status update 
-    # and copy the mkdocs output to the htdocs dir
-
-    status_url = "https://archie.nihdatacommons.us/output/%s"%(status_file)
-
+    
     if build_status == "pass":
 
         if build_msg == "":
-            build_msg = params['pass_msg']
+            build_msg = params['build_pass_msg']
+        if htdocs_msg == "":
+            htdocs_msg = params['htdocs_pass_msg']
 
         try:
             commit_status = c.create_status(
                             state = "success",
                             target_url = status_url,
                             description = build_msg,
-                            context = params['task_name']
+                            context = params['build_task_name']
+            )
+        except GithubException as e:
+            logging.info("Github error: commit status failed to update.")
+
+        try:
+            commit_status = c.create_status(
+                            state = "success",
+                            target_url = status_url,
+                            description = htdocs_msg,
+                            context = params['htdocs_task_name']
             )
         except GithubException as e:
             logging.info("Github error: commit status failed to update.")
@@ -206,20 +230,23 @@ def process_payload(payload, meta, config):
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
-        logging.info("    Link %s"%status_url)
+        logging.info("    Output Log Link %s"%status_url_log)
+        logging.info("    Htdocs Serve Link %s"%status_url_www)
         return
 
     elif build_status == "fail":
 
         if build_msg == "":
-            build_msg = params['fail_msg']
+            build_msg = params['build_fail_msg']
+        if htdocs_msg == "":
+            htdocs_msg = params['htdocs_pass_msg']
 
         try:
             commit_status = c.create_status(
                             state = "failure",
                             target_url = status_url,
                             description = build_msg,
-                            context = params['task_name']
+                            context = params['build_task_name']
             )
         except GithubException as e:
             logging.info("Github error: commit status failed to update.")
@@ -228,8 +255,28 @@ def process_payload(payload, meta, config):
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
-        logging.info("    Link %s"%status_url)
+        logging.info("    Output Log Link %s"%status_url)
         return
+
+
+
+def serve_htdocs_output(cwd_dir,unique_htdocs):
+    """
+    Given a folder name unique_htdocs containing
+    the htdocs directory from this mkdocs run,
+    """
+    output_path = os.path.join(HTDOCS,'output')
+    output_file = os.path.join(output_path,unique_htdocs)
+
+    try:
+        subprocess.call(['mv','site',output_file],
+                    cwd=cwd_dir)
+    except:
+        err = "Error moving site/ to %s"%(output_file)
+        logging.error(err)
+        raise Exception(err)
+
+    return unique_htdocs
 
 
 
@@ -237,11 +284,15 @@ def record_and_check_output(proc,label,unique_filename):
     """
     Given a process, get the stdout and stderr streams
     and record them in an output file that can be provided
-    to users as a link. Also return a boolean on whether
-    there was a problem with the process.
-
+    to users as a link. 
+    
     Run this function on the last/most important step
     in your CI test. 
+
+    Returns:
+
+    status_failed       Boolean: did status fail?
+    status_file         String: filename where log is located
     """ 
     output_path = os.path.join(HTDOCS,'output')
     output_file = os.path.join(output_path,unique_filename)
