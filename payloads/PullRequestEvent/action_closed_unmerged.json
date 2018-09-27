@@ -37,7 +37,6 @@
         "created_at": "2018-09-04T20:48:54Z",
         "updated_at": "2018-09-04T20:49:20Z",
         "closed_at": "2018-09-04T20:49:19Z",
-        "merged_at": "2018-09-04T20:49:19Z",
         "merge_commit_sha": "840a2481f55748cf2d01937e7534ca3228f91200",
         "assignee": null,
         "assignees": [],
@@ -325,30 +324,10 @@
             }
         },
         "author_association": "OWNER",
-        "merged": true,
+        "merged": false,
         "mergeable": null,
         "rebaseable": null,
         "mergeable_state": "unknown",
-        "merged_by": {
-            "login": "charlesreid1",
-            "id": 368075,
-            "node_id": "MDQ6VXNlcjM2ODA3NQ==",
-            "avatar_url": "https://avatars3.githubusercontent.com/u/368075?v=4",
-            "gravatar_id": "",
-            "url": "https://api.github.com/users/charlesreid1",
-            "html_url": "https://github.com/charlesreid1",
-            "followers_url": "https://api.github.com/users/charlesreid1/followers",
-            "following_url": "https://api.github.com/users/charlesreid1/following{/other_user}",
-            "gists_url": "https://api.github.com/users/charlesreid1/gists{/gist_id}",
-            "starred_url": "https://api.github.com/users/charlesreid1/starred{/owner}{/repo}",
-            "subscriptions_url": "https://api.github.com/users/charlesreid1/subscriptions",
-            "organizations_url": "https://api.github.com/users/charlesreid1/orgs",
-            "repos_url": "https://api.github.com/users/charlesreid1/repos",
-            "events_url": "https://api.github.com/users/charlesreid1/events{/privacy}",
-            "received_events_url": "https://api.github.com/users/charlesreid1/received_events",
-            "type": "User",
-            "site_admin": false
-        },
         "comments": 0,
         "review_comments": 0,
         "maintainer_can_modify": false,
@@ -477,4 +456,5 @@
         "site_admin": false
     }
 }
+
 

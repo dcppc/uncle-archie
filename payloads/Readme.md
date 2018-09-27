@@ -58,10 +58,15 @@ Actions:
 
 if action is "closed":
 
-* if "closed" and merge key is false, 
+* if "closed" and merged key is false, 
   PR was closed w/ unmerged commits.
-* if "closed" and merge key is true,
+* if "closed" and merged key is true,
   PR was merged
+
+
+TODO: We need to get an unmerged PR closed
+webhook, because we are just guessing at it.
+we had to manufacture our own.
 
 
 ## PullRequestReviewEvent
