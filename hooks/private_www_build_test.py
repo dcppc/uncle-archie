@@ -18,6 +18,9 @@ Otherwise the commit is marked as failed.
 
 HTDOCS="/www/archie.nihdatacommons.us/htdocs"
 
+OUTPUT_LOGS="output/logs"
+OUTPUT_HTDOCS="output/htdocs"
+
 def process_payload(payload, meta, config):
     """
     Look for events that are pull requests being opened or updated. 
@@ -290,7 +293,7 @@ def serve_htdocs_output(cwd_dir,unique_htdocs):
     Given a folder name unique_htdocs containing
     the htdocs directory from this mkdocs run,
     """
-    output_path = os.path.join(HTDOCS,'output','htdocs')
+    output_path = os.path.join(HTDOCS,OUTPUT_HTDOCS)
     output_file = os.path.join(output_path,unique_htdocs)
 
     if not os.path.exists(output_path):
@@ -326,7 +329,7 @@ def record_and_check_output(proc,label,unique_filename,ignore_text=None):
     status_failed       Boolean: did status fail?
     status_file         String: filename where log is located
     """ 
-    output_path = os.path.join(HTDOCS,'output','logs')
+    output_path = os.path.join(HTDOCS,OUTPUT_LOGS)
     output_file = os.path.join(output_path,unique_filename)
 
     if not os.path.exists(output_path):
