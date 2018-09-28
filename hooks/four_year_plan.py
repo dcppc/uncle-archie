@@ -73,12 +73,7 @@ def process_payload(payload, meta, config):
     logging.info("Starting four-year-plan build test build")
 
     # Strategy:
-    # * This will _always_ use four-year-plan  as the build repo
-    # * This will _always_ clone recursively
-    # * This will _only_ update the submodule of interest,
-    #   to the head commit of the pull request.
-    # * This will run mkdocs on the entire four-year-plan site.
-
+    # * This will run mkdocs on the four-year-plan site.
 
     unique = datetime.now().strftime("%Y%m%d%H%M%S")
     unique_filename = "four_year_plan_build_test_%s"%(unique)
@@ -149,20 +144,6 @@ def process_payload(payload, meta, config):
             build_status = "fail"
             abort = True
 
-    # In case of new submodule
-    if not abort:
-        sucmd = ['git','submodule','update','--init']
-        suproc = subprocess.Popen(
-                sucmd,
-                stdout=PIPE, 
-                stderr=PIPE, 
-                cwd=repo_dir
-        )
-        status_failed, status_file = record_and_check_output(suproc,"submodule update",unique_filename)
-        if status_failed:
-            build_status = "fail"
-            abort = True
-
     if not abort:
         buildcmd = ['snakemake','--nocolor','build']
         buildproc = subprocess.Popen(
@@ -185,7 +166,7 @@ def process_payload(payload, meta, config):
     # This is where we add a second status update 
     # and copy the mkdocs output to the htdocs dir
 
-    status_url = "https://archie.nihdatacommons.us/output/%s"%(status_file)
+    status_url = "https://archie.nihdatacommons.us/output/logs/%s"%(status_file)
 
     if build_status == "pass":
 
@@ -200,7 +181,7 @@ def process_payload(payload, meta, config):
                             context = params['task_name']
             )
         except GithubException as e:
-            logging.info("Github error: commit status failed to update.")
+            logging.exception("Github error: failed to mark commit status as success.")
 
         logging.info("four-year-plan build test succes:")
         logging.info("    Commit %s"%head_commit)
@@ -222,7 +203,7 @@ def process_payload(payload, meta, config):
                             context = params['task_name']
             )
         except GithubException as e:
-            logging.info("Github error: commit status failed to update.")
+            logging.exception("Github error: failed to mark commit status as failure.")
 
         logging.info("four-year-plan build test failure:")
         logging.info("    Commit %s"%head_commit)
@@ -243,8 +224,11 @@ def record_and_check_output(proc,label,unique_filename):
     Run this function on the last/most important step
     in your CI test. 
     """ 
-    output_path = os.path.join(HTDOCS,'output')
+    output_path = os.path.join(HTDOCS,'output','logs')
     output_file = os.path.join(output_path,unique_filename)
+
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
 
     out = proc.stdout.read().decode('utf-8')
     err = proc.stderr.read().decode('utf-8')
