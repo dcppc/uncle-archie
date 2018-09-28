@@ -72,6 +72,9 @@ def process_payload(payload, meta, config):
     r = g.get_repo(full_repo_name)
     c = r.get_commit(head_commit)
 
+    gitc = c.commit
+    commit_message = gitc.message
+
     # -----------------------------------------------
     # start private-www build test with snakemake
 
@@ -139,7 +142,12 @@ def process_payload(payload, meta, config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    status_failed, status_file = record_and_check_output(cloneproc,"git clone",unique_filename)
+    status_failed, status_file = record_and_check_output(
+            cloneproc,
+            "git clone",
+            unique_filename,
+            ignore_text=commit_message
+    )
     if status_failed:
         build_status = "fail"
         abort = True
@@ -154,7 +162,12 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
+        status_failed, status_file = record_and_check_output(
+                coproc,
+                "git checkout",
+                unique_filename,
+                ignore_text=commit_message
+        )
         if status_failed:
             build_status = "fail"
             abort = True
@@ -168,7 +181,12 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        status_failed, status_file = record_and_check_output(suproc,"submodule update",unique_filename)
+        status_failed, status_file = record_and_check_output(
+                suproc,
+                "submodule update",
+                unique_filename,
+                ignore_text=commit_message
+        )
         if status_failed:
             build_status = "fail"
             abort = True
@@ -181,7 +199,12 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        status_failed, status_file = record_and_check_output(buildproc,"snakemake build",unique_filename)
+        status_failed, status_file = record_and_check_output(
+                buildproc,
+                "snakemake build",
+                unique_filename,
+                ignore_text=commit_message
+        )
         if status_failed:
             build_status = "fail"
         else:
@@ -284,7 +307,7 @@ def serve_htdocs_output(cwd_dir,unique_htdocs):
 
 
 
-def record_and_check_output(proc,label,unique_filename):
+def record_and_check_output(proc,label,unique_filename,ignore_text=None):
     """
     Given a process, get the stdout and stderr streams
     and record them in an output file that can be provided
@@ -292,6 +315,10 @@ def record_and_check_output(proc,label,unique_filename):
     
     Run this function on the last/most important step
     in your CI test. 
+
+    ignore_text is a string that should be stripped out of 
+    the output to prevent it from accidentally triggering 
+    the "error" or "exception" detector.
 
     Returns:
 
@@ -309,6 +336,12 @@ def record_and_check_output(proc,label,unique_filename):
 
     lout = out.lower()
     lerr = err.lower()
+
+    # Strip out ignore_text
+    if ignore_text not None:
+        lout = re.sub(ignore_text,'',lout)
+        lerr = re.sub(ignore_text,'',lerr)
+
 
     lines = [ "======================\n",
               "======= STDOUT =======\n",
