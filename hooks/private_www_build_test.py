@@ -96,6 +96,9 @@ def process_payload(payload, meta, config):
     unique_filename = "private_www_build_test_%s"%(unique)
     unique_htdocs   = "private_www_build_test_%s_htdocs"%(unique)
 
+    status_url_log = "https://archie.nihdatacommons.us/output/log/%s"%(status_file)
+    status_url_www = "https://archie.nihdatacommons.us/output/htdocs/%s"%(htdocs_dir)
+
 
     ######################
     # logic. noise.
@@ -196,6 +199,29 @@ def process_payload(payload, meta, config):
             abort = True
 
     if not abort:
+
+        # Here.... we need to adjust mkdocs.yml 
+        # set the site_url variable to the output/htdocs url
+        # that way the test site will interlink
+
+        mkdocs_pre = []
+        mkdocs_dot_yml = os.path.join(repo_dir,'mkdocs.yml')
+
+        with open(mkdocs_dot_yml,'r') as f:
+            mkdocs_pre = f.readlines()
+
+        mkdocs_post = []
+        for line in mkdocs_pre:
+            if 'site_url' in line:
+                mkdocs_post.append("site_url: %s"%(status_url_www))
+            else:
+                mkdocs_post.append(line)
+
+        with open(mkdocs_dot_yml,'w') as f:
+            f.write("\n".join(mkdocs_post))
+
+
+    if not abort:
         buildcmd = ['snakemake','--nocolor','build_docs']
         buildproc = subprocess.Popen(
                 buildcmd, 
@@ -221,8 +247,6 @@ def process_payload(payload, meta, config):
     # end snakemake build
     # -----------------------------------------------
 
-    status_url_log = "https://archie.nihdatacommons.us/output/log/%s"%(status_file)
-    status_url_www = "https://archie.nihdatacommons.us/output/htdocs/%s"%(htdocs_dir)
 
     
     if build_status == "pass":
