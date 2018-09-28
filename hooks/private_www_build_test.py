@@ -194,9 +194,8 @@ def process_payload(payload, meta, config):
     # end snakemake build
     # -----------------------------------------------
 
-    status_url_base = "https://archie.nihdatacommons.us/output/"
-    status_url_log = "https://archie.nihdatacommons.us/output/%s"%(status_file)
-    status_url_www = "https://archie.nihdatacommons.us/output/%s"%(htdocs_dir)
+    status_url_log = "https://archie.nihdatacommons.us/output/log/%s"%(status_file)
+    status_url_www = "https://archie.nihdatacommons.us/output/htdocs/%s"%(htdocs_dir)
 
     
     if build_status == "pass":
@@ -206,20 +205,22 @@ def process_payload(payload, meta, config):
         if htdocs_msg == "":
             htdocs_msg = params['htdocs_pass_msg']
 
+        # build task status 
         try:
             commit_status = c.create_status(
                             state = "success",
-                            target_url = status_url,
+                            target_url = status_url_log,
                             description = build_msg,
                             context = params['build_task_name']
             )
         except GithubException as e:
             logging.info("Github error: commit status failed to update.")
 
+        # htdocs hosting task status 
         try:
             commit_status = c.create_status(
                             state = "success",
-                            target_url = status_url,
+                            target_url = status_url_www,
                             description = htdocs_msg,
                             context = params['htdocs_task_name']
             )
@@ -265,8 +266,11 @@ def serve_htdocs_output(cwd_dir,unique_htdocs):
     Given a folder name unique_htdocs containing
     the htdocs directory from this mkdocs run,
     """
-    output_path = os.path.join(HTDOCS,'output')
+    output_path = os.path.join(HTDOCS,'output','htdocs')
     output_file = os.path.join(output_path,unique_htdocs)
+
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
 
     try:
         subprocess.call(['mv','site',output_file],
@@ -294,8 +298,11 @@ def record_and_check_output(proc,label,unique_filename):
     status_failed       Boolean: did status fail?
     status_file         String: filename where log is located
     """ 
-    output_path = os.path.join(HTDOCS,'output')
+    output_path = os.path.join(HTDOCS,'output','logs')
     output_file = os.path.join(output_path,unique_filename)
+
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
 
     out = proc.stdout.read().decode('utf-8')
     err = proc.stderr.read().decode('utf-8')
