@@ -144,6 +144,8 @@ def process_payload(payload, meta, config):
         # was updated from the payload (repo_name)
         repo_dir = os.path.join(scratch_dir, "private-www")
 
+        # Submodule remap:
+        # {'dcppc-workshops':'workshops'}
         if repo_name == 'dcppc-workshops':
             submodule_dir_relative = os.path.join('docs','workshops')
         else:

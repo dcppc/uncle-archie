@@ -146,6 +146,9 @@ def process_payload(payload, meta, config):
     # get the API token
     token = config['github_access_token']
 
+    # note: this needs to parameterize
+    # the base branch name instead of
+    # hard-coding master...
     clonecmd = ['git','clone','--recursive','-b','master',parent_repo_url]
     logging.debug("Running cmd: %s"%(' '.join(clonecmd)))
     cloneproc = subprocess.Popen(
