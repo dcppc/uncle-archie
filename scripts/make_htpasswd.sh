@@ -66,6 +66,9 @@ else
     echo "Creating .htpasswd file..."
     echo "STEP 1: Preparing to set username"
 
+    rm -f .htpasswd
+    touch .htpasswd
+
     # Username is always "archie"
     echo -n 'archie:' >> .htpasswd
 
@@ -79,11 +82,14 @@ else
     echo "STEP 3: Preparing to copy .htpasswd file into place."
 
     # Move the .htpasswd file into place
-    if [ -f /etc/nginx/ ]; then
+    if [ -d /etc/nginx ]; then
+        echo "STEP 3: Copying .htpasswd file."
         sudo mv .htpasswd /etc/nginx/.htpasswd
+        echo "STEP 3: .htpasswd file has been moved into place."
+    else
+        echo "STEP 3: Failed to find /etc/nginx, file could not be copied."
     fi
 
-    echo "STEP 3: .htpasswd file has been moved into place."
 
     final
 fi
