@@ -324,8 +324,10 @@ def serve_htdocs_output(cwd_dir,unique_htdocs):
         os.mkdir(output_path)
 
     try:
-        subprocess.call(['mv','site',output_file],
-                    cwd=cwd_dir)
+        subprocess.call(
+                ['mv','site/content',output_file],
+                cwd=cwd_dir
+        )
     except:
         err = "Error moving site/ to %s"%(output_file)
         logging.error(err)
