@@ -93,11 +93,11 @@ def process_payload(payload, meta, config):
 
 
     unique = datetime.now().strftime("%Y%m%d%H%M%S")
-    unique_filename = "private_www_build_test_%s"%(unique)
+    unique_filename = "private_www_build_test_%s.txt"%(unique)
     unique_htdocs   = "private_www_build_test_%s_htdocs"%(unique)
 
-    status_url_log = "https://archie.nihdatacommons.us/output/log/%s"%(status_file)
-    status_url_www = "https://archie.nihdatacommons.us/output/htdocs/%s"%(htdocs_dir)
+    status_url_log = "https://archie.nihdatacommons.us/output/log/%s"%(unique_filename)
+    status_url_www = "https://archie.nihdatacommons.us/output/htdocs/%s"%(unique_htdocs)
 
 
     ######################
@@ -324,8 +324,10 @@ def serve_htdocs_output(cwd_dir,unique_htdocs):
         os.mkdir(output_path)
 
     try:
-        subprocess.call(['mv','site',output_file],
-                    cwd=cwd_dir)
+        subprocess.call(
+                ['mv','site',output_file],
+                cwd=cwd_dir
+        )
     except:
         err = "Error moving site/ to %s"%(output_file)
         logging.error(err)
@@ -395,26 +397,5 @@ def record_and_check_output(proc,label,unique_filename,ignore_text=None):
         return True, unique_filename
 
     return False, unique_filename
-
-
-def check_for_errors(proc,label):
-    """
-    Given a process, get the stdout and stderr streams and look for
-    exceptions or errors.  Return a boolean whether there was a problem.
-    """ 
-    out = proc.stdout.read().decode('utf-8').lower()
-    err = proc.stderr.read().decode('utf-8').lower()
-
-    logging.info("Results from process %s:"%(label))
-    logging.info("%s"%(out))
-    logging.info("%s"%(err))
-
-    if "exception" in out or "exception" in err:
-        return True
-
-    if "error" in out or "error" in err:
-        return True
-
-    return False
 
 
