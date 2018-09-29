@@ -366,7 +366,7 @@ def record_and_check_output(proc,label,unique_filename,ignore_text=None):
     lerr = err.lower()
 
     # Strip out ignore_text
-    if ignore_text not None:
+    if ignore_text is not None:
         lout = re.sub(ignore_text,'',lout)
         lerr = re.sub(ignore_text,'',lerr)
 
