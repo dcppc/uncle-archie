@@ -19,7 +19,7 @@ Otherwise the commit is marked as failed.
 HTDOCS="/www/archie.nihdatacommons.us/htdocs"
 
 OUTPUT_LOGS="output/logs"
-OUTPUT_HTDOCS="output/htdocs"
+OUTPUT_SERVE="output/serve"
 
 def process_payload(payload, meta, config):
     """
@@ -39,9 +39,9 @@ def process_payload(payload, meta, config):
             'build_pass_msg' : 'The private-www build test passed!',
             'build_fail_msg' : 'The private-www build test failed.',
 
-            'htdocs_task_name' : 'Uncle Archie private-www Htdocs Serve',
-            'htdocs_pass_msg' : 'The private-www htdocs are served!',
-            'htdocs_fail_msg' : 'The private-www htdocs could not be served.',
+            'serve_task_name' : 'Uncle Archie private-www Site Hosting',
+            'serve_pass_msg' : 'The site is served!',
+            'serve_fail_msg' : 'The site could not be served.',
     }
 
     # This must be a pull request
@@ -94,10 +94,10 @@ def process_payload(payload, meta, config):
 
     unique = datetime.now().strftime("%Y%m%d%H%M%S")
     unique_filename = "private_www_build_test_%s.txt"%(unique)
-    unique_htdocs   = "private_www_build_test_%s_htdocs"%(unique)
+    unique_serve    = "private_www_build_test_%s_serve"%(unique)
 
     status_url_log = "https://archie.nihdatacommons.us/output/log/%s"%(unique_filename)
-    status_url_www = "https://archie.nihdatacommons.us/output/htdocs/%s"%(unique_htdocs)
+    status_url_www = "https://archie.nihdatacommons.us/output/serve/%s"%(unique_serve)
 
 
     ######################
@@ -108,9 +108,9 @@ def process_payload(payload, meta, config):
     build_status = "fail"
     build_msg = "" # if blank at the end, use the default
 
-    # Serving htdocs: fail by default!
-    htdocs_status = "fail"
-    htdocs_msg = ""
+    # Serving: fail by default!
+    serve_status = "fail"
+    serve_msg = ""
 
 
     ######################
@@ -201,7 +201,7 @@ def process_payload(payload, meta, config):
     if not abort:
 
         # Here.... we need to adjust mkdocs.yml 
-        # set the site_url variable to the output/htdocs url
+        # set the site_url variable to the output/serve url
         # that way the test site will interlink
 
         mkdocs_pre = []
@@ -242,7 +242,7 @@ def process_payload(payload, meta, config):
             build_status = "pass"
 
     if not abort:
-        htdocs_dir = serve_htdocs_output(repo_dir,unique_htdocs)
+        serve_dir = serve_htdocs_output(repo_dir,unique_serve)
         
     # end snakemake build
     # -----------------------------------------------
@@ -253,8 +253,8 @@ def process_payload(payload, meta, config):
 
         if build_msg == "":
             build_msg = params['build_pass_msg']
-        if htdocs_msg == "":
-            htdocs_msg = params['htdocs_pass_msg']
+        if serve_msg == "":
+            serve_msg = params['serve_pass_msg']
 
         # build task status 
         try:
@@ -267,31 +267,31 @@ def process_payload(payload, meta, config):
         except GithubException as e:
             logging.info("Github error: commit status failed to update.")
 
-        # htdocs hosting task status 
+        # serve task status 
         try:
             commit_status = c.create_status(
                             state = "success",
                             target_url = status_url_www,
-                            description = htdocs_msg,
-                            context = params['htdocs_task_name']
+                            description = serve_msg,
+                            context = params['serve_task_name']
             )
         except GithubException as e:
             logging.info("Github error: commit status failed to update.")
 
-        logging.info("private-www build test succes:")
+        logging.info("private-www build test success:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
         logging.info("    Output Log Link %s"%status_url_log)
-        logging.info("    Htdocs Serve Link %s"%status_url_www)
+        logging.info("    Serve Link %s"%status_url_www)
         return
 
     elif build_status == "fail":
 
         if build_msg == "":
             build_msg = params['build_fail_msg']
-        if htdocs_msg == "":
-            htdocs_msg = params['htdocs_pass_msg']
+        if serve_msg == "":
+            serve_msg = params['serve_fail_msg']
 
         try:
             commit_status = c.create_status(
@@ -312,13 +312,13 @@ def process_payload(payload, meta, config):
 
 
 
-def serve_htdocs_output(cwd_dir,unique_htdocs):
+def serve_htdocs_output(cwd_dir,unique_serve):
     """
     Given a folder name unique_htdocs containing
     the htdocs directory from this mkdocs run,
     """
-    output_path = os.path.join(HTDOCS,OUTPUT_HTDOCS)
-    output_file = os.path.join(output_path,unique_htdocs)
+    output_path = os.path.join(HTDOCS,OUTPUT_SERVE)
+    output_file = os.path.join(output_path,unique_serve)
 
     if not os.path.exists(output_path):
         os.mkdir(output_path)
@@ -329,11 +329,11 @@ def serve_htdocs_output(cwd_dir,unique_htdocs):
                 cwd=cwd_dir
         )
     except:
-        err = "Error moving site/ to %s"%(output_file)
+        err = "Error moving site/content/ to %s"%(output_file)
         logging.error(err)
         raise Exception(err)
 
-    return unique_htdocs
+    return unique_serve
 
 
 

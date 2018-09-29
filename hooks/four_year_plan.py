@@ -18,6 +18,9 @@ Otherwise the commit is marked as failed.
 
 HTDOCS="/www/archie.nihdatacommons.us/htdocs"
 
+OUTPUT_LOGS="output/logs"
+OUTPUT_SERVE="output/serve"
+
 def process_payload(payload, meta, config):
     """
     Look for events that are pull requests being opened or updated. 
@@ -30,9 +33,14 @@ def process_payload(payload, meta, config):
     # Set parameters for the PR builder
     params = {
             'repo_whitelist' : ['dcppc/four-year-plan'],
-            'task_name' : 'Uncle Archie four-year-plan Build Test',
-            'pass_msg' : 'The four-year-plan build test passed!',
-            'fail_msg' : 'The four-year-plan build test failed.',
+
+            'build_task_name' : 'Uncle Archie four-year-plan Build Test',
+            'build_pass_msg' : 'The four-year-plan build test passed!',
+            'build_fail_msg' : 'The four-year-plan build test failed.',
+
+            'serve_task_name' : 'Uncle Archie private-www Site Hosting',
+            'serve_pass_msg' : 'The site is served!',
+            'serve_fail_msg' : 'The site could not be served.',
     }
 
     # This must be a pull request
@@ -76,7 +84,8 @@ def process_payload(payload, meta, config):
     # * This will run mkdocs on the four-year-plan site.
 
     unique = datetime.now().strftime("%Y%m%d%H%M%S")
-    unique_filename = "four_year_plan_build_test_%s"%(unique)
+    unique_filename = "four_year_plan_%s"%(unique)
+    unique_serve    = "four_year_plan_%s_serve"%(unique)
 
 
     ######################
@@ -144,6 +153,30 @@ def process_payload(payload, meta, config):
             build_status = "fail"
             abort = True
 
+
+    if not abort:
+
+        # Here.... we need to adjust mkdocs.yml 
+        # set the site_url variable to the output/serve url
+        # that way the test site will interlink
+
+        mkdocs_pre = []
+        mkdocs_dot_yml = os.path.join(repo_dir,'mkdocs.yml')
+
+        with open(mkdocs_dot_yml,'r') as f:
+            mkdocs_pre = f.readlines()
+
+        mkdocs_post = []
+        for line in mkdocs_pre:
+            if 'site_url' in line:
+                mkdocs_post.append("site_url: %s"%(status_url_www))
+            else:
+                mkdocs_post.append(line)
+
+        with open(mkdocs_dot_yml,'w') as f:
+            f.write("\n".join(mkdocs_post))
+
+
     if not abort:
         buildcmd = ['snakemake','--nocolor','build']
         buildproc = subprocess.Popen(
@@ -159,12 +192,15 @@ def process_payload(payload, meta, config):
             # the only test that mattered, passed
             build_status = "pass"
 
+    if not abort:
+        serve_dir = serve_htdocs_output(repo_dir,unique_serve)
+
     # end snakemake build
     # -----------------------------------------------
 
 
     # This is where we add a second status update 
-    # and copy the mkdocs output to the htdocs dir
+    # and copy the mkdocs output to the serve dir
 
     status_url = "https://archie.nihdatacommons.us/output/logs/%s"%(status_file)
 
@@ -172,22 +208,37 @@ def process_payload(payload, meta, config):
 
         if build_msg == "":
             build_msg = params['pass_msg']
+        if serve_msg == "":
+            serve_msg = params['serve_pass_msg']
 
+        # build task status 
         try:
             commit_status = c.create_status(
                             state = "success",
-                            target_url = status_url,
+                            target_url = status_url_log,
                             description = build_msg,
-                            context = params['task_name']
+                            context = params['build_task_name']
             )
         except GithubException as e:
             logging.exception("Github error: failed to mark commit status as success.")
 
-        logging.info("four-year-plan build test succes:")
+        # serve task status 
+        try:
+            commit_status = c.create_status(
+                            state = "success",
+                            target_url = status_url_www,
+                            description = serve_msg,
+                            context = params['serve_task_name']
+            )
+        except GithubException as e:
+            logging.info("Github error: commit status failed to update.")
+
+        logging.info("four-year-plan build test success:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
-        logging.info("    Link %s"%status_url)
+        logging.info("    Output Log Link %s"%status_url_log)
+        logging.info("    Serve Link %s"%status_url_www)
         return
 
     elif build_status == "fail":
@@ -200,7 +251,7 @@ def process_payload(payload, meta, config):
                             state = "failure",
                             target_url = status_url,
                             description = build_msg,
-                            context = params['task_name']
+                            context = params['build_task_name']
             )
         except GithubException as e:
             logging.exception("Github error: failed to mark commit status as failure.")
@@ -209,8 +260,35 @@ def process_payload(payload, meta, config):
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
-        logging.info("    Link %s"%status_url)
+        logging.info("    Output Log Link %s"%status_url)
         return
+
+
+
+def serve_htdocs_output(cwd_dir,unique_serve):
+    """
+    Given a folder name unique_htdocs containing
+    the htdocs directory from this mkdocs run,
+    """
+    output_path = os.path.join(HTDOCS,OUTPUT_SERVE)
+    output_file = os.path.join(output_path,unique_serve)
+
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
+
+    try:
+        subprocess.call(
+                ['mv','site',output_file],
+                cwd=cwd_dir
+        )
+    except:
+        err = "Error moving site/ to %s"%(output_file)
+        logging.error(err)
+        raise Exception(err)
+
+    return unique_serve
+
+
 
 
 
