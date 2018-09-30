@@ -18,7 +18,7 @@ Otherwise the commit is marked as failed.
 
 HTDOCS="/www/archie.nihdatacommons.us/htdocs"
 
-OUTPUT_LOGS="output/logs"
+OUTPUT_LOG="output/log"
 OUTPUT_SERVE="output/serve"
 
 def process_payload(payload, meta, config):
@@ -75,6 +75,9 @@ def process_payload(payload, meta, config):
     r = g.get_repo(full_repo_name)
     c = r.get_commit(head_commit)
 
+    gitc = c.commit
+    commit_message = gitc.message
+
     # -----------------------------------------------
     # start four-year-plan build test with snakemake
 
@@ -84,17 +87,24 @@ def process_payload(payload, meta, config):
     # * This will run mkdocs on the four-year-plan site.
 
     unique = datetime.now().strftime("%Y%m%d%H%M%S")
-    unique_filename = "four_year_plan_%s"%(unique)
-    unique_serve    = "four_year_plan_%s_serve"%(unique)
+    unique_filename = "four_year_plan_build_test_%s"%(unique)
+    unique_serve    = "four_year_plan_serve_test_%s"%(unique)
+
+    status_url_log = "https://archie.nihdatacommons.us/output/log/%s"%(unique_filename)
+    status_url_www = "https://archie.nihdatacommons.us/output/serve/%s"%(unique_serve)
 
 
     ######################
     # logic. noise.
     ######################
 
-    # Fail by default!
+    # Build: fail by default!
     build_status = "fail"
     build_msg = "" # if blank at the end, use the default
+
+    # Serving: fail by default!
+    serve_status = "fail"
+    serve_msg = ""
 
 
     ######################
@@ -133,7 +143,12 @@ def process_payload(payload, meta, config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    status_failed, status_file = record_and_check_output(cloneproc,"git clone",unique_filename)
+    status_failed, status_file = record_and_check_output(
+            cloneproc,
+            "git clone",
+            unique_filename,
+            ignore_text=commit_message
+    )
     if status_failed:
         build_status = "fail"
         abort = True
@@ -148,7 +163,12 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
+        status_failed, status_file = record_and_check_output(
+                coproc,
+                "git checkout",
+                unique_filename,
+                ignore_text=commit_message
+        )
         if status_failed:
             build_status = "fail"
             abort = True
@@ -185,7 +205,12 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        status_failed, status_file = record_and_check_output(buildproc,"snakemake build",unique_filename)
+        status_failed, status_file = record_and_check_output(
+                buildproc,
+                "snakemake build",
+                unique_filename,
+                ignore_text=commit_message
+        )
         if status_failed:
             build_status = "fail"
         else:
@@ -199,15 +224,11 @@ def process_payload(payload, meta, config):
     # -----------------------------------------------
 
 
-    # This is where we add a second status update 
-    # and copy the mkdocs output to the serve dir
-
-    status_url = "https://archie.nihdatacommons.us/output/logs/%s"%(status_file)
 
     if build_status == "pass":
 
         if build_msg == "":
-            build_msg = params['pass_msg']
+            build_msg = params['build_pass_msg']
         if serve_msg == "":
             serve_msg = params['serve_pass_msg']
 
@@ -244,7 +265,9 @@ def process_payload(payload, meta, config):
     elif build_status == "fail":
 
         if build_msg == "":
-            build_msg = params['fail_msg']
+            build_msg = params['build_fail_msg']
+        if serve_msg == "":
+            serve_msg = params['serve_fail_msg']
 
         try:
             commit_status = c.create_status(
@@ -290,9 +313,7 @@ def serve_htdocs_output(cwd_dir,unique_serve):
 
 
 
-
-
-def record_and_check_output(proc,label,unique_filename):
+def record_and_check_output(proc,label,unique_filename,ignore_text=None):
     """
     Given a process, get the stdout and stderr streams
     and record them in an output file that can be provided
@@ -301,8 +322,17 @@ def record_and_check_output(proc,label,unique_filename):
 
     Run this function on the last/most important step
     in your CI test. 
+
+    ignore_text is a string that should be stripped out of 
+    the output to prevent it from accidentally triggering 
+    the "error" or "exception" detector.
+
+    Returns:
+
+    status_failed       Boolean: did status fail?
+    status_file         String: filename where log is located
     """ 
-    output_path = os.path.join(HTDOCS,'output','logs')
+    output_path = os.path.join(HTDOCS,OUTPUT_LOG)
     output_file = os.path.join(output_path,unique_filename)
 
     if not os.path.exists(output_path):
@@ -313,6 +343,12 @@ def record_and_check_output(proc,label,unique_filename):
 
     lout = out.lower()
     lerr = err.lower()
+
+    # Strip out ignore_text
+    if ignore_text is not None:
+        lout = re.sub(ignore_text,'',lout)
+        lerr = re.sub(ignore_text,'',lerr)
+
 
     lines = [ "======================\n",
               "======= STDOUT =======\n",
@@ -331,9 +367,6 @@ def record_and_check_output(proc,label,unique_filename):
     logging.info("%s"%(err))
     logging.info("Recorded in file %s"%(output_file))
 
-    # Here - we need to be more careful.
-    # Commit messages can contain exception or error.
-
     if "exception" in lout or "exception" in lerr:
         return True, unique_filename
 
@@ -341,26 +374,4 @@ def record_and_check_output(proc,label,unique_filename):
         return True, unique_filename
 
     return False, unique_filename
-
-
-def check_for_errors(proc,label):
-    """
-    Given a process, get the stdout and stderr streams and look for
-    exceptions or errors.  Return a boolean whether there was a problem.
-    """ 
-    out = proc.stdout.read().decode('utf-8').lower()
-    err = proc.stderr.read().decode('utf-8').lower()
-
-    logging.info("Results from process %s:"%(label))
-    logging.info("%s"%(out))
-    logging.info("%s"%(err))
-
-    if "exception" in out or "exception" in err:
-        return True
-
-    if "error" in out or "error" in err:
-        return True
-
-    return False
-
 

@@ -243,12 +243,12 @@ def process_payload(payload, meta, config):
 
     if not abort:
         serve_dir = serve_htdocs_output(repo_dir,unique_serve)
-        
+
     # end snakemake build
     # -----------------------------------------------
 
 
-    
+
     if build_status == "pass":
 
         if build_msg == "":
@@ -265,7 +265,7 @@ def process_payload(payload, meta, config):
                             context = params['build_task_name']
             )
         except GithubException as e:
-            logging.info("Github error: commit status failed to update.")
+            logging.exception("Github error: commit status failed to update.")
 
         # serve task status 
         try:
@@ -301,7 +301,7 @@ def process_payload(payload, meta, config):
                             context = params['build_task_name']
             )
         except GithubException as e:
-            logging.info("Github error: commit status failed to update.")
+            logging.exception("Github error: commit status failed to update.")
 
         logging.info("private-www build test failure:")
         logging.info("    Commit %s"%head_commit)
@@ -341,8 +341,9 @@ def record_and_check_output(proc,label,unique_filename,ignore_text=None):
     """
     Given a process, get the stdout and stderr streams
     and record them in an output file that can be provided
-    to users as a link. 
-    
+    to users as a link. Also return a boolean on whether
+    there was a problem with the process.
+
     Run this function on the last/most important step
     in your CI test. 
 
@@ -397,5 +398,4 @@ def record_and_check_output(proc,label,unique_filename,ignore_text=None):
         return True, unique_filename
 
     return False, unique_filename
-
 
