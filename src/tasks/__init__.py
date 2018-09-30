@@ -4,7 +4,6 @@ from .github_base import GithubTask, PyGithubTask
 
 # test Task types
 from .ghtest import TestPRTask
-from .ghtest import TestMergeCommitTask
 
 
 # dcppc Task types
@@ -22,7 +21,6 @@ __all__ = [
         'PyGithubTask',
 
         'TestPRTask',
-        'TestMergeCommitTask',
 
         'private_www_PR_builder',
         'private_www_deployer',

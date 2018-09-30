@@ -133,7 +133,7 @@ class GithubTask(UncleArchieTask):
         String: head commit of this pull request
         (Tested)
         """
-        if self.is_pull_request(payload):
+        if self.is_pr(payload):
             return payload['pull_request']['head']['sha']
         return None
 
@@ -143,7 +143,7 @@ class GithubTask(UncleArchieTask):
         String: get id number of pull request
         (Tested)
         """
-        if self.is_pull_request(payload):
+        if self.is_pr(payload):
             return payload['number']
         return None
 
@@ -179,20 +179,18 @@ class GithubTask(UncleArchieTask):
         return False
 
 
-    def is_pull_request(self,payload):
+    def is_pr(self,payload):
         """
         Boolean: is this webhook a PR?
-        (Tested)
         """
         if 'pull_request' in payload.keys():
             return True
         return False
 
 
-    def is_pull_request_open(self,payload):
+    def is_pr_opened(self,payload):
         """
         Boolean: is this webhook opening a PR?
-        (Tested)
         """
         if 'action' in payload.keys():
             if payload['action']=='opened':
@@ -200,10 +198,9 @@ class GithubTask(UncleArchieTask):
         return False
 
 
-    def is_pull_request_sync(self,payload):
+    def is_pr_sync(self,payload):
         """
         Boolean: is this webhook syncing a PR?
-        (Tested)
         """
         if 'action' in payload.keys():
             if payload['action']=='synchronize':
@@ -211,7 +208,43 @@ class GithubTask(UncleArchieTask):
         return False
 
 
-    def is_pull_request_close(self,payload):
+    def is_pr_closed_merged(self,payload):
+        """
+        Boolean: is this webhook closing a PR by merging it?
+        """
+        if self.is_pr(payload):
+            if 'action' in payload.keys():
+                if payload['action']=='closed':
+                    if 'merged' in payload['pull_request']:
+                        if payload['pull_request']['merged'] is True:
+                            return True
+        return False
+
+
+    def is_pr_closed_unmerged(self,payload):
+        """
+        Boolean: is this webhook closing a PR *WITHOUT* merging it?
+        """
+        if self.is_pr(payload):
+            if 'action' in payload.keys():
+                if payload['action']=='closed':
+                    if 'merged' in payload['pull_request']:
+                        if payload['pull_request']['merged'] is False:
+                            return True
+        return False
+
+
+    def is_pr_closed(self,payload):
+        """
+        Boolean: is this webhook closing a PR?
+        """
+        if 'action' in payload.keys():
+            if payload['action']=='closed':
+                return True
+        return False
+
+
+    def is_pr_close(self,payload):
         """
         Boolean: is this webhook closing a PR?
         (Tested)
@@ -222,13 +255,13 @@ class GithubTask(UncleArchieTask):
         return False
 
 
-    def is_pull_request_merge_commit(self,payload):
+    def is_pr_merge_commit(self,payload):
         """
         Boolean: does this webhook have a PR merge commit?
         (Tested)
         """
         # WRONG WRONG WRONG
-        if self.is_pull_request(payload):
+        if self.is_pr(payload):
             if 'merge_commit_sha' in payload['pull_request']:
                 return True
         return False
