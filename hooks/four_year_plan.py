@@ -86,8 +86,8 @@ def process_payload(payload, meta, config):
     # Strategy:
     # * This will run mkdocs on the four-year-plan site.
 
-    unique = datetime.now().strftime("%Y%m%d%H%M%S")
-    unique_filename = "four_year_plan_build_test_%s"%(unique)
+    unique = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_filename = "four_year_plan_build_test_%s.txt"%(unique)
     unique_serve    = "four_year_plan_serve_test_%s"%(unique)
 
     status_url_log = "https://archie.nihdatacommons.us/output/log/%s"%(unique_filename)

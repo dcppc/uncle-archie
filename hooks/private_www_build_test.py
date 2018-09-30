@@ -92,7 +92,7 @@ def process_payload(payload, meta, config):
     # * This will run mkdocs on the entire private-www site.
 
 
-    unique = datetime.now().strftime("%Y%m%d%H%M%S")
+    unique = datetime.now().strftime("%Y%m%d_%H%M%S")
     unique_filename = "private_www_build_test_%s.txt"%(unique)
     unique_serve    = "private_www_build_test_%s_serve"%(unique)
 
