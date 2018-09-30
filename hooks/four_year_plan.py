@@ -38,7 +38,7 @@ def process_payload(payload, meta, config):
             'build_pass_msg' : 'The four-year-plan build test passed!',
             'build_fail_msg' : 'The four-year-plan build test failed.',
 
-            'serve_task_name' : 'Uncle Archie private-www Site Hosting',
+            'serve_task_name' : 'Uncle Archie four-year-plan Site Hosting',
             'serve_pass_msg' : 'The site is served!',
             'serve_fail_msg' : 'The site could not be served.',
     }
