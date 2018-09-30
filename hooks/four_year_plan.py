@@ -19,7 +19,7 @@ Otherwise the commit is marked as failed.
 HTDOCS="/www/archie.nihdatacommons.us/htdocs"
 
 OUTPUT_LOG="output/log"
-OUTPUT_SERVE="output/serve"
+OUTPUT_SERVE="output/4year"
 
 def process_payload(payload, meta, config):
     """
@@ -90,8 +90,8 @@ def process_payload(payload, meta, config):
     unique_filename = "four_year_plan_build_test_%s.txt"%(unique)
     unique_serve    = "four_year_plan_serve_test_%s"%(unique)
 
-    status_url_log = "https://archie.nihdatacommons.us/output/log/%s"%(unique_filename)
-    status_url_www = "https://archie.nihdatacommons.us/output/serve/%s"%(unique_serve)
+    status_url_log = "https://archie.nihdatacommons.us/%s/%s"%(OUTPUT_LOG,unique_filename)
+    status_url_www = "https://archie.nihdatacommons.us/%s/%s"%(OUTPUT_SERVE,unique_serve)
 
 
     ######################
