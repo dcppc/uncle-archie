@@ -1,20 +1,23 @@
 from .handlers import \
         BasePayloadHandler, \
         PRTestingPayloadHandler, \
-        MCTestingPayloadHandler, \
-        NBTestingPayloadHandler, \
-        LoggingPayloadHandler, \
-        DCPPCPayloadHandler
+        LoggingPayloadHandler
+
+from .dcppc import DCPPCPayloadHandler
 
 
 class PayloadHandlerFactory(object):
+    """
+    Given the string name of a payload handler,
+    the factory returns an instance of that
+    payload handler.
+    """
     payload_handlers = {
             'default': LoggingPayloadHandler,
             'pr_test': PRTestingPayloadHandler,
-            'mc_test': MCTestingPayloadHandler,
-            'nb_test': NBTestingPayloadHandler,
             'dcppc':   DCPPCPayloadHandler
     }
+
     def factory(self,handler_type,config,**kwargs):
         """
         Given a payload handler type 
