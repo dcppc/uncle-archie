@@ -3,11 +3,10 @@ import archie
 from .utils import \
         extract_payload, \
         post_pingpong_webhook, \
-        post_pr_webhook, \
-        post_new_branch_webhook, \
-        post_pr_close_webhook, \
-        post_pr_commit_to_master_webhook, \
-        post_pr_sync_webhook
+        post_pr_opened, \
+        post_pr_closed_merged, \
+        post_pr_closed_unmerged, \
+        post_pr_sync
 
 import logging
 import os, sys
@@ -26,7 +25,7 @@ class test_payload_server(unittest.TestCase):
         client = app.test_client()
         app.set_payload_handler('')
     
-        r = post_pr_webhook(client)
+        r = post_pr_opened(client)
         self.assertEqual(r.status_code,200)
     
     def test_ping_webhook(self):
