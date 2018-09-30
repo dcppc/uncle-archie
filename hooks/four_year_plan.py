@@ -198,7 +198,48 @@ def process_payload(payload, meta, config):
 
 
     if not abort:
-        buildcmd = ['snakemake','--nocolor','build']
+
+        # Set up the virtual environment
+        venv = ['virtualenv','vp']
+        venvproc = subprocess.Popen(
+                venv, 
+                stdout=PIPE,
+                stderr=PIPE, 
+                cwd=repo_dir
+        )
+        status_failed, status_file = record_and_check_output(
+                venvproc,
+                "virtualenv vp",
+                unique_filename,
+                ignore_text=commit_message
+        )
+        if status_failed:
+            build_status = "fail"
+            abort = True
+
+
+        # Install requirements.txt
+        srcvenv = ['vp/bin/pip','install','-r','requirements.txt']
+        srcvenvproc = subprocess.Popen(
+                srcvenv, 
+                stdout=PIPE,
+                stderr=PIPE, 
+                cwd=repo_dir
+        )
+        status_failed, status_file = record_and_check_output(
+                srcvenvproc,
+                "pip install",
+                unique_filename,
+                ignore_text=commit_message
+        )
+        if status_failed:
+            build_status = "fail"
+            abort = True
+
+
+
+    if not abort:
+        buildcmd = ['vp/bin/snakemake','--nocolor','build']
         buildproc = subprocess.Popen(
                 buildcmd, 
                 stdout=PIPE,
