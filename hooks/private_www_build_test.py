@@ -296,7 +296,7 @@ def process_payload(payload, meta, config):
         try:
             commit_status = c.create_status(
                             state = "failure",
-                            target_url = status_url,
+                            target_url = status_url_log,
                             description = build_msg,
                             context = params['build_task_name']
             )
