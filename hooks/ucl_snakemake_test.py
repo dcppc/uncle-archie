@@ -326,7 +326,7 @@ def process_payload(payload, meta, config):
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
-        logging.info("    Output Log Link %s"%status_url)
+        logging.info("    Output Log Link %s"%status_url_log)
         return
 
 
