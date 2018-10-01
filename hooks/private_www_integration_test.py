@@ -20,6 +20,9 @@ Otherwise the commit is marked as failed.
 
 HTDOCS="/www/archie.nihdatacommons.us/htdocs"
 
+OUTPUT_LOG="output/log"
+OUTPUT_SERVE="output/serve"
+
 def process_payload(payload, meta, config):
     """
     Look for events that are pull requests being opened or updated. 
@@ -78,7 +81,7 @@ def process_payload(payload, meta, config):
 
 
     unique = datetime.now().strftime("%Y%m%d%H%M%S")
-    unique_filename = "private_www_integration_test_%s"%(unique)
+    unique_filename = "private_www_integration_test_%s.txt"%(unique)
 
 
     ######################
