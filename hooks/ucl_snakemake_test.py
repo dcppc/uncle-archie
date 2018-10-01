@@ -184,7 +184,8 @@ def process_payload(payload, meta, config):
         # Adjust site_url in mkdocs.yml
 
         mkdocs_pre = []
-        mkdocs_dot_yml = os.path.join(repo_dir,'mkdocs.yml')
+        # unique for UCL
+        mkdocs_dot_yml = os.path.join(repo_dir,'templates','mkdocs.yml')
 
         with open(mkdocs_dot_yml,'r') as f:
             mkdocs_pre = f.readlines()
@@ -193,6 +194,8 @@ def process_payload(payload, meta, config):
         for line in mkdocs_pre:
             if 'site_url' in line:
                 mkdocs_post.append("site_url: %s"%(status_url_www))
+            elif 'base_url' in line:
+                mkdocs_post.append("base_url: %s"%(status_url_www))
             else:
                 mkdocs_post.append(line)
 
