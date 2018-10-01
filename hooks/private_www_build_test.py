@@ -276,7 +276,7 @@ def process_payload(payload, meta, config):
                             context = params['serve_task_name']
             )
         except GithubException as e:
-            logging.info("Github error: commit status failed to update.")
+            logging.exception("Github error: commit status failed to update.")
 
         logging.info("private-www build test success:")
         logging.info("    Commit %s"%head_commit)
@@ -334,7 +334,6 @@ def serve_htdocs_output(cwd_dir,unique_serve):
         raise Exception(err)
 
     return unique_serve
-
 
 
 def record_and_check_output(proc,label,unique_filename,ignore_text=None):

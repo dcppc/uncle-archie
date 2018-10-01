@@ -47,7 +47,7 @@ def process_payload(payload, meta, config):
     if ('pull_request' not in payload.keys()) or ('action' not in payload.keys()):
         return
 
-    # This must be a whitelisted repo
+    # This must be the four-year-plan repo
     repo_name = payload['repository']['name']
     full_repo_name = payload['repository']['full_name']
     if full_repo_name not in params['repo_whitelist']:
@@ -80,11 +80,7 @@ def process_payload(payload, meta, config):
 
     # -----------------------------------------------
     # start four-year-plan build test with snakemake
-
     logging.info("Starting four-year-plan build test build")
-
-    # Strategy:
-    # * This will run mkdocs on the four-year-plan site.
 
     unique = datetime.now().strftime("%Y%m%d_%H%M%S")
     unique_filename = "four_year_plan_build_test_%s.txt"%(unique)
@@ -173,12 +169,9 @@ def process_payload(payload, meta, config):
             build_status = "fail"
             abort = True
 
-
     if not abort:
 
-        # Here.... we need to adjust mkdocs.yml 
-        # set the site_url variable to the output/serve url
-        # that way the test site will interlink
+        # Adjust site_url in mkdocs.yml
 
         mkdocs_pre = []
         mkdocs_dot_yml = os.path.join(repo_dir,'mkdocs.yml')
@@ -263,7 +256,6 @@ def process_payload(payload, meta, config):
 
     # end snakemake build
     # -----------------------------------------------
-
 
 
     if build_status == "pass":
