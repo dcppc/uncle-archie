@@ -344,11 +344,11 @@ def serve_htdocs_output(cwd_dir,unique_serve):
 
     try:
         subprocess.call(
-                ['mv','site/content',output_file],
+                ['mv','output/site',output_file],
                 cwd=cwd_dir
         )
     except:
-        err = "Error moving site/content/ to %s"%(output_file)
+        err = "Error moving output/site to %s"%(output_file)
         logging.error(err)
         raise Exception(err)
 
