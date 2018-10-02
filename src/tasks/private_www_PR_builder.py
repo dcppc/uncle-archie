@@ -1,6 +1,7 @@
 from .github_base import PyGithubTask
 
 from urllib.parse import urljoin
+import logging
 import yaml
 
 class private_www_PR_builder(PyGithubTask):
@@ -79,6 +80,7 @@ class private_www_PR_builder(PyGithubTask):
             # build test: outcome of the snakemake build test
             # move results to htdocs dir
             self.build_test_url_prep(payload)
+
             # set commit status
             self.build_test_status_update(payload)
 

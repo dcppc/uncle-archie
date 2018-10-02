@@ -320,14 +320,19 @@ without Github, we can just define a new
 class.
 """
 
-class PyGithubTask(UncleArchieTask):
+class PyGithubTask(GithubTask):
     """
     Base class for a Python + Github test.
+    
+    Note that using virtual environments with subprocess
+    require specifying the path to the binary, rather than
+    running "source bin/activate" at the beginning of the
+    session.
     """
     def __init__(self,config,**kwargs):
         """
         This performs the initialization procedure
-        common to all Uncle Archie tests that use
+        common to all Github-related tests that use
         Python in their task.
 
         config vars:
