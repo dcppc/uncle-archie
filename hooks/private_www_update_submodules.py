@@ -189,6 +189,7 @@ def process_payload(payload, meta, config):
     # Make a branch and a PR 
     existing_pr_head = None
     if existing_pr_head is not None:
+        pass
 
     # ------------------------------------
     # Begin sync PR workflow 
