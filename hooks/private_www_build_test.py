@@ -321,7 +321,7 @@ def serve_htdocs_output(cwd_dir,unique_serve):
     output_file = os.path.join(output_path,unique_serve)
 
     if not os.path.exists(output_path):
-        os.mkdir(output_path)
+        subprocess.call(['mkdir','-p',output_path])
 
     try:
         subprocess.call(
@@ -359,7 +359,7 @@ def record_and_check_output(proc,label,unique_filename,ignore_text=None):
     output_file = os.path.join(output_path,unique_filename)
 
     if not os.path.exists(output_path):
-        os.mkdir(output_path)
+        subprocess.call(['mkdir','-p',output_path])
 
     out = proc.stdout.read().decode('utf-8')
     err = proc.stderr.read().decode('utf-8')
