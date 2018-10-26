@@ -378,6 +378,7 @@ def record_and_check_output(proc,label,unique_filename,ignore_text=None):
     output_file = os.path.join(output_path,unique_filename)
 
     if not os.path.exists(output_path):
+        logging.info('Creating output log path: %s'%(output_path))
         subprocess.call(['mkdir','-p',output_path])
 
     out = proc.stdout.read().decode('utf-8')
