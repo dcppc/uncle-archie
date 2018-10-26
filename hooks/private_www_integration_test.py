@@ -35,9 +35,14 @@ def process_payload(payload, meta, config):
     # Set parameters for the PR builder
     params = {
             'repo_whitelist' : ['dcppc/internal','dcppc/organize','dcppc/nih-demo-meetings','dcppc/dcppc-workshops'],
-            'task_name' : 'Uncle Archie private-www Integration Test',
-            'pass_msg' : 'The private-www integration test passed!',
-            'fail_msg' : 'The private-www integration test failed.',
+
+            'build_task_name' : 'Uncle Archie private-www Integration Test',
+            'build_pass_msg' : 'The private-www integration test passed!',
+            'build_fail_msg' : 'The private-www integration test failed.',
+
+            'serve_task_name' : 'Uncle Archie private-www Site Hosting',
+            'serve_pass_msg' : 'The site is served!',
+            'serve_fail_msg' : 'The site could not be served.',
     }
 
     # This must be a pull request
@@ -80,8 +85,12 @@ def process_payload(payload, meta, config):
     # * This will run mkdocs on the entire private-www site.
 
 
-    unique = datetime.now().strftime("%Y%m%d%H%M%S")
+    unique = datetime.now().strftime("%Y%m%d_%H%M%S")
     unique_filename = "private_www_integration_test_%s.txt"%(unique)
+    unique_serve    = "private_www_integration_test_%s_serve"%(unique)
+
+    status_url_log = "https://archie.nihdatacommons.us/output/log/%s"%(unique_filename)
+    status_url_www = "https://archie.nihdatacommons.us/output/serve/%s"%(unique_serve)
 
 
     ######################
@@ -136,15 +145,17 @@ def process_payload(payload, meta, config):
 
         # However, we do need to check out
         # a version of the submodule PR that 
-        # gtriggered this test.
+        # triggered this test.
 
         # Get the head commit of the PR that
         # triggered this test, and update the
         # appropriate submodule before running
         # snakemake build_docs
 
-        # Assemble submodule directory by determining which submdule
-        # was updated from the payload (repo_name)
+        # Assemble submodule directory by 
+        # determining which submodule was 
+        # updated. that info is in the 
+        # payload (repo_name)
         repo_dir = os.path.join(scratch_dir, "private-www")
 
         # Submodule remap:
@@ -183,6 +194,71 @@ def process_payload(payload, meta, config):
             build_status = "fail"
             abort = True
 
+
+    if not abort:
+
+        # Here.... we need to adjust mkdocs.yml 
+        # set the site_url variable to the output/serve url
+        # that way the test site will interlink
+
+        mkdocs_pre = []
+        mkdocs_dot_yml = os.path.join(repo_dir,'mkdocs.yml')
+
+        with open(mkdocs_dot_yml,'r') as f:
+            mkdocs_pre = f.readlines()
+
+        mkdocs_post = []
+        for line in mkdocs_pre:
+            if 'site_url' in line:
+                mkdocs_post.append("site_url: %s"%(status_url_www))
+            else:
+                mkdocs_post.append(line)
+
+        with open(mkdocs_dot_yml,'w') as f:
+            f.write("\n".join(mkdocs_post))
+
+
+
+    if not abort:
+
+        # Set up the virtual environment
+        venv = ['virtualenv','vp']
+        venvproc = subprocess.Popen(
+                venv, 
+                stdout=PIPE,
+                stderr=PIPE, 
+                cwd=repo_dir
+        )
+        status_failed, status_file = record_and_check_output(
+                venvproc,
+                "virtualenv vp",
+                unique_filename,
+                ignore_text=commit_message
+        )
+        if status_failed:
+            build_status = "fail"
+            abort = True
+
+        # Install requirements.txt
+        srcvenv = ['vp/bin/pip','install','-r','requirements.txt']
+        srcvenvproc = subprocess.Popen(
+                srcvenv, 
+                stdout=PIPE,
+                stderr=PIPE, 
+                cwd=repo_dir
+        )
+        status_failed, status_file = record_and_check_output(
+                srcvenvproc,
+                "pip install",
+                unique_filename,
+                ignore_text=commit_message
+        )
+        if status_failed:
+            build_status = "fail"
+            abort = True
+
+
+
     if not abort:
         buildcmd = ['snakemake','--nocolor','build_docs']
         logging.debug("Running build command %s"%(' '.join(buildcmd)))
@@ -200,54 +276,98 @@ def process_payload(payload, meta, config):
             # the only test that mattered, passed
             build_status = "pass"
 
+    if not abort:
+        serve_dir = serve_htdocs_output(repo_dir,unique_serve)
+
     # end mkdocs build
     # -----------------------------------------------
 
-    status_url = "https://archie.nihdatacommons.us/output/%s"%(status_file)
 
     if build_status == "pass":
 
         if build_msg == "":
-            build_msg = params['pass_msg']
+            build_msg = params['build_pass_msg']
+        if serve_msg == "":
+            serve_msg = params['serve_pass_msg']
 
+        # build task status 
         try:
             commit_status = c.create_status(
                             state = "success",
-                            target_url = status_url,
+                            target_url = status_url_log,
                             description = build_msg,
-                            context = params['task_name']
+                            context = params['build_task_name']
             )
         except GithubException as e:
-            logging.info("Github error: commit status failed to update.")
+            logging.exception("Github error: commit status failed to update.")
+
+        # serve task status 
+        try:
+            commit_status = c.create_status(
+                            state = "success",
+                            target_url = status_url_www,
+                            description = serve_msg,
+                            context = params['serve_task_name']
+            )
+        except GithubException as e:
+            logging.exception("Github error: commit status failed to update.")
+
 
         logging.info("private-www integration test success:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
-        logging.info("    Link %s"%status_url)
+        logging.info("    Output Log Link %s"%status_url_log)
+        logging.info("    Serve Link %s"%status_url_www)
         return
 
     elif build_status == "fail":
 
         if build_msg == "":
             build_msg = params['fail_msg']
+        if serve_msg == "":
+            serve_msg = params['serve_fail_msg']
 
         try:
             commit_status = c.create_status(
                             state = "failure",
-                            target_url = status_url,
+                            target_url = status_url_log,
                             description = build_msg,
-                            context = params['task_name']
+                            context = params['build_task_name']
             )
         except GithubException as e:
-            logging.info("Github error: commit status failed to update.")
+            logging.exception("Github error: commit status failed to update.")
 
         logging.info("private-www integration test failure:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
-        logging.info("    Link %s"%status_url)
+        logging.info("    Output Log Link %s"%status_url_log)
         return
+
+
+def serve_htdocs_output(cwd_dir,unique_serve):
+    """
+    Given a folder name unique_htdocs containing
+    the htdocs directory from this mkdocs run,
+    """
+    output_path = os.path.join(HTDOCS,OUTPUT_SERVE)
+    output_file = os.path.join(output_path,unique_serve)
+
+    if not os.path.exists(output_path):
+        subprocess.call(['mkdir','-p',output_path])
+
+    try:
+        subprocess.call(
+                ['mv','site/content',output_file],
+                cwd=cwd_dir
+        )
+    except:
+        err = "Error moving site/content/ to %s"%(output_file)
+        logging.error(err)
+        raise Exception(err)
+
+    return unique_serve
 
 
 def record_and_check_output(proc,label,unique_filename):
