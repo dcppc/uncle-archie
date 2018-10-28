@@ -416,7 +416,6 @@ def record_and_check_output(proc,label,unique_filename,ignore_text=None):
               "========= STDOUT \n",
               "========= %s\n"%(" ".join(proc.args)),
               "\n\n",
-              "======================\n",
               "========= STDERR \n",
               "========= %s\n"%(" ".join(proc.args)),
               err,

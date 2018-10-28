@@ -397,7 +397,6 @@ def record_and_check_output(proc,label,unique_filename):
               "========= STDOUT \n",
               "========= %s\n"%(" ".join(proc.args)),
               "\n\n",
-              "======================\n",
               "========= STDERR \n",
               "========= %s\n"%(" ".join(proc.args)),
               err,
