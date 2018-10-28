@@ -383,28 +383,34 @@ def record_and_check_output(proc,label,unique_filename):
     output_path = os.path.join(HTDOCS,'output')
     output_file = os.path.join(output_path,unique_filename)
 
+    if not os.path.exists(output_path):
+        logging.info('Creating output log path: %s'%(output_path))
+        subprocess.call(['mkdir','-p',output_path])
+
     out = proc.stdout.read().decode('utf-8')
     err = proc.stderr.read().decode('utf-8')
 
     lout = out.lower()
     lerr = err.lower()
 
-    lines = [ "======================\n",
-              "======= STDOUT =======\n",
-              out,
+    lines = [ "================================\n",
+              "========= STDOUT \n",
+              "========= %s\n"%(" ".join(proc.args)),
               "\n\n",
               "======================\n",
-              "======= STDERR =======\n",
+              "========= STDERR \n",
+              "========= %s\n"%(" ".join(proc.args)),
               err,
               "\n\n"]
 
     with open(output_file,'w') as f:
         [f.write(j) for j in lines]
 
-    logging.info("Results from process %s:"%(label))
+    logging.info("Results from process: %s"%(label))
+    logging.info("Running command: %s"%(" ".join(proc.args)))
     logging.info("%s"%(out))
     logging.info("%s"%(err))
-    logging.info("Recorded in file %s"%(output_file))
+    logging.info("Recorded in file: %s"%(output_file))
 
     if "exception" in lout or "exception" in lerr:
         return True, unique_filename
@@ -413,26 +419,4 @@ def record_and_check_output(proc,label,unique_filename):
         return True, unique_filename
 
     return False, unique_filename
-
-
-def check_for_errors(proc,label):
-    """
-    Given a process, get the stdout and stderr streams and look for
-    exceptions or errors.  Return a boolean whether there was a problem.
-    """ 
-    out = proc.stdout.read().decode('utf-8').lower()
-    err = proc.stderr.read().decode('utf-8').lower()
-
-    logging.info("Results from process %s:"%(label))
-    logging.info("%s"%(out))
-    logging.info("%s"%(err))
-
-    if "exception" in out or "exception" in err:
-        return True
-
-    if "error" in out or "error" in err:
-        return True
-
-    return False
-
 

@@ -398,6 +398,7 @@ def record_and_check_output(proc,label,unique_filename,ignore_text=None):
     output_file = os.path.join(output_path,unique_filename)
 
     if not os.path.exists(output_path):
+        logging.info('Creating output log path: %s'%(output_path))
         subprocess.call(['mkdir','-p',output_path])
 
     out = proc.stdout.read().decode('utf-8')
@@ -411,23 +412,24 @@ def record_and_check_output(proc,label,unique_filename,ignore_text=None):
         lout = re.sub(ignore_text,'',lout)
         lerr = re.sub(ignore_text,'',lerr)
 
-
-    lines = [ "======================\n",
-              "======= STDOUT =======\n",
-              out,
+    lines = [ "================================\n",
+              "========= STDOUT \n",
+              "========= %s\n"%(" ".join(proc.args)),
               "\n\n",
               "======================\n",
-              "======= STDERR =======\n",
+              "========= STDERR \n",
+              "========= %s\n"%(" ".join(proc.args)),
               err,
               "\n\n"]
 
-    with open(output_file,'w') as f:
+    with open(output_file,'a') as f:
         [f.write(j) for j in lines]
 
-    logging.info("Results from process %s:"%(label))
+    logging.info("Results from process: %s"%(label))
+    logging.info("Running command: %s"%(" ".join(proc.args)))
     logging.info("%s"%(out))
     logging.info("%s"%(err))
-    logging.info("Recorded in file %s"%(output_file))
+    logging.info("Recorded in file: %s"%(output_file))
 
     if "exception" in lout or "exception" in lerr:
         return True, unique_filename
