@@ -267,24 +267,6 @@ def process_payload(payload, meta, config):
 
 
 
-        #########################
-        cat = ['cat','scripts/process.py']
-        catproc = subprocess.Popen(
-                cat,
-                stdout=PIPE,
-                stderr=PIPE, 
-                cwd=repo_dir
-        )
-        status_failed, status_file = record_and_check_output(
-                catproc,
-                "cat process.py",
-                unique_filename,
-                ignore_text=commit_message
-        )
-        ##########################
-
-
-
     if not abort:
         buildcmd = ['vp/bin/snakemake','--nocolor','build']
         buildproc = subprocess.Popen(
