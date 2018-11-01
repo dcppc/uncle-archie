@@ -197,10 +197,10 @@ def process_payload(payload, meta, config):
     first = True
     for pr in parent_r.get_pulls(state='open',sort='created',direction='desc',base='master'):
         if commit_prefix in pr.title:
-             # Get the head branch name for this PR
-             head_branch = payload['pull_request']['head']['ref']
+            # Get the head branch name for this PR
+            head_branch = payload['pull_request']['head']['ref']
 
-             if first:
+            if first:
                 # Update the PR title for the first (freshest) PR/commit 
                 pr.edit(title = commit_msg)
                 existing_pr_head = pr.head.sha
