@@ -373,7 +373,7 @@ def serve_htdocs_output(cwd_dir,unique_serve):
     return unique_serve
 
 
-def record_and_check_output(proc,label,unique_filename):
+def record_and_check_output(proc,label,unique_filename,ignore_text=None):
     """
     Given a process, get the stdout and stderr streams
     and record them in an output file that can be provided
@@ -395,6 +395,11 @@ def record_and_check_output(proc,label,unique_filename):
 
     lout = out.lower()
     lerr = err.lower()
+
+    # Strip out ignore_text
+    if ignore_text is not None:
+        lout = re.sub(ignore_text,'',lout)
+        lerr = re.sub(ignore_text,'',lerr)
 
     lines = [ "================================\n",
               "========= STDOUT \n",
