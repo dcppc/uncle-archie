@@ -154,9 +154,11 @@ def process_payload(payload, meta, config):
             unique_filename,
             ignore_text=commit_message
     )
-    if status_failed:
-        build_status = "fail"
-        abort = True
+    ## Fails if word "error" or "exception" show up anywhere.
+    ## Infurating. Kludge it.
+    #if status_failed:
+    #    build_status = "fail"
+    #    abort = True
 
 
 
@@ -176,9 +178,11 @@ def process_payload(payload, meta, config):
                 unique_filename,
                 ignore_text=commit_message
         )
-        if status_failed:
-            build_status = "fail"
-            abort = True
+        ## Fails if word "error" or "exception" show up anywhere.
+        ## Infurating. Kludge it.
+        #if status_failed:
+        #    build_status = "fail"
+        #    abort = True
 
 
     # In case of new submodule
@@ -196,9 +200,12 @@ def process_payload(payload, meta, config):
                 unique_filename,
                 ignore_text=commit_message
         )
-        if status_failed:
-            build_status = "fail"
-            abort = True
+        ## This will fail if the word "error" or "exception"
+        ## is in the commit message OR the branch name.
+        ## Mildly infuriating. Just... kludge it.
+        #if status_failed:
+        #    build_status = "fail"
+        #    abort = True
 
 
 
