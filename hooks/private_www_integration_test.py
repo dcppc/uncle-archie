@@ -73,6 +73,9 @@ def process_payload(payload, meta, config):
     r = g.get_repo(full_repo_name)
     c = r.get_commit(head_commit)
 
+    gitc = c.commit
+    commit_message = gitc.message
+
     # -----------------------------------------------
     # start private-www integration test build
     logging.info("Starting private-www integration test build for submodule %s"%(full_repo_name))
