@@ -104,6 +104,10 @@ def process_payload(payload, meta, config):
     build_status = "fail"
     build_msg = "" # if blank at the end, use the default
 
+    # Serving: fail by default!
+    serve_status = "fail"
+    serve_msg = ""
+
 
     ######################
     # make space.
@@ -134,7 +138,12 @@ def process_payload(payload, meta, config):
             cwd=scratch_dir
     )
     # save the output first
-    status_failed, status_file = record_and_check_output(cloneproc,"git clone",unique_filename)
+    status_failed, status_file = record_and_check_output(
+            cloneproc,
+            "git clone",
+            unique_filename,
+            ignore_text=commit_message
+    )
     if status_failed:
         build_status = "fail"
         abort = True
@@ -178,7 +187,12 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=submodule_dir
         )
-        status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
+        status_failed, status_file = record_and_check_output(
+                coproc,
+                "git checkout",
+                unique_filename,
+                ignore_text=commit_message
+        )
         if status_failed:
             build_status = "fail"
             abort = True
@@ -192,7 +206,12 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        status_failed, status_file = record_and_check_output(suproc,"submodule update",unique_filename)
+        status_failed, status_file = record_and_check_output(
+                suproc,
+                "submodule update",
+                unique_filename,
+                ignore_text=commit_message
+        )
         if status_failed:
             build_status = "fail"
             abort = True
