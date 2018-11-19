@@ -11,23 +11,6 @@ from datetime import datetime
 private-www Submodule Update PR for Uncle Archie
 
 
-
-Notes:
-
-We need to set up a submodule experiment with search-demo-mkdocs-material
-and the submodule fake-docs so that we can troubleshoot this before we
-deploy it for real.
-
-- search-demo is private-www
-- fake-docs is submodule
-- install webhooks for uncle archie
-- add a second hook script, and work on parameterizing it 
-- make changes to fake-docs (submodule) and make a pull request
-- merge the pull request to trigger the hook function
-
-
-
-
 Description:
 
 This is a bit of an odd "CI test" because it isn't exactly a CI test, but it is
@@ -56,7 +39,6 @@ def process_payload(payload, meta, config):
     When we get a push event, we should figure out
     whether it is on the master branch, and if so, 
     we open a new pull request that updates the submodules.
-
 
     Strategy:
     - use the shell, because it will work
@@ -140,16 +122,18 @@ def process_payload(payload, meta, config):
     parent_repo_name = "private-www"
     parent_full_repo_name = "dcppc/private-www"
 
+    parent_branch_name = "master"
+
     # This is always the repo we clone
     parent_repo_url = "git@github.com:dcppc/%s"%(parent_repo_name)
 
     # get the API token
     token = config['github_access_token']
 
-    # note: this needs to parameterize
-    # the base branch name instead of
-    # hard-coding master...
-    clonecmd = ['git','clone','--recursive','-b','master',parent_repo_url]
+    # Note: this branch name (master) should be 
+    # a parameter set by the user, so that they
+    # can change it later.
+    clonecmd = ['git','clone','--recursive','-b',parent_branch_name,parent_repo_url]
     logging.debug("Running cmd: %s"%(' '.join(clonecmd)))
     cloneproc = subprocess.Popen(
             clonecmd, 
@@ -163,7 +147,6 @@ def process_payload(payload, meta, config):
             unique_filename
     )
     ## Fails if word "error" or "exception" show up anywhere.
-    ## Infurating. Kludge it.
     #if status_failed:
     #    build_status = "fail"
     #    abort = True
@@ -187,36 +170,58 @@ def process_payload(payload, meta, config):
     new_sha = payload['pull_request']['merge_commit_sha']
 
     commit_prefix = '[Uncle Archie] Update submodule %s'%full_sub_name
-    commit_msg = '[Uncle Archie] Update submodule %s to commit %s'%(full_sub_name,new_sha[0:7])
+    commit_msg = '%s to commit %s'%(commit_prefix,new_sha[0:7])
     pr_msg = commit_msg 
 
 
     # Iterate through all open pull requests having master as their base
     # Look for a PR containing commit_prefix in the title (updates same submodule)
-    # 
+
+
+
+
     # 3 possibilities:
     # 1. If we find one PR with that in the title, use it (make our commit on that PR)
     # 2. If we find 2+ PRs with that in the title, keep the freshest, close the others
     # 3. No PRs, in which case, create branch and open PR
 
-    existing_pr_head = None
+
+
+    # if there is an existing PR,
+    # save the branch name 
+    # and the pull request object
+    existing_pr_head_sha = None
+    existing_pr_head_branch = None
+    existing_pr = None
+
+    # is this the first open PR to update this submodule?
     first = True
+
+    # Look for open PRs that update this submodule
+    # (sort by most recent first)
     for pr in parent_r.get_pulls(state='open',sort='created',direction='desc',base='master'):
+
+        # the pull request title should be prefixed with Uncle Archie
+        # and include the name of the submodule being updated 
         if commit_prefix in pr.title:
-            # Get the head branch name for this PR
+
+            # We found an existing (stale) pull request that updates the submodule (to a stale commit)
+
+            # Get head branch name for this existing pull request
             head_branch = payload['pull_request']['head']['ref']
 
             if first:
-                # Update the PR title for the first (freshest) PR/commit 
-                pr.edit(title = commit_msg)
-                existing_pr_head = pr.head.sha
+                # Save information about the existing pull request
+                existing_pr_head_sha = pr.head.sha
+                existing_pr_head_branch = pr.head.ref
+                existing_pr = pr
                 first = False
             else:
                 # Close the (crusty) pull request
                 pr.edit(state = 'closed')
             
 
-    if existing_pr_head is not None:
+    if existing_pr_head_sha is not None:
 
         # ------------------------------------
         # Begin "sync with existing PR" workflow 
@@ -224,7 +229,14 @@ def process_payload(payload, meta, config):
         # We know that the existing PR
         # must be coming from a branch 
         # in this repo (not a fork)
-        branch_name = existing_pr_head
+        branch_name = existing_pr_head_branch
+
+
+        # Update the PR title for this first (most recent) PR/commit
+        # "[Uncle Archie] Update submodule dcppc/something to commit XYZ"
+        pr.edit(title = commit_msg)
+
+
 
         ######################
         # Check out branch 
@@ -235,7 +247,7 @@ def process_payload(payload, meta, config):
             repo_dir = os.path.join(scratch_dir, parent_repo_name)
 
             cocmd = ['git','checkout','-b',branch_name,'origin/%s'%(branch_name)]
-            logging.debug("Running cmd: %s"%(' '.join(cocmd))) # <-- sequence item 3 expected  str, nonetype found
+            logging.debug("Running cmd: %s"%(' '.join(cocmd)))
             coproc = subprocess.Popen(
                     cocmd,
                     stdout=PIPE, 
@@ -248,7 +260,6 @@ def process_payload(payload, meta, config):
                     unique_filename
             )
             ## Fails if word "error" or "exception" show up anywhere.
-            ## Infurating. Kludge it.
             #if status_failed:
             #    build_status = "fail"
             #    abort = True
@@ -268,7 +279,6 @@ def process_payload(payload, meta, config):
                     unique_filename
             )
             ## Fails if word "error" or "exception" show up anywhere.
-            ## Infurating. Kludge it.
             #if status_failed:
             #    build_status = "fail"
             #    abort = True
@@ -303,7 +313,6 @@ def process_payload(payload, meta, config):
                     unique_filename
             )
             ## Fails if word "error" or "exception" show up anywhere.
-            ## Infurating. Kludge it.
             #if status_failed:
             #    build_status = "fail"
             #    abort = True
@@ -324,7 +333,6 @@ def process_payload(payload, meta, config):
                     unique_filename
             )
             ## Fails if word "error" or "exception" show up anywhere.
-            ## Infurating. Kludge it.
             #if status_failed:
             #    build_status = "fail"
             #    abort = True
@@ -430,7 +438,6 @@ def process_payload(payload, meta, config):
                     unique_filename
             )
             ## Fails if word "error" or "exception" show up anywhere.
-            ## Infurating. Kludge it.
             #if status_failed:
             #    build_status = "fail"
             #    abort = True
@@ -450,7 +457,6 @@ def process_payload(payload, meta, config):
                     unique_filename
             )
             ## Fails if word "error" or "exception" show up anywhere.
-            ## Infurating. Kludge it.
             #if status_failed:
             #    build_status = "fail"
             #    abort = True
@@ -484,7 +490,6 @@ def process_payload(payload, meta, config):
                     unique_filename
             )
             ## Fails if word "error" or "exception" show up anywhere.
-            ## Infurating. Kludge it.
             #if status_failed:
             #    build_status = "fail"
             #    abort = True
@@ -503,7 +508,6 @@ def process_payload(payload, meta, config):
                     unique_filename
             )
             ## Fails if word "error" or "exception" show up anywhere.
-            ## Infurating. Kludge it.
             #if status_failed:
             #    build_status = "fail"
             #    abort = True
