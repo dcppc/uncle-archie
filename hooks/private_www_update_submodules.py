@@ -234,7 +234,7 @@ def process_payload(payload, meta, config):
 
         # Update the PR title for this first (most recent) PR/commit
         # "[Uncle Archie] Update submodule dcppc/something to commit XYZ"
-        pr.edit(title = commit_msg)
+        existing_pr.edit(title = commit_msg)
 
 
 
