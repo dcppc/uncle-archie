@@ -28,12 +28,14 @@ config = {
         'archie.webapp',
         'archie.payload_handlers',
         'archie.tasks',
+        'archie.tests',
     ],
     'package_dir' : {
         'archie' :                 'src',
         'archie.webapp' :          'src/webapp',
         'archie.payload_handlers': 'src/payload_handlers',
         'archie.tasks'  :          'src/tasks',
+        'archie.tests'  :          'src/tests',
     },
     'scripts': [],
     'zip_safe' : False

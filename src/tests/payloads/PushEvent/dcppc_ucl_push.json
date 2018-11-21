@@ -1,0 +1,465 @@
+{
+    "ref": "refs/heads/master",
+    "before": "d40629eef65699b879b3f9f68952d3dd4179ae4e",
+    "after": "2f171241e3bcb8e3d2649a25703941355f7b7e0c",
+    "created": false,
+    "deleted": false,
+    "forced": false,
+    "base_ref": null,
+    "compare": "https://github.com/dcppc/use-case-library/compare/d40629eef656...2f171241e3bc",
+    "commits": [
+        {
+            "id": "2fe12148cafa52a45de79f8b159e6c8ff9e02c07",
+            "tree_id": "b3d52bcccbb19b44b38ebfe5210a70244f11d107",
+            "distinct": false,
+            "message": "now with updated inputs and outputs",
+            "timestamp": "2018-10-01T16:01:18-05:00",
+            "url": "https://github.com/dcppc/use-case-library/commit/2fe12148cafa52a45de79f8b159e6c8ff9e02c07",
+            "author": {
+                "name": "raynamharris",
+                "email": "rayna.harris@utexas.edu",
+                "username": "raynamharris"
+            },
+            "committer": {
+                "name": "raynamharris",
+                "email": "rayna.harris@utexas.edu",
+                "username": "raynamharris"
+            },
+            "added": [],
+            "removed": [
+                "library/EPIC-48-share-notebooks.md"
+            ],
+            "modified": [
+                "library/EPIC-45-build-a-cohort.md",
+                "library/EPIC-46-select-analyses.md",
+                "library/EPIC-47-compare-cohorts.md",
+                "library/SUMMARY-24-GTExBioJupies.md",
+                "library/USERSTORY-79.md",
+                "library/USERSTORY-81.md",
+                "library/USERSTORY-82.md",
+                "library/USERSTORY-83.md"
+            ]
+        },
+        {
+            "id": "795ae0b5d772cc4e33901661d759386feb39aba6",
+            "tree_id": "ea542225debf26397bcd8986445eb907cc85ec01",
+            "distinct": false,
+            "message": "remove periods, update last story, remove obsolete story",
+            "timestamp": "2018-10-01T16:05:52-05:00",
+            "url": "https://github.com/dcppc/use-case-library/commit/795ae0b5d772cc4e33901661d759386feb39aba6",
+            "author": {
+                "name": "raynamharris",
+                "email": "rayna.harris@utexas.edu",
+                "username": "raynamharris"
+            },
+            "committer": {
+                "name": "raynamharris",
+                "email": "rayna.harris@utexas.edu",
+                "username": "raynamharris"
+            },
+            "added": [],
+            "removed": [
+                "library/USERSTORY-85.md"
+            ],
+            "modified": [
+                "library/USERSTORY-81.md",
+                "library/USERSTORY-84.md"
+            ]
+        },
+        {
+            "id": "899ff584750acbee15ce5a15adb922013b5dd763",
+            "tree_id": "4e924149a6a66a0ec87181d6f802be1b40eeae55",
+            "distinct": false,
+            "message": "add exception handling and improved error message when EPIC missing from NARRATIVE",
+            "timestamp": "2018-10-01T15:52:51-07:00",
+            "url": "https://github.com/dcppc/use-case-library/commit/899ff584750acbee15ce5a15adb922013b5dd763",
+            "author": {
+                "name": "C Reid",
+                "email": "charlesreid1@Gmail.com",
+                "username": "charlesreid1"
+            },
+            "committer": {
+                "name": "C Reid",
+                "email": "charlesreid1@Gmail.com",
+                "username": "charlesreid1"
+            },
+            "added": [],
+            "removed": [],
+            "modified": [
+                "scripts/library_objects.py"
+            ]
+        },
+        {
+            "id": "1598e3bea4a00c682f7d516a4b07a6eb6bdb97bc",
+            "tree_id": "ead4a501ce4f21f13a6ce8290ace169ef4421e05",
+            "distinct": false,
+            "message": "change newline to trigger uncle archie",
+            "timestamp": "2018-10-01T15:56:58-07:00",
+            "url": "https://github.com/dcppc/use-case-library/commit/1598e3bea4a00c682f7d516a4b07a6eb6bdb97bc",
+            "author": {
+                "name": "C Reid",
+                "email": "charlesreid1@Gmail.com",
+                "username": "charlesreid1"
+            },
+            "committer": {
+                "name": "C Reid",
+                "email": "charlesreid1@Gmail.com",
+                "username": "charlesreid1"
+            },
+            "added": [],
+            "removed": [],
+            "modified": [
+                "README.md"
+            ]
+        },
+        {
+            "id": "54a1cce6ddf5940a18756de814d0268d2b9a1ed3",
+            "tree_id": "3dfd9bc0c07d6c7bd9e1b298ec9aedb026f4ce4a",
+            "distinct": false,
+            "message": "change newline to trigger uncle archie",
+            "timestamp": "2018-10-01T16:07:07-07:00",
+            "url": "https://github.com/dcppc/use-case-library/commit/54a1cce6ddf5940a18756de814d0268d2b9a1ed3",
+            "author": {
+                "name": "C Reid",
+                "email": "charlesreid1@Gmail.com",
+                "username": "charlesreid1"
+            },
+            "committer": {
+                "name": "C Reid",
+                "email": "charlesreid1@Gmail.com",
+                "username": "charlesreid1"
+            },
+            "added": [],
+            "removed": [],
+            "modified": [
+                "README.md"
+            ]
+        },
+        {
+            "id": "1179967c982c71198461cdaa94f9b7a1bd1f0c13",
+            "tree_id": "ead4a501ce4f21f13a6ce8290ace169ef4421e05",
+            "distinct": false,
+            "message": "change newline to trigger uncle archie",
+            "timestamp": "2018-10-01T16:09:51-07:00",
+            "url": "https://github.com/dcppc/use-case-library/commit/1179967c982c71198461cdaa94f9b7a1bd1f0c13",
+            "author": {
+                "name": "C Reid",
+                "email": "charlesreid1@Gmail.com",
+                "username": "charlesreid1"
+            },
+            "committer": {
+                "name": "C Reid",
+                "email": "charlesreid1@Gmail.com",
+                "username": "charlesreid1"
+            },
+            "added": [],
+            "removed": [],
+            "modified": [
+                "README.md"
+            ]
+        },
+        {
+            "id": "3dd4287afb6be587e52a5fcf7e96c428fb2be29c",
+            "tree_id": "3dfd9bc0c07d6c7bd9e1b298ec9aedb026f4ce4a",
+            "distinct": false,
+            "message": "change newline to trigger uncle archie",
+            "timestamp": "2018-10-01T16:12:02-07:00",
+            "url": "https://github.com/dcppc/use-case-library/commit/3dd4287afb6be587e52a5fcf7e96c428fb2be29c",
+            "author": {
+                "name": "C Reid",
+                "email": "charlesreid1@Gmail.com",
+                "username": "charlesreid1"
+            },
+            "committer": {
+                "name": "C Reid",
+                "email": "charlesreid1@Gmail.com",
+                "username": "charlesreid1"
+            },
+            "added": [],
+            "removed": [],
+            "modified": [
+                "README.md"
+            ]
+        },
+        {
+            "id": "775d7932388ca2deab5c97eecd54d85729cde06b",
+            "tree_id": "3dfd9bc0c07d6c7bd9e1b298ec9aedb026f4ce4a",
+            "distinct": false,
+            "message": "Merge pull request #133 from dcppc/improve-error-message\n\nadd exception handling and improved error message when EPIC missing",
+            "timestamp": "2018-10-01T16:13:08-07:00",
+            "url": "https://github.com/dcppc/use-case-library/commit/775d7932388ca2deab5c97eecd54d85729cde06b",
+            "author": {
+                "name": "Chaz Reid",
+                "email": "charlesreid1@gmail.com",
+                "username": "charlesreid1"
+            },
+            "committer": {
+                "name": "GitHub",
+                "email": "noreply@github.com",
+                "username": "web-flow"
+            },
+            "added": [],
+            "removed": [],
+            "modified": [
+                "README.md",
+                "scripts/library_objects.py"
+            ]
+        },
+        {
+            "id": "5830244b6ac8d83be078262ed7c39971053a46ea",
+            "tree_id": "a129dfb3ffa131f00a9233df2c10fa318e780af9",
+            "distinct": false,
+            "message": "whitespace in readme",
+            "timestamp": "2018-10-01T16:15:20-07:00",
+            "url": "https://github.com/dcppc/use-case-library/commit/5830244b6ac8d83be078262ed7c39971053a46ea",
+            "author": {
+                "name": "C Reid",
+                "email": "charlesreid1@Gmail.com",
+                "username": "charlesreid1"
+            },
+            "committer": {
+                "name": "C Reid",
+                "email": "charlesreid1@Gmail.com",
+                "username": "charlesreid1"
+            },
+            "added": [],
+            "removed": [],
+            "modified": [
+                "README.md"
+            ]
+        },
+        {
+            "id": "58144011e4cf609c7e5af7ca242c06b044a3d3a6",
+            "tree_id": "f2f63d756f2d876238b581d14da647556bdf9b50",
+            "distinct": false,
+            "message": "remove link to removed epic 48",
+            "timestamp": "2018-10-01T20:39:22-05:00",
+            "url": "https://github.com/dcppc/use-case-library/commit/58144011e4cf609c7e5af7ca242c06b044a3d3a6",
+            "author": {
+                "name": "raynamharris",
+                "email": "rayna.harris@utexas.edu",
+                "username": "raynamharris"
+            },
+            "committer": {
+                "name": "raynamharris",
+                "email": "rayna.harris@utexas.edu",
+                "username": "raynamharris"
+            },
+            "added": [],
+            "removed": [],
+            "modified": [
+                "library/NARRATIVE-24-GTExBioJupies.md"
+            ]
+        },
+        {
+            "id": "2f171241e3bcb8e3d2649a25703941355f7b7e0c",
+            "tree_id": "a445983b43f9cddff10b83e622937977a807ed84",
+            "distinct": true,
+            "message": "Merge pull request #132 from dcppc/gtex-biojupies-2\n\nnow with updated inputs and outputs for Biojupies GETex",
+            "timestamp": "2018-10-01T21:58:02-05:00",
+            "url": "https://github.com/dcppc/use-case-library/commit/2f171241e3bcb8e3d2649a25703941355f7b7e0c",
+            "author": {
+                "name": "Rayna M Harris",
+                "email": "raynamharris@users.noreply.github.com",
+                "username": "raynamharris"
+            },
+            "committer": {
+                "name": "GitHub",
+                "email": "noreply@github.com",
+                "username": "web-flow"
+            },
+            "added": [],
+            "removed": [
+                "library/EPIC-48-share-notebooks.md",
+                "library/USERSTORY-85.md"
+            ],
+            "modified": [
+                "README.md",
+                "library/EPIC-45-build-a-cohort.md",
+                "library/EPIC-46-select-analyses.md",
+                "library/EPIC-47-compare-cohorts.md",
+                "library/NARRATIVE-24-GTExBioJupies.md",
+                "library/SUMMARY-24-GTExBioJupies.md",
+                "library/USERSTORY-79.md",
+                "library/USERSTORY-81.md",
+                "library/USERSTORY-82.md",
+                "library/USERSTORY-83.md",
+                "library/USERSTORY-84.md",
+                "scripts/library_objects.py"
+            ]
+        }
+    ],
+    "head_commit": {
+        "id": "2f171241e3bcb8e3d2649a25703941355f7b7e0c",
+        "tree_id": "a445983b43f9cddff10b83e622937977a807ed84",
+        "distinct": true,
+        "message": "Merge pull request #132 from dcppc/gtex-biojupies-2\n\nnow with updated inputs and outputs for Biojupies GETex",
+        "timestamp": "2018-10-01T21:58:02-05:00",
+        "url": "https://github.com/dcppc/use-case-library/commit/2f171241e3bcb8e3d2649a25703941355f7b7e0c",
+        "author": {
+            "name": "Rayna M Harris",
+            "email": "raynamharris@users.noreply.github.com",
+            "username": "raynamharris"
+        },
+        "committer": {
+            "name": "GitHub",
+            "email": "noreply@github.com",
+            "username": "web-flow"
+        },
+        "added": [],
+        "removed": [
+            "library/EPIC-48-share-notebooks.md",
+            "library/USERSTORY-85.md"
+        ],
+        "modified": [
+            "README.md",
+            "library/EPIC-45-build-a-cohort.md",
+            "library/EPIC-46-select-analyses.md",
+            "library/EPIC-47-compare-cohorts.md",
+            "library/NARRATIVE-24-GTExBioJupies.md",
+            "library/SUMMARY-24-GTExBioJupies.md",
+            "library/USERSTORY-79.md",
+            "library/USERSTORY-81.md",
+            "library/USERSTORY-82.md",
+            "library/USERSTORY-83.md",
+            "library/USERSTORY-84.md",
+            "scripts/library_objects.py"
+        ]
+    },
+    "repository": {
+        "id": 146474673,
+        "node_id": "MDEwOlJlcG9zaXRvcnkxNDY0NzQ2NzM=",
+        "name": "use-case-library",
+        "full_name": "dcppc/use-case-library",
+        "private": true,
+        "owner": {
+            "name": "dcppc",
+            "email": "",
+            "login": "dcppc",
+            "id": 33266722,
+            "node_id": "MDEyOk9yZ2FuaXphdGlvbjMzMjY2NzIy",
+            "avatar_url": "https://avatars0.githubusercontent.com/u/33266722?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/dcppc",
+            "html_url": "https://github.com/dcppc",
+            "followers_url": "https://api.github.com/users/dcppc/followers",
+            "following_url": "https://api.github.com/users/dcppc/following{/other_user}",
+            "gists_url": "https://api.github.com/users/dcppc/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/dcppc/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/dcppc/subscriptions",
+            "organizations_url": "https://api.github.com/users/dcppc/orgs",
+            "repos_url": "https://api.github.com/users/dcppc/repos",
+            "events_url": "https://api.github.com/users/dcppc/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/dcppc/received_events",
+            "type": "Organization",
+            "site_admin": false
+        },
+        "html_url": "https://github.com/dcppc/use-case-library",
+        "description": "Use Case Library.",
+        "fork": false,
+        "url": "https://github.com/dcppc/use-case-library",
+        "forks_url": "https://api.github.com/repos/dcppc/use-case-library/forks",
+        "keys_url": "https://api.github.com/repos/dcppc/use-case-library/keys{/key_id}",
+        "collaborators_url": "https://api.github.com/repos/dcppc/use-case-library/collaborators{/collaborator}",
+        "teams_url": "https://api.github.com/repos/dcppc/use-case-library/teams",
+        "hooks_url": "https://api.github.com/repos/dcppc/use-case-library/hooks",
+        "issue_events_url": "https://api.github.com/repos/dcppc/use-case-library/issues/events{/number}",
+        "events_url": "https://api.github.com/repos/dcppc/use-case-library/events",
+        "assignees_url": "https://api.github.com/repos/dcppc/use-case-library/assignees{/user}",
+        "branches_url": "https://api.github.com/repos/dcppc/use-case-library/branches{/branch}",
+        "tags_url": "https://api.github.com/repos/dcppc/use-case-library/tags",
+        "blobs_url": "https://api.github.com/repos/dcppc/use-case-library/git/blobs{/sha}",
+        "git_tags_url": "https://api.github.com/repos/dcppc/use-case-library/git/tags{/sha}",
+        "git_refs_url": "https://api.github.com/repos/dcppc/use-case-library/git/refs{/sha}",
+        "trees_url": "https://api.github.com/repos/dcppc/use-case-library/git/trees{/sha}",
+        "statuses_url": "https://api.github.com/repos/dcppc/use-case-library/statuses/{sha}",
+        "languages_url": "https://api.github.com/repos/dcppc/use-case-library/languages",
+        "stargazers_url": "https://api.github.com/repos/dcppc/use-case-library/stargazers",
+        "contributors_url": "https://api.github.com/repos/dcppc/use-case-library/contributors",
+        "subscribers_url": "https://api.github.com/repos/dcppc/use-case-library/subscribers",
+        "subscription_url": "https://api.github.com/repos/dcppc/use-case-library/subscription",
+        "commits_url": "https://api.github.com/repos/dcppc/use-case-library/commits{/sha}",
+        "git_commits_url": "https://api.github.com/repos/dcppc/use-case-library/git/commits{/sha}",
+        "comments_url": "https://api.github.com/repos/dcppc/use-case-library/comments{/number}",
+        "issue_comment_url": "https://api.github.com/repos/dcppc/use-case-library/issues/comments{/number}",
+        "contents_url": "https://api.github.com/repos/dcppc/use-case-library/contents/{+path}",
+        "compare_url": "https://api.github.com/repos/dcppc/use-case-library/compare/{base}...{head}",
+        "merges_url": "https://api.github.com/repos/dcppc/use-case-library/merges",
+        "archive_url": "https://api.github.com/repos/dcppc/use-case-library/{archive_format}{/ref}",
+        "downloads_url": "https://api.github.com/repos/dcppc/use-case-library/downloads",
+        "issues_url": "https://api.github.com/repos/dcppc/use-case-library/issues{/number}",
+        "pulls_url": "https://api.github.com/repos/dcppc/use-case-library/pulls{/number}",
+        "milestones_url": "https://api.github.com/repos/dcppc/use-case-library/milestones{/number}",
+        "notifications_url": "https://api.github.com/repos/dcppc/use-case-library/notifications{?since,all,participating}",
+        "labels_url": "https://api.github.com/repos/dcppc/use-case-library/labels{/name}",
+        "releases_url": "https://api.github.com/repos/dcppc/use-case-library/releases{/id}",
+        "deployments_url": "https://api.github.com/repos/dcppc/use-case-library/deployments",
+        "created_at": 1535473135,
+        "updated_at": "2018-10-02T02:34:12Z",
+        "pushed_at": 1538449083,
+        "git_url": "git://github.com/dcppc/use-case-library.git",
+        "ssh_url": "git@github.com:dcppc/use-case-library.git",
+        "clone_url": "https://github.com/dcppc/use-case-library.git",
+        "svn_url": "https://github.com/dcppc/use-case-library",
+        "homepage": "http://nih-data-commons.us/use-case-library/",
+        "size": 4558,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "language": "CSS",
+        "has_issues": true,
+        "has_projects": true,
+        "has_downloads": true,
+        "has_wiki": false,
+        "has_pages": true,
+        "forks_count": 2,
+        "mirror_url": null,
+        "archived": false,
+        "open_issues_count": 35,
+        "license": null,
+        "forks": 2,
+        "open_issues": 35,
+        "watchers": 0,
+        "default_branch": "master",
+        "stargazers": 0,
+        "master_branch": "master",
+        "organization": "dcppc"
+    },
+    "pusher": {
+        "name": "raynamharris",
+        "email": "raynamharris@users.noreply.github.com"
+    },
+    "organization": {
+        "login": "dcppc",
+        "id": 33266722,
+        "node_id": "MDEyOk9yZ2FuaXphdGlvbjMzMjY2NzIy",
+        "url": "https://api.github.com/orgs/dcppc",
+        "repos_url": "https://api.github.com/orgs/dcppc/repos",
+        "events_url": "https://api.github.com/orgs/dcppc/events",
+        "hooks_url": "https://api.github.com/orgs/dcppc/hooks",
+        "issues_url": "https://api.github.com/orgs/dcppc/issues",
+        "members_url": "https://api.github.com/orgs/dcppc/members{/member}",
+        "public_members_url": "https://api.github.com/orgs/dcppc/public_members{/member}",
+        "avatar_url": "https://avatars0.githubusercontent.com/u/33266722?v=4",
+        "description": ""
+    },
+    "sender": {
+        "login": "raynamharris",
+        "id": 7544197,
+        "node_id": "MDQ6VXNlcjc1NDQxOTc=",
+        "avatar_url": "https://avatars2.githubusercontent.com/u/7544197?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/raynamharris",
+        "html_url": "https://github.com/raynamharris",
+        "followers_url": "https://api.github.com/users/raynamharris/followers",
+        "following_url": "https://api.github.com/users/raynamharris/following{/other_user}",
+        "gists_url": "https://api.github.com/users/raynamharris/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/raynamharris/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/raynamharris/subscriptions",
+        "organizations_url": "https://api.github.com/users/raynamharris/orgs",
+        "repos_url": "https://api.github.com/users/raynamharris/repos",
+        "events_url": "https://api.github.com/users/raynamharris/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/raynamharris/received_events",
+        "type": "User",
+        "site_admin": false
+    }
+}
