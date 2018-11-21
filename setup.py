@@ -21,8 +21,8 @@ config = {
     'version' : __version__,
     'install_requires': required,
     'include_package_data' : True,
-    'test_suite': 'nose.collector',
-    'tests_require': ['nose'],
+    'test_suite': 'tests',
+    'tests_require': ['pytest'],
     'packages': [
         'archie',
         'archie.webapp',

@@ -1,13 +1,5 @@
 import archie
 
-from .utils import \
-        extract_payload, \
-        post_pingpong_webhook, \
-        post_pr_opened, \
-        post_pr_closed_merged, \
-        post_pr_closed_unmerged, \
-        post_pr_sync
-
 import logging
 import os, sys
 import json
@@ -25,7 +17,7 @@ class test_payload_server(unittest.TestCase):
         client = app.test_client()
         app.set_payload_handler('')
     
-        r = post_pr_opened(client)
+        r = archie.tests.post_pr_opened(client)
         self.assertEqual(r.status_code,200)
     
     def test_ping_webhook(self):
@@ -38,10 +30,10 @@ class test_payload_server(unittest.TestCase):
         client = app.test_client()
         app.set_payload_handler('')
     
-        r = post_pingpong_webhook(client)
+        r = archie.tests.post_pingpong_webhook(client)
         self.assertEqual(r.status_code,200)
     
-        d = extract_payload(r)
+        d = archie.tests.extract_payload(r)
         self.assertIn('msg',d.keys())
         self.assertEqual(d['msg'],'pong')
     

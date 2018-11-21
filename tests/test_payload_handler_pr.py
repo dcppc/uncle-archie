@@ -40,7 +40,7 @@ class test_pr_payload_handler(payload_handler_base):
                 "Repo html url: https://github.com/charlesreid1/search-demo-mkdocs-material",
         ]
         self.doit(
-                'pr_test',
+                'pr_build',
                 archie.tests.post_pr_opened,
                 log_statements
         )
@@ -64,7 +64,7 @@ class test_pr_payload_handler(payload_handler_base):
                 "Repo html url: https://github.com/charlesreid1/fake-docs",
         ]
         self.doit(
-                'pr_test',
+                'pr_build',
                 archie.tests.post_pr_closed_merged,
                 log_statements
         )
@@ -88,7 +88,7 @@ class test_pr_payload_handler(payload_handler_base):
                 "Repo html url: https://github.com/charlesreid1/fake-docs",
         ]
         self.doit(
-                'pr_test',
+                'pr_build',
                 archie.tests.post_pr_closed_unmerged,
                 log_statements
         )
@@ -112,7 +112,7 @@ class test_pr_payload_handler(payload_handler_base):
                 "Repo html url: https://github.com/dcppc/private-www",
         ]
         self.doit(
-                'pr_test',
+                'pr_build',
                 archie.tests.post_pr_sync,
                 log_statements
         )
