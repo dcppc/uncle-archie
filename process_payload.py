@@ -6,6 +6,7 @@ from hooks.private_www_build_test           import process_payload as private_ww
 from hooks.ucl_snakemake_test               import process_payload as ucl_snakemake_test
 from hooks.search_demo_update_submodules    import process_payload as search_demo_update_submodules
 from hooks.private_www_update_submodules    import process_payload as private_www_update_submodules
+from hooks.four_year_plan                   import process_payload as four_year_plan
 
 def process_payload(payload,meta,config):
     dump_payload(payload,meta,config)
@@ -16,6 +17,7 @@ def process_payload(payload,meta,config):
     ucl_snakemake_test(payload,meta,config)
     search_demo_update_submodules(payload,meta,config)
     private_www_update_submodules(payload,meta,config)
+    four_year_plan(payload,meta,config)
 
 if __name__=="__main__":
     process_payload({'type':'test','name':'process_payload'},{'a':1,'b':2})

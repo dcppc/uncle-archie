@@ -4,6 +4,11 @@ config.py
 # ignore virtualenv
 vp
 
+.htpasswd
+__pycache__
+site/
+config.json
+
 # mkdocs
 site/
 

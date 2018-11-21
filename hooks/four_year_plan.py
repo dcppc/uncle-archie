@@ -7,9 +7,9 @@ from github import Github, GithubException
 from datetime import datetime
 
 """
-private-www Build Test CI Hook for Uncle Archie
+four-year-plan Build Test CI Hook for Uncle Archie
 
-This hook should be installed in the private-www repository.
+This hook should be installed in the four-year-plan repository.
 This will use snakemake to attempt to build the site.
 
 If the build succeeds, the commit is marked as having succeed.
@@ -19,7 +19,7 @@ Otherwise the commit is marked as failed.
 HTDOCS="/www/archie.nihdatacommons.us/htdocs"
 
 OUTPUT_LOG="output/log"
-OUTPUT_SERVE="output/serve"
+OUTPUT_SERVE="output/4year"
 
 def process_payload(payload, meta, config):
     """
@@ -30,16 +30,15 @@ def process_payload(payload, meta, config):
     Examine output for failures.
     Mark the commit pass/fail.
     """
-
     # Set parameters for the PR builder
     params = {
-            'repo_whitelist' : ['dcppc/private-www'],
+            'repo_whitelist' : ['dcppc/four-year-plan'],
 
-            'build_task_name' : 'Uncle Archie private-www Build Test',
-            'build_pass_msg' : 'The private-www build test passed!',
-            'build_fail_msg' : 'The private-www build test failed.',
+            'build_task_name' : 'Uncle Archie four-year-plan Build Test',
+            'build_pass_msg' : 'The four-year-plan build test passed!',
+            'build_fail_msg' : 'The four-year-plan build test failed.',
 
-            'serve_task_name' : 'Uncle Archie private-www Site Hosting',
+            'serve_task_name' : 'Uncle Archie four-year-plan Site Hosting',
             'serve_pass_msg' : 'The site is served!',
             'serve_fail_msg' : 'The site could not be served.',
     }
@@ -48,21 +47,21 @@ def process_payload(payload, meta, config):
     if ('pull_request' not in payload.keys()) or ('action' not in payload.keys()):
         return
 
-    # This must be a whitelisted repo
+    # This must be the four-year-plan repo
     repo_name = payload['repository']['name']
     full_repo_name = payload['repository']['full_name']
     if full_repo_name not in params['repo_whitelist']:
-        logging.debug("Skipping private-www build test: this is not the private-www repo")
+        logging.debug("Skipping four-year-plan build test: this is not the four-year-plan repo")
         return
 
     # We are only interested in PRs that are
     # being opened or updated
     if payload['action'] not in ['opened','synchronize']:
-        logging.debug("Skipping private-www build test: this is not opening/updating a PR")
+        logging.debug("Skipping four-year-plan build test: this is not opening/updating a PR")
         return
 
-    if payload['pull_request']['base']['ref']=='heroku-pages':
-        logging.debug("Skipping private-www build test because PR is based on heroku-pages branch")
+    if payload['pull_request']['base']['ref']=='gh-pages':
+        logging.debug("Skipping four-year-plan build test because PR is based on gh-pages branch")
         return
 
     # Keep it simple:
@@ -80,24 +79,15 @@ def process_payload(payload, meta, config):
     commit_message = gitc.message
 
     # -----------------------------------------------
-    # start private-www build test with snakemake
-
-    logging.info("Starting private-www build test build for submodule %s"%(full_repo_name))
-
-    # Strategy:
-    # * This will _always_ use private-www  as the build repo
-    # * This will _always_ clone recursively
-    # * This will _only_ update the submodule of interest,
-    #   to the head commit of the pull request.
-    # * This will run mkdocs on the entire private-www site.
-
+    # start four-year-plan build test with snakemake
+    logging.info("Starting four-year-plan build test build")
 
     unique = datetime.now().strftime("%Y%m%d_%H%M%S")
-    unique_filename = "private_www_build_test_%s.txt"%(unique)
-    unique_serve    = "private_www_build_test_%s_serve"%(unique)
+    unique_filename = "four_year_plan_build_test_%s.txt"%(unique)
+    unique_serve    = "four_year_plan_serve_test_%s"%(unique)
 
-    status_url_log = "https://archie.nihdatacommons.us/output/log/%s"%(unique_filename)
-    status_url_www = "https://archie.nihdatacommons.us/output/serve/%s"%(unique_serve)
+    status_url_log = "https://archie.nihdatacommons.us/%s/%s"%(OUTPUT_LOG,unique_filename)
+    status_url_www = "https://archie.nihdatacommons.us/%s/%s"%(OUTPUT_SERVE,unique_serve)
 
 
     ######################
@@ -131,7 +121,7 @@ def process_payload(payload, meta, config):
     abort = False
 
     # This is always the repo we clone
-    ghurl = "git@github.com:dcppc/private-www"
+    ghurl = "git@github.com:dcppc/four-year-plan"
 
     # Note that this checks out repos
     # using the SSH keys in ~/.ssh
@@ -183,32 +173,9 @@ def process_payload(payload, meta, config):
         #    build_status = "fail"
         #    abort = True
 
-    # In case of new submodule
-    if not abort:
-        sucmd = ['git','submodule','update','--init']
-        suproc = subprocess.Popen(
-                sucmd,
-                stdout=PIPE, 
-                stderr=PIPE, 
-                cwd=repo_dir
-        )
-        status_failed, status_file = record_and_check_output(
-                suproc,
-                "submodule update",
-                unique_filename,
-                ignore_text=commit_message
-        )
-        ## Fails if word "error" or "exception" show up anywhere.
-        ## Infurating. Kludge it.
-        #if status_failed:
-        #    build_status = "fail"
-        #    abort = True
-
     if not abort:
 
-        # Here.... we need to adjust mkdocs.yml 
-        # set the site_url variable to the output/serve url
-        # that way the test site will interlink
+        # Adjust site_url in mkdocs.yml
 
         mkdocs_pre = []
         mkdocs_dot_yml = os.path.join(repo_dir,'mkdocs.yml')
@@ -247,6 +214,7 @@ def process_payload(payload, meta, config):
             build_status = "fail"
             abort = True
 
+
         # Install requirements.txt
         srcvenv = ['vp/bin/pip','install','-r','requirements.txt']
         srcvenvproc = subprocess.Popen(
@@ -266,8 +234,9 @@ def process_payload(payload, meta, config):
             abort = True
 
 
+
     if not abort:
-        buildcmd = ['snakemake','--nocolor','build_docs']
+        buildcmd = ['vp/bin/snakemake','--nocolor','build']
         buildproc = subprocess.Popen(
                 buildcmd, 
                 stdout=PIPE,
@@ -293,7 +262,6 @@ def process_payload(payload, meta, config):
     # -----------------------------------------------
 
 
-
     if build_status == "pass":
 
         if build_msg == "":
@@ -310,7 +278,7 @@ def process_payload(payload, meta, config):
                             context = params['build_task_name']
             )
         except GithubException as e:
-            logging.exception("Github error: commit status failed to update.")
+            logging.exception("Github error: failed to mark commit status as success.")
 
         # serve task status 
         try:
@@ -321,9 +289,9 @@ def process_payload(payload, meta, config):
                             context = params['serve_task_name']
             )
         except GithubException as e:
-            logging.exception("Github error: commit status failed to update.")
+            logging.info("Github error: commit status failed to update.")
 
-        logging.info("private-www build test success:")
+        logging.info("four-year-plan build test success:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
@@ -346,9 +314,9 @@ def process_payload(payload, meta, config):
                             context = params['build_task_name']
             )
         except GithubException as e:
-            logging.exception("Github error: commit status failed to update.")
+            logging.exception("Github error: failed to mark commit status as failure.")
 
-        logging.info("private-www build test failure:")
+        logging.info("four-year-plan build test failure:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
@@ -370,15 +338,16 @@ def serve_htdocs_output(cwd_dir,unique_serve):
 
     try:
         subprocess.call(
-                ['mv','site/content',output_file],
+                ['mv','site',output_file],
                 cwd=cwd_dir
         )
     except:
-        err = "Error moving site/content/ to %s"%(output_file)
+        err = "Error moving site/ to %s"%(output_file)
         logging.error(err)
         raise Exception(err)
 
     return unique_serve
+
 
 
 def record_and_check_output(proc,label,unique_filename,ignore_text=None):

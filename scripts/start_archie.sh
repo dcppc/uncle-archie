@@ -26,11 +26,8 @@ cd ${ARCHIE_DIR}
 echo "Installing virtualenv"
 virtualenv vp
 source vp/bin/activate
+vp/bin/pip install -r requirements.txt
 
 echo "Running Uncle Archie bare"
-python ${ARCHIE_DIR}/uncle_archie.py && tail -f /nev/null
-
-#echo "Running Uncle Archie in a screen"
-##screen -S archie -d -m bash -c "python ${ARCHIE_DIR}/uncle_archie.py; tail -f /dev/null"
-#screen -d -m bash -c "python ${ARCHIE_DIR}/uncle_archie.py; tail -f /dev/null"
+vp/bin/python ${ARCHIE_DIR}/uncle_archie.py && tail -f /nev/null
 

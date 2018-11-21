@@ -1,5 +1,4 @@
 {
     "github_access_token" : "XXXXXXXXXX",
-    "github_ips_only" : true,
     "enforce_secret": "SOMELONGSECRETSTRINGTHATYOUPASTEINTOGITHUBORGITEAWEBINTERFACE"
 }

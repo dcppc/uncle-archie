@@ -20,6 +20,9 @@ Otherwise the commit is marked as failed.
 
 HTDOCS="/www/archie.nihdatacommons.us/htdocs"
 
+OUTPUT_LOG="output/log"
+OUTPUT_SERVE="output/serve"
+
 def process_payload(payload, meta, config):
     """
     Look for events that are pull requests being opened or updated. 
@@ -32,9 +35,14 @@ def process_payload(payload, meta, config):
     # Set parameters for the PR builder
     params = {
             'repo_whitelist' : ['dcppc/internal','dcppc/organize','dcppc/nih-demo-meetings','dcppc/dcppc-workshops'],
-            'task_name' : 'Uncle Archie private-www Integration Test',
-            'pass_msg' : 'The private-www integration test passed!',
-            'fail_msg' : 'The private-www integration test failed.',
+
+            'build_task_name' : 'Uncle Archie private-www Integration Test',
+            'build_pass_msg' : 'The private-www integration test passed!',
+            'build_fail_msg' : 'The private-www integration test failed.',
+
+            'serve_task_name' : 'Uncle Archie private-www Site Hosting',
+            'serve_pass_msg' : 'The site is served!',
+            'serve_fail_msg' : 'The site could not be served.',
     }
 
     # This must be a pull request
@@ -65,6 +73,9 @@ def process_payload(payload, meta, config):
     r = g.get_repo(full_repo_name)
     c = r.get_commit(head_commit)
 
+    gitc = c.commit
+    commit_message = gitc.message
+
     # -----------------------------------------------
     # start private-www integration test build
     logging.info("Starting private-www integration test build for submodule %s"%(full_repo_name))
@@ -77,8 +88,12 @@ def process_payload(payload, meta, config):
     # * This will run mkdocs on the entire private-www site.
 
 
-    unique = datetime.now().strftime("%Y%m%d%H%M%S")
-    unique_filename = "private_www_integration_test_%s"%(unique)
+    unique = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_filename = "private_www_integration_test_%s.txt"%(unique)
+    unique_serve    = "private_www_integration_test_%s_serve"%(unique)
+
+    status_url_log = "https://archie.nihdatacommons.us/output/log/%s"%(unique_filename)
+    status_url_www = "https://archie.nihdatacommons.us/output/serve/%s"%(unique_serve)
 
 
     ######################
@@ -88,6 +103,10 @@ def process_payload(payload, meta, config):
     # Fail by default!
     build_status = "fail"
     build_msg = "" # if blank at the end, use the default
+
+    # Serving: fail by default!
+    serve_status = "fail"
+    serve_msg = ""
 
 
     ######################
@@ -119,10 +138,17 @@ def process_payload(payload, meta, config):
             cwd=scratch_dir
     )
     # save the output first
-    status_failed, status_file = record_and_check_output(cloneproc,"git clone",unique_filename)
-    if status_failed:
-        build_status = "fail"
-        abort = True
+    status_failed, status_file = record_and_check_output(
+            cloneproc,
+            "git clone",
+            unique_filename,
+            ignore_text=commit_message
+    )
+    ## Fails if word "error" or "exception" show up anywhere.
+    ## Infurating. Kludge it.
+    #if status_failed:
+    #    build_status = "fail"
+    #    abort = True
 
     if not abort:
 
@@ -133,17 +159,21 @@ def process_payload(payload, meta, config):
 
         # However, we do need to check out
         # a version of the submodule PR that 
-        # gtriggered this test.
+        # triggered this test.
 
         # Get the head commit of the PR that
         # triggered this test, and update the
         # appropriate submodule before running
         # snakemake build_docs
 
-        # Assemble submodule directory by determining which submdule
-        # was updated from the payload (repo_name)
+        # Assemble submodule directory by 
+        # determining which submodule was 
+        # updated. that info is in the 
+        # payload (repo_name)
         repo_dir = os.path.join(scratch_dir, "private-www")
 
+        # Submodule remap:
+        # {'dcppc-workshops':'workshops'}
         if repo_name == 'dcppc-workshops':
             submodule_dir_relative = os.path.join('docs','workshops')
         else:
@@ -159,10 +189,17 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=submodule_dir
         )
-        status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
-        if status_failed:
-            build_status = "fail"
-            abort = True
+        status_failed, status_file = record_and_check_output(
+                coproc,
+                "git checkout",
+                unique_filename,
+                ignore_text=commit_message
+        )
+        ## Fails if word "error" or "exception" show up anywhere.
+        ## Infurating. Kludge it.
+        #if status_failed:
+        #    build_status = "fail"
+        #    abort = True
 
     # In case of new submodule
     if not abort:
@@ -173,10 +210,82 @@ def process_payload(payload, meta, config):
                 stderr=PIPE, 
                 cwd=repo_dir
         )
-        status_failed, status_file = record_and_check_output(suproc,"submodule update",unique_filename)
+        status_failed, status_file = record_and_check_output(
+                suproc,
+                "submodule update",
+                unique_filename,
+                ignore_text=commit_message
+        )
+        ## Fails if word "error" or "exception" show up anywhere.
+        ## Infurating. Kludge it.
+        #if status_failed:
+        #    build_status = "fail"
+        #    abort = True
+
+
+    if not abort:
+
+        # Here.... we need to adjust mkdocs.yml 
+        # set the site_url variable to the output/serve url
+        # that way the test site will interlink
+
+        mkdocs_pre = []
+        mkdocs_dot_yml = os.path.join(repo_dir,'mkdocs.yml')
+
+        with open(mkdocs_dot_yml,'r') as f:
+            mkdocs_pre = f.readlines()
+
+        mkdocs_post = []
+        for line in mkdocs_pre:
+            if 'site_url' in line:
+                mkdocs_post.append("site_url: %s"%(status_url_www))
+            else:
+                mkdocs_post.append(line)
+
+        with open(mkdocs_dot_yml,'w') as f:
+            f.write("\n".join(mkdocs_post))
+
+
+
+    if not abort:
+
+        # Set up the virtual environment
+        venv = ['virtualenv','vp']
+        venvproc = subprocess.Popen(
+                venv, 
+                stdout=PIPE,
+                stderr=PIPE, 
+                cwd=repo_dir
+        )
+        status_failed, status_file = record_and_check_output(
+                venvproc,
+                "virtualenv vp",
+                unique_filename,
+                ignore_text=commit_message
+        )
         if status_failed:
             build_status = "fail"
             abort = True
+
+        # Install requirements.txt
+        srcvenv = ['vp/bin/pip','install','-r','requirements.txt']
+        srcvenvproc = subprocess.Popen(
+                srcvenv, 
+                stdout=PIPE,
+                stderr=PIPE, 
+                cwd=repo_dir
+        )
+        status_failed, status_file = record_and_check_output(
+                srcvenvproc,
+                "pip install",
+                unique_filename,
+                ignore_text=commit_message
+        )
+        if status_failed:
+            build_status = "fail"
+            abort = True
+
+
 
     if not abort:
         buildcmd = ['snakemake','--nocolor','build_docs']
@@ -195,57 +304,101 @@ def process_payload(payload, meta, config):
             # the only test that mattered, passed
             build_status = "pass"
 
+    if not abort:
+        serve_dir = serve_htdocs_output(repo_dir,unique_serve)
+
     # end mkdocs build
     # -----------------------------------------------
 
-    status_url = "https://archie.nihdatacommons.us/output/%s"%(status_file)
 
     if build_status == "pass":
 
         if build_msg == "":
-            build_msg = params['pass_msg']
+            build_msg = params['build_pass_msg']
+        if serve_msg == "":
+            serve_msg = params['serve_pass_msg']
 
+        # build task status 
         try:
             commit_status = c.create_status(
                             state = "success",
-                            target_url = status_url,
+                            target_url = status_url_log,
                             description = build_msg,
-                            context = params['task_name']
+                            context = params['build_task_name']
             )
         except GithubException as e:
-            logging.info("Github error: commit status failed to update.")
+            logging.exception("Github error: commit status failed to update.")
+
+        # serve task status 
+        try:
+            commit_status = c.create_status(
+                            state = "success",
+                            target_url = status_url_www,
+                            description = serve_msg,
+                            context = params['serve_task_name']
+            )
+        except GithubException as e:
+            logging.exception("Github error: commit status failed to update.")
+
 
         logging.info("private-www integration test success:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
-        logging.info("    Link %s"%status_url)
+        logging.info("    Output Log Link %s"%status_url_log)
+        logging.info("    Serve Link %s"%status_url_www)
         return
 
     elif build_status == "fail":
 
         if build_msg == "":
             build_msg = params['fail_msg']
+        if serve_msg == "":
+            serve_msg = params['serve_fail_msg']
 
         try:
             commit_status = c.create_status(
                             state = "failure",
-                            target_url = status_url,
+                            target_url = status_url_log,
                             description = build_msg,
-                            context = params['task_name']
+                            context = params['build_task_name']
             )
         except GithubException as e:
-            logging.info("Github error: commit status failed to update.")
+            logging.exception("Github error: commit status failed to update.")
 
         logging.info("private-www integration test failure:")
         logging.info("    Commit %s"%head_commit)
         logging.info("    PR %s"%pull_number)
         logging.info("    Repo %s"%full_repo_name)
-        logging.info("    Link %s"%status_url)
+        logging.info("    Output Log Link %s"%status_url_log)
         return
 
 
-def record_and_check_output(proc,label,unique_filename):
+def serve_htdocs_output(cwd_dir,unique_serve):
+    """
+    Given a folder name unique_htdocs containing
+    the htdocs directory from this mkdocs run,
+    """
+    output_path = os.path.join(HTDOCS,OUTPUT_SERVE)
+    output_file = os.path.join(output_path,unique_serve)
+
+    if not os.path.exists(output_path):
+        subprocess.call(['mkdir','-p',output_path])
+
+    try:
+        subprocess.call(
+                ['mv','site/content',output_file],
+                cwd=cwd_dir
+        )
+    except:
+        err = "Error moving site/content/ to %s"%(output_file)
+        logging.error(err)
+        raise Exception(err)
+
+    return unique_serve
+
+
+def record_and_check_output(proc,label,unique_filename,ignore_text=None):
     """
     Given a process, get the stdout and stderr streams
     and record them in an output file that can be provided
@@ -258,28 +411,39 @@ def record_and_check_output(proc,label,unique_filename):
     output_path = os.path.join(HTDOCS,'output')
     output_file = os.path.join(output_path,unique_filename)
 
+    if not os.path.exists(output_path):
+        logging.info('Creating output log path: %s'%(output_path))
+        subprocess.call(['mkdir','-p',output_path])
+
     out = proc.stdout.read().decode('utf-8')
     err = proc.stderr.read().decode('utf-8')
 
     lout = out.lower()
     lerr = err.lower()
 
-    lines = [ "======================\n",
-              "======= STDOUT =======\n",
+    # Strip out ignore_text
+    if ignore_text is not None:
+        lout = re.sub(ignore_text,'',lout)
+        lerr = re.sub(ignore_text,'',lerr)
+
+    lines = [ "================================\n",
+              "========= STDOUT \n",
+              "========= %s\n"%(" ".join(proc.args)),
               out,
               "\n\n",
-              "======================\n",
-              "======= STDERR =======\n",
+              "========= STDERR \n",
+              "========= %s\n"%(" ".join(proc.args)),
               err,
               "\n\n"]
 
     with open(output_file,'w') as f:
         [f.write(j) for j in lines]
 
-    logging.info("Results from process %s:"%(label))
+    logging.info("Results from process: %s"%(label))
+    logging.info("Running command: %s"%(" ".join(proc.args)))
     logging.info("%s"%(out))
     logging.info("%s"%(err))
-    logging.info("Recorded in file %s"%(output_file))
+    logging.info("Recorded in file: %s"%(output_file))
 
     if "exception" in lout or "exception" in lerr:
         return True, unique_filename
@@ -288,26 +452,4 @@ def record_and_check_output(proc,label,unique_filename):
         return True, unique_filename
 
     return False, unique_filename
-
-
-def check_for_errors(proc,label):
-    """
-    Given a process, get the stdout and stderr streams and look for
-    exceptions or errors.  Return a boolean whether there was a problem.
-    """ 
-    out = proc.stdout.read().decode('utf-8').lower()
-    err = proc.stderr.read().decode('utf-8').lower()
-
-    logging.info("Results from process %s:"%(label))
-    logging.info("%s"%(out))
-    logging.info("%s"%(err))
-
-    if "exception" in out or "exception" in err:
-        return True
-
-    if "error" in out or "error" in err:
-        return True
-
-    return False
-
 

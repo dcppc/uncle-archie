@@ -11,23 +11,6 @@ from datetime import datetime
 private-www Submodule Update PR for Uncle Archie
 
 
-
-Notes:
-
-We need to set up a submodule experiment with search-demo-mkdocs-material
-and the submodule fake-docs so that we can troubleshoot this before we
-deploy it for real.
-
-- search-demo is private-www
-- fake-docs is submodule
-- install webhooks for uncle archie
-- add a second hook script, and work on parameterizing it 
-- make changes to fake-docs (submodule) and make a pull request
-- merge the pull request to trigger the hook function
-
-
-
-
 Description:
 
 This is a bit of an odd "CI test" because it isn't exactly a CI test, but it is
@@ -56,7 +39,6 @@ def process_payload(payload, meta, config):
     When we get a push event, we should figure out
     whether it is on the master branch, and if so, 
     we open a new pull request that updates the submodules.
-
 
     Strategy:
     - use the shell, because it will work
@@ -140,13 +122,18 @@ def process_payload(payload, meta, config):
     parent_repo_name = "private-www"
     parent_full_repo_name = "dcppc/private-www"
 
+    parent_branch_name = "master"
+
     # This is always the repo we clone
     parent_repo_url = "git@github.com:dcppc/%s"%(parent_repo_name)
 
     # get the API token
     token = config['github_access_token']
 
-    clonecmd = ['git','clone','--recursive','-b','master',parent_repo_url]
+    # Note: this branch name (master) should be 
+    # a parameter set by the user, so that they
+    # can change it later.
+    clonecmd = ['git','clone','--recursive','-b',parent_branch_name,parent_repo_url]
     logging.debug("Running cmd: %s"%(' '.join(clonecmd)))
     cloneproc = subprocess.Popen(
             clonecmd, 
@@ -154,59 +141,102 @@ def process_payload(payload, meta, config):
             stderr=PIPE, 
             cwd=scratch_dir
     )
-    status_failed, status_file = record_and_check_output(cloneproc,"git clone",unique_filename)
-    if status_failed:
-        build_status = "fail"
-        abort = True
+    status_failed, status_file = record_and_check_output(
+            cloneproc,
+            "git clone",
+            unique_filename
+    )
+    ## Fails if word "error" or "exception" show up anywhere.
+    #if status_failed:
+    #    build_status = "fail"
+    #    abort = True
 
-
-    # Two entirely different workflows,
-    # depending on whether a PR is already open
+    # We have two different workflows,
+    # depending on whether a PR 
+    # has already been opened or not
     token = config['github_access_token']
     g = Github(token)
     r = g.get_repo(full_repo_name)
     parent_r = g.get_repo(parent_full_repo_name)
 
 
-    # We need to add which submodule head commit 
-    # we're updating to this commit message
+    # Which commit are we updating the submodule to?
     # 
     # The merge_pr_event.json sample payload
     # includes this in the payload at
     # 
     #   payload['pull_request']['merge_commit_sha']
-
+    # 
     new_sha = payload['pull_request']['merge_commit_sha']
 
-    commit_prefix = '[Uncle Archie] Updating submodule %s'%full_sub_name
-
-    commit_msg = '[Uncle Archie] Updating submodule %s to commit %s'%(full_sub_name,new_sha[0:7])
+    commit_prefix = '[Uncle Archie] Update submodule %s'%full_sub_name
+    commit_msg = '%s to commit %s'%(commit_prefix,new_sha[0:7])
     pr_msg = commit_msg 
 
-    # Look for a PR containing commit_prefix
-    # If we find one, do a commit and a push
-    # If we don't find one, do a branch and a PR
-    existing_pr_head = None
-    for pr in parent_r.get_pulls(state='open',base='master'):
-        if commit_prefix in pr.title:
-            # Get the branch name
-            head = existing_pr_head
-            # Update the title with the new commit
-            pr.edit(title = commit_msg)
-            break
 
-    if existing_pr_head is not None:
+    # Iterate through all open pull requests having master as their base
+    # Look for a PR containing commit_prefix in the title (updates same submodule)
+
+
+
+
+    # 3 possibilities:
+    # 1. If we find one PR with that in the title, use it (make our commit on that PR)
+    # 2. If we find 2+ PRs with that in the title, keep the freshest, close the others
+    # 3. No PRs, in which case, create branch and open PR
+
+
+
+    # if there is an existing PR,
+    # save the branch name 
+    # and the pull request object
+    existing_pr_head_sha = None
+    existing_pr_head_branch = None
+    existing_pr = None
+
+    # is this the first open PR to update this submodule?
+    first = True
+
+    # Look for open PRs that update this submodule
+    # (sort by most recent first)
+    for pr in parent_r.get_pulls(state='open',sort='created',direction='desc',base='master'):
+
+        # the pull request title should be prefixed with Uncle Archie
+        # and include the name of the submodule being updated 
+        if commit_prefix in pr.title:
+
+            # We found an existing (stale) pull request that updates the submodule (to a stale commit)
+
+            # Get head branch name for this existing pull request
+            head_branch = payload['pull_request']['head']['ref']
+
+            if first:
+                # Save information about the existing pull request
+                existing_pr_head_sha = pr.head.sha
+                existing_pr_head_branch = pr.head.ref
+                existing_pr = pr
+                first = False
+            else:
+                # Close the (crusty) pull request
+                pr.edit(state = 'closed')
+            
+
+    if existing_pr_head_sha is not None:
 
         # ------------------------------------
-        # Begin sync PR workflow 
+        # Begin "sync with existing PR" workflow 
 
-        ######################
-        # Unique branch name
-        ######################
+        # We know that the existing PR
+        # must be coming from a branch 
+        # in this repo (not a fork)
+        branch_name = existing_pr_head_branch
 
-        # We know this is a branch in the same repo
-        # b/c, eyyy, it's me, Uncle Archie
-        branch_name = existing_pr_head
+
+        # Update the PR title for this first (most recent) PR/commit
+        # "[Uncle Archie] Update submodule dcppc/something to commit XYZ"
+        existing_pr.edit(title = commit_msg)
+
+
 
         ######################
         # Check out branch 
@@ -224,10 +254,15 @@ def process_payload(payload, meta, config):
                     stderr=PIPE, 
                     cwd=repo_dir
             )
-            status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
-            if status_failed:
-                build_status = "fail"
-                abort = True
+            status_failed, status_file = record_and_check_output(
+                    coproc,
+                    "git checkout",
+                    unique_filename
+            )
+            ## Fails if word "error" or "exception" show up anywhere.
+            #if status_failed:
+            #    build_status = "fail"
+            #    abort = True
 
         # In case of new submodule
         if not abort:
@@ -238,24 +273,31 @@ def process_payload(payload, meta, config):
                     stderr=PIPE, 
                     cwd=repo_dir
             )
-            status_failed, status_file = record_and_check_output(suproc,"submodule update",unique_filename)
-            if status_failed:
-                build_status = "fail"
-                abort = True
-
+            status_failed, status_file = record_and_check_output(
+                    suproc,
+                    "submodule update",
+                    unique_filename
+            )
+            ## Fails if word "error" or "exception" show up anywhere.
+            #if status_failed:
+            #    build_status = "fail"
+            #    abort = True
+    
         ######################
         # Check out the master branch of the submodule
         # and pull the latest changes from upstream
         ######################
-
+    
         if not abort:
-
+    
             if repo_name == 'dcppc-workshops':
                 submodule_dir_relative = os.path.join('docs','workshops')
             else:
                 submodule_dir_relative = os.path.join('docs', repo_name)
-
+    
             submodule_dir = os.path.join(repo_dir, submodule_dir_relative)
+    
+
 
             subcocmd = ['git','checkout','master']
             logging.debug("Running cmd: %s"%(' '.join(subcocmd)))
@@ -265,11 +307,18 @@ def process_payload(payload, meta, config):
                     stderr=PIPE, 
                     cwd=submodule_dir
             )
-            status_failed, status_file = record_and_check_output(subcoproc,"git checkout submodule",unique_filename)
-            if status_failed:
-                build_status = "fail"
-                abort = True
+            status_failed, status_file = record_and_check_output(
+                    subcoproc,
+                    "git checkout submodule",
+                    unique_filename
+            )
+            ## Fails if word "error" or "exception" show up anywhere.
+            #if status_failed:
+            #    build_status = "fail"
+            #    abort = True
 
+
+    
             pullcmd = ['git','pull','origin','master']
             logging.debug("Running cmd: %s"%(' '.join(pullcmd)))
             pullproc = subprocess.Popen(
@@ -278,17 +327,24 @@ def process_payload(payload, meta, config):
                     stderr=PIPE, 
                     cwd=submodule_dir
             )
-            status_failed, status_file = record_and_check_output(pullproc,"git pull submodule",unique_filename)
-            if status_failed:
-                build_status = "fail"
-                abort = True
+            status_failed, status_file = record_and_check_output(
+                    pullproc,
+                    "git pull submodule",
+                    unique_filename
+            )
+            ## Fails if word "error" or "exception" show up anywhere.
+            #if status_failed:
+            #    build_status = "fail"
+            #    abort = True
+    
+
 
         ######################
         # Add commit push the new submodule
         ######################
-
+    
         if not abort:
-
+    
             # Add the submodule
             addcmd = ['git','add',submodule_dir_relative]
             logging.debug("Running cmd: %s"%(' '.join(addcmd)))
@@ -302,10 +358,10 @@ def process_payload(payload, meta, config):
             if status_failed:
                 build_status = "fail"
                 abort = True
-
-
+    
+    
             # Commit the new submodule
-
+    
             commitcmd = ['git','commit',submodule_dir_relative,'-m',commit_msg]
             logging.debug("Running cmd: %s"%(' '.join(commitcmd)))
             commitproc = subprocess.Popen(
@@ -314,13 +370,17 @@ def process_payload(payload, meta, config):
                     stderr=PIPE,
                     cwd=repo_dir
             )
-            status_failed, status_file = record_and_check_output(commitproc,"git commit submodule",unique_filename)
+            status_failed, status_file = record_and_check_output(
+                    commitproc,
+                    "git commit submodule",
+                    unique_filename
+            )
             if status_failed:
                 build_status = "fail"
                 abort = True
-
-
-
+    
+    
+    
             pushcmd = ['git','push','origin',branch_name]
             logging.debug("Running cmd: %s"%(' '.join(pushcmd)))
             pushproc = subprocess.Popen(
@@ -329,18 +389,23 @@ def process_payload(payload, meta, config):
                     stderr=PIPE,
                     cwd=repo_dir
             )
-            status_failed, status_file = record_and_check_output(pushproc,"git push origin branch",unique_filename)
+            status_failed, status_file = record_and_check_output(
+                    pushproc,
+                    "git push origin branch",
+                    unique_filename
+            )
             if status_failed:
                 build_status = "fail"
                 abort = True
-
-        # End sync PR workflow 
+    
+        # End "sync with existing PR" workflow 
         # ------------------------------------
 
     else:
 
         # ------------------------------------
-        # Begin open new PR workflow 
+        # Begin "open new PR" workflow
+
 
         ######################
         # Unique branch name
@@ -363,28 +428,38 @@ def process_payload(payload, meta, config):
             logging.debug("Running cmd: %s"%(' '.join(cocmd)))
             coproc = subprocess.Popen(
                     cocmd,
-                    stdout=PIPE, 
-                    stderr=PIPE, 
+                    stdout=PIPE,
+                    stderr=PIPE,
                     cwd=repo_dir
             )
-            status_failed, status_file = record_and_check_output(coproc,"git checkout",unique_filename)
-            if status_failed:
-                build_status = "fail"
-                abort = True
+            status_failed, status_file = record_and_check_output(
+                    coproc,
+                    "git checkout",
+                    unique_filename
+            )
+            ## Fails if word "error" or "exception" show up anywhere.
+            #if status_failed:
+            #    build_status = "fail"
+            #    abort = True
 
         # In case of new submodule
         if not abort:
             sucmd = ['git','submodule','update','--init']
             suproc = subprocess.Popen(
                     sucmd,
-                    stdout=PIPE, 
-                    stderr=PIPE, 
+                    stdout=PIPE,
+                    stderr=PIPE,
                     cwd=repo_dir
             )
-            status_failed, status_file = record_and_check_output(suproc,"submodule update",unique_filename)
-            if status_failed:
-                build_status = "fail"
-                abort = True
+            status_failed, status_file = record_and_check_output(
+                    suproc,
+                    "submodule update",
+                    unique_filename
+            )
+            ## Fails if word "error" or "exception" show up anywhere.
+            #if status_failed:
+            #    build_status = "fail"
+            #    abort = True
 
 
         ######################
@@ -405,27 +480,37 @@ def process_payload(payload, meta, config):
             logging.debug("Running cmd: %s"%(' '.join(subcocmd)))
             subcoproc = subprocess.Popen(
                     subcocmd,
-                    stdout=PIPE, 
-                    stderr=PIPE, 
+                    stdout=PIPE,
+                    stderr=PIPE,
                     cwd=submodule_dir
             )
-            status_failed, status_file = record_and_check_output(subcoproc,"git checkout submodule",unique_filename)
-            if status_failed:
-                build_status = "fail"
-                abort = True
+            status_failed, status_file = record_and_check_output(
+                    subcoproc,
+                    "git checkout submodule",
+                    unique_filename
+            )
+            ## Fails if word "error" or "exception" show up anywhere.
+            #if status_failed:
+            #    build_status = "fail"
+            #    abort = True
 
             pullcmd = ['git','pull','origin','master']
             logging.debug("Running cmd: %s"%(' '.join(pullcmd)))
             pullproc = subprocess.Popen(
                     pullcmd,
-                    stdout=PIPE, 
-                    stderr=PIPE, 
+                    stdout=PIPE,
+                    stderr=PIPE,
                     cwd=submodule_dir
             )
-            status_failed, status_file = record_and_check_output(pullproc,"git pull submodule",unique_filename)
-            if status_failed:
-                build_status = "fail"
-                abort = True
+            status_failed, status_file = record_and_check_output(
+                    pullproc,
+                    "git pull submodule",
+                    unique_filename
+            )
+            ## Fails if word "error" or "exception" show up anywhere.
+            #if status_failed:
+            #    build_status = "fail"
+            #    abort = True
 
 
         ######################
@@ -443,7 +528,11 @@ def process_payload(payload, meta, config):
                     stderr=PIPE,
                     cwd=repo_dir
             )
-            status_failed, status_file = record_and_check_output(addproc,"git add submodule",unique_filename)
+            status_failed, status_file = record_and_check_output(
+                    addproc,
+                    "git add submodule",
+                    unique_filename
+            )
             if status_failed:
                 build_status = "fail"
                 abort = True
@@ -459,7 +548,11 @@ def process_payload(payload, meta, config):
                     stderr=PIPE,
                     cwd=repo_dir
             )
-            status_failed, status_file = record_and_check_output(commitproc,"git commit submodule",unique_filename)
+            status_failed, status_file = record_and_check_output(
+                    commitproc,
+                    "git commit submodule",
+                    unique_filename
+            )
             if status_failed:
                 build_status = "fail"
                 abort = True
@@ -474,7 +567,11 @@ def process_payload(payload, meta, config):
                     stderr=PIPE,
                     cwd=repo_dir
             )
-            status_failed, status_file = record_and_check_output(pushproc,"git push origin branch",unique_filename)
+            status_failed, status_file = record_and_check_output(
+                    pushproc,
+                    "git push origin branch",
+                    unique_filename
+            )
             if status_failed:
                 build_status = "fail"
                 abort = True
@@ -500,7 +597,11 @@ def process_payload(payload, meta, config):
                     stderr=PIPE,
                     cwd=repo_dir
             )
-            status_failed, status_file = record_and_check_output(hubproc,"create pull request",unique_filename)
+            status_failed, status_file = record_and_check_output(
+                    hubproc,
+                    "create pull request"
+                    ,unique_filename
+            )
             if status_failed:
                 build_status = "fail"
                 abort = True
@@ -512,8 +613,10 @@ def process_payload(payload, meta, config):
 
         os.environ['GITHUB_TOKEN'] = ""
 
-        # End open new PR workflow 
+
+        # End open new PR workflow
         # ------------------------------------
+
 
     # End private-www submodule update
     # -----------------------------------------------
