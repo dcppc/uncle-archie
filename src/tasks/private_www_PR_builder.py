@@ -113,7 +113,7 @@ class private_www_PR_builder(PyGithubTask):
         if self.is_pr(payload):
 
             # must be a whitelisted repo
-            if self.get_full_repo_name(payload) in self.repo_whitelist:
+            if self.get_full_repo_name(payload) in self.repo_whitelist or len(self.repo_whitelist) is 0:
 
                 # must be PR being opened or synced
                 if self.is_pr_opened(payload) or self.is_pr_sync(payload):
