@@ -1,14 +1,13 @@
 import archie
 
 # webapp
-app = archie.webapp.app
+app = archie.webapp.get_flask_app()
 
 # set config
-config = archie.webapp.app.config
-config['private_www_build_test'] = {
-        'repo_whitelist' : ['dcppc/private-www','charlesreid1/private-www']
+app.config['private_www_build_test'] = {
+        'repo_whitelist' : ['dcppc/private-www']
 }
-config['debug'] = True
+app.config['debug'] = True
 
 # set payload handler
 app.set_payload_handler('dcppc')
