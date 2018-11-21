@@ -27,9 +27,12 @@ Source code mirror: <https://github.com/charlesreid1/uncle-archie>
 
 ## Quick Start
 
+**(Unless otherwise noted, the following commands should be
+executed from the command line.)**
+
 To get started, run the Uncle Archie Flask server:
 
-```
+```bash
 python uncle_archie.py
 ```
 
@@ -41,7 +44,9 @@ define a custom function that takes the payload, a dictionary
 of meta-info (repo, branch name, and action name), and the 
 configuration dictionary:
 
-```
+(The following is Python code)
+
+```python
 def process_payload(payload, meta, config):
     # Do some stuff here, 
     # like use the payload to see
@@ -53,7 +58,7 @@ def process_payload(payload, meta, config):
 
 Put this in a Python file in the the `hooks/` directory:
 
-```
+```bash
 cat > hooks/my_cool_hook.py <<EOF
 def process_payload(payload, meta, config):
     # Do some stuff here, 
@@ -68,10 +73,13 @@ EOF
 Now edit `process_payload.py` in the repo so that it loads
 this new hook:
 
-```
+(The following is Python code)
+
+```python
 # ...
 # other import statements
 # ...
+
 from hooks.my_cool_hook import process_payload as my_cool_hook
 
 def process_payload(payload,meta,config):

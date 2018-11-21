@@ -8,10 +8,6 @@ import json
 import logging
 
 
-# Config file and directories to look
-CONFIG_FILE = 'config.json'
-
-
 def get_flask_app():
     app = UAFlask(
             __name__,

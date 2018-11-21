@@ -3,25 +3,32 @@ from .github_base import GithubTask
 import logging
 
 
-class GithubTestTask(GithubTask):
+class GithubBuildTask(GithubTask):
     """
     This task runs a test of every Github boolean test method
     """
     def run(self,payload,meta,config):
-        pr_is_open = self.is_pull_request_open(payload)
-        msg = "%s: run(): Is pull request open? %s"%(self.__class__.__name__,pr_is_open)
+        msg = "%s: run(): Starting..."%(self.__class__.__name__)
         logging.debug(msg)
 
-        pr_is_sync = self.is_pull_request_sync(payload)
+        pr_is_opened = self.is_pr_opened(payload)
+        msg = "%s: run(): Is pull request open? %s"%(self.__class__.__name__,pr_is_opened)
+        logging.debug(msg)
+
+        pr_is_sync = self.is_pr_sync(payload)
         msg = "%s: run(): Is pull request sync? %s"%(self.__class__.__name__,pr_is_sync)
         logging.debug(msg)
 
-        pr_is_close = self.is_pull_request_close(payload)
-        msg = "%s: run(): Is pull request close? %s"%(self.__class__.__name__,pr_is_close)
+        pr_is_close = self.is_pr_closed(payload)
+        msg = "%s: run(): Is pull request closed? %s"%(self.__class__.__name__,pr_is_close)
         logging.debug(msg)
 
-        is_merge = self.is_pull_request_merge_commit(payload)
-        msg = "%s: run(): Is this a merge commit? %s"%(self.__class__.__name__,is_merge)
+        is_merged = self.is_pr_closed_merged(payload)
+        msg = "%s: run(): Is this PR closed via merging? %s"%(self.__class__.__name__,is_merged)
+        logging.debug(msg)
+
+        is_unmerged = self.is_pr_closed_unmerged(payload)
+        msg = "%s: run(): Is this PR closed without merging? %s"%(self.__class__.__name__,is_unmerged)
         logging.debug(msg)
 
         pr_number = self.get_pull_request_number(payload)
@@ -53,33 +60,18 @@ class GithubTestTask(GithubTask):
         logging.debug(msg)
 
 
-class TestPRTask(GithubTestTask):
+class BuildPRTask(GithubBuildTask):
     """
     This task tests if this is a pull request payload
     """
     LABEL = "PR test task"
     def run(self,payload,meta,config):
         # This test checks PR webhooks only
-        if not self.is_pull_request(payload):
+        if self.is_pr(payload):
+            super().run(payload,meta,config)
+        else:
             msg = "TestPRTask: run(): This is not a pull request payload"
             logging.debug(msg)
             return
-        else:
-            super().run(payload,meta,config)
-
-
-class TestPRMCTask(GithubTestTask):
-    """
-    Task to test if this is a pull request merge commit payload
-    """
-    LABEL = "merge commit test task"
-    def run(self,payload,meta,config):
-        # This test checks merge commit webhooks only
-        if not self.is_pull_request_merge_commit(payload):
-            msg = "TestMergeCommitTask: run(): This is not a pull request merge commit payload"
-            logging.debug(msg)
-            return
-        else:
-            super().run(payload,meta,config)
 
 

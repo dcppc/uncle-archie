@@ -3,4 +3,4 @@ PyGithub>=1.39
 requests>=2.19
 mkdocs>=1.0
 pyyaml
-nose
+pytest

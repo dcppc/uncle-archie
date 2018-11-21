@@ -2,16 +2,16 @@ from .factory import PayloadHandlerFactory
 
 from .handlers import \
         BasePayloadHandler, \
-        PRTestingPayloadHandler, \
-        MCTestingPayloadHandler, \
-        LoggingPayloadHandler, \
+        PRBuildPayloadHandler, \
+        LoggingPayloadHandler
+
+from .dcppc import \
         DCPPCPayloadHandler
 
 __all__ = [
         'PayloadHandlerFactory',
         'BasePayloadHandler',
-        'PRTestingPayloadHandler',
-        'MCTestingPayloadHandler',
+        'PRBuildPayloadHandler',
         'LoggingPayloadHandler',
         'DCPPCPayloadHandler'
 ]
