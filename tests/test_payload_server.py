@@ -5,6 +5,16 @@ import os, sys
 import json
 import unittest
 
+"""
+Test Uncle Archie Server
+(empty payload handler)
+
+
+This runs a test client-server configuration for the 
+Uncle Archie flask server, and tests that the server
+returns a 200 code when accessed.
+"""
+
 class test_payload_server(unittest.TestCase):
     def test_webhooks_ok(self):
         """

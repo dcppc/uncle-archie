@@ -13,6 +13,12 @@ This sets up Uncle Archie with the PR test
 payload handler, and checks whether that
 payload handler is correctly handled.
 
+Note that Uncle Archie can be run in non-test 
+mode with this same PR handler by running the
+script in:
+
+    examples/example_payload_handler_pr.py
+
 assertLogs:
 https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertLogs
 """
