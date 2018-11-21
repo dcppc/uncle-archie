@@ -30,8 +30,6 @@ app.config['DEBUG'] = True
 app.config['TESTING'] = True
 app.config['GITHUB_ACCESS_TOKEN'] = GITHUB_ACCESS_TOKEN
 
-client = app.test_client()
-
 app.set_payload_handler('dcppc')
 
 # set payload handler
