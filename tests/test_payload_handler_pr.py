@@ -1,13 +1,6 @@
 import archie
 
 from .payload_handler_base import payload_handler_base
-from .utils import \
-        extract_payload, \
-        post_pingpong_webhook, \
-        post_pr_opened, \
-        post_pr_closed_merged, \
-        post_pr_closed_unmerged, \
-        post_pr_sync
 
 import logging
 import os, sys
@@ -48,7 +41,7 @@ class test_pr_payload_handler(payload_handler_base):
         ]
         self.doit(
                 'pr_test',
-                post_pr_opened,
+                archie.tests.post_pr_opened,
                 log_statements
         )
 
@@ -72,7 +65,7 @@ class test_pr_payload_handler(payload_handler_base):
         ]
         self.doit(
                 'pr_test',
-                post_pr_closed_merged,
+                archie.tests.post_pr_closed_merged,
                 log_statements
         )
 
@@ -96,7 +89,7 @@ class test_pr_payload_handler(payload_handler_base):
         ]
         self.doit(
                 'pr_test',
-                post_pr_closed_unmerged,
+                archie.tests.post_pr_closed_unmerged,
                 log_statements
         )
 
@@ -120,7 +113,7 @@ class test_pr_payload_handler(payload_handler_base):
         ]
         self.doit(
                 'pr_test',
-                post_pr_sync,
+                archie.tests.post_pr_sync,
                 log_statements
         )
     
