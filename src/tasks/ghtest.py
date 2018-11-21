@@ -3,7 +3,7 @@ from .github_base import GithubTask
 import logging
 
 
-class GithubTestTask(GithubTask):
+class GithubBuildTask(GithubTask):
     """
     This task runs a test of every Github boolean test method
     """
@@ -60,7 +60,7 @@ class GithubTestTask(GithubTask):
         logging.debug(msg)
 
 
-class TestPRTask(GithubTestTask):
+class BuildPRTask(GithubBuildTask):
     """
     This task tests if this is a pull request payload
     """

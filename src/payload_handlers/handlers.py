@@ -47,13 +47,13 @@ class LoggingPayloadHandler(TaskPayloadHandler):
         self.tasks.append(LoggingTask(config,**kwargs))
 
 
-class PRTestingPayloadHandler(TaskPayloadHandler):
+class PRBuildPayloadHandler(TaskPayloadHandler):
     def __init__(self,config,**kwargs):
         """
-        Create a PR test task and store it in the task container
+        Create a PR build task and store it in the task container
         """
         super().__init__(config,**kwargs)
 
-        self.tasks.append(TestPRTask(config,**kwargs))
+        self.tasks.append(BuildPRTask(config,**kwargs))
 
 

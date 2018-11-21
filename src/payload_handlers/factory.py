@@ -1,6 +1,6 @@
 from .handlers import \
         BasePayloadHandler, \
-        PRTestingPayloadHandler, \
+        PRBuildPayloadHandler, \
         LoggingPayloadHandler
 
 from .dcppc import DCPPCPayloadHandler
@@ -14,7 +14,7 @@ class PayloadHandlerFactory(object):
     """
     payload_handlers = {
             'default': LoggingPayloadHandler,
-            'pr_test': PRTestingPayloadHandler,
+            'pr_build': PRBuildPayloadHandler,
             'dcppc':   DCPPCPayloadHandler
     }
 
