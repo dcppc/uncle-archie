@@ -110,33 +110,32 @@ class private_www_PR_builder(PyGithubTask):
         validated = False
 
         # must be a pull request
-        if self.is_pull_request(payload):
+        if self.is_pr(payload):
 
             # must be a whitelisted repo
             if self.get_full_repo_name(payload) in self.repo_whitelist:
 
                 # must be PR being opened or synced
-                if self.is_pull_request_open(payload) \
-                or self.is_pull_request_sync(payload):
+                if self.is_pr_opened(payload) or self.is_pr_sync(payload):
 
                     validated = True
 
                 else:
                     msg = "%s: validate(): Skipping task, "%(self.LABEL)
-                    msg += "this payload's repository %s "%get_full_repo_name(payload)
+                    msg += "this payload's repository %s "%(self.get_full_repo_name(payload))
                     msg += "is on the whitelist, but this PR is not "
                     msg += "being opened or synced."
                     logging.debug(msg)
 
             else:
                 msg = "%s: validate(): Skipping task, "%(self.LABEL)
-                msg += "this payload's repository %s "%get_full_repo_name(payload)
+                msg += "this payload's repository %s "%(self.get_full_repo_name(payload))
                 msg += "is not on the whitelist: %s"%(", ".join(self.repo_whitelist))
                 logging.debug(msg)
 
         else:
             msg = "%s: validate(): Skipping task, "%(self.LABEL)
-            msg += "this payload for repository %s "%get_full_repo_name(payload)
+            msg += "this payload for repository %s "%(self.get_full_repo_name(payload))
             msg += "is not a pull request."
             logging.debug(msg)
 
