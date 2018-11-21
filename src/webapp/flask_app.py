@@ -27,8 +27,8 @@ class UAFlask(Flask):
                 # relative path
                 self.config.from_pyfile(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
                 loaded_config = True
-                msg = "UAFlask: __init__(): Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
-                msg += "Loaded config file at %s"%(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
+                msg =  "UAFlask: __init__(): Succesfuly loaded webapp config file from UNCLE_ARCHIE_CONFIG variable.\n"
+                msg += "UAFlask: __init__(): Loaded config file at %s"%(os.path.join(call,os.environ['UNCLE_ARCHIE_CONFIG']))
                 logging.info(msg)
         
             elif os.path.isfile(os.environ['UNCLE_ARCHIE_CONFIG']):
@@ -40,8 +40,8 @@ class UAFlask(Flask):
                 logging.info(msg)
         
         else:
-            err = "UAFlask: __init__(): Warning: No UNCLE_ARCHIE_CONFIG environment variable defined. "
-            err += "Looking for 'config.py' in current directory."
+            err =  "UAFlask: __init__(): Warning: No UNCLE_ARCHIE_CONFIG environment variable defined. "
+            err += "UAFlask: __init__(): Looking for 'config.py' in current directory."
             logging.info(err)
 
             # hail mary: look for config.py in the current directory
@@ -85,7 +85,7 @@ class UAFlask(Flask):
 
     def get_payload_handler(self):
         if self.payload_handler is None:
-            err = "ERROR: UAFlask: get_payload_handler(): "
+            err =  "ERROR: UAFlask: get_payload_handler(): "
             err += "No payload handler has been set!"
             logging.error(err)
             raise Exception(err)
