@@ -1,4 +1,6 @@
 from ..tasks import *
+import pprint
+
 
 class BasePayloadHandler(object):
     """
@@ -17,66 +19,41 @@ class BasePayloadHandler(object):
         err += "PayloadHandler object that defines process_payload()."
         raise Exception(err)
 
-class DumpPayloadHandler(BasePayloadHandler):
-    def __init__(self,config,**kwargs):
-        pass
-    def process_payload(self, payload, meta, config):
-        """
-        Process the payload using the default
-        task/action: dumping the payload
-        to a file.
-        """
-        pass
 
-class DCPPCPayloadHandler(DumpPayloadHandler):
-    """
-    The DCPPC Payload Handler handles payloads
-    by running all available DCPPC Tasks on 
-    each payload it receives.
-    """
+class TaskPayloadHandler(BasePayloadHandler):
     def __init__(self,config,**kwargs):
         """
-        Create all tests and store them in a container
+        Create a tasks container
         """
-        tests = []
-
-        ## private www PR builder
-        tests.append(private_www_pr_builder(config))
-
-        ## private www submodule integration PR builder
-        tests.append(private_www_submodule_integration_PR_builder(config))
-
-        ## private www submodule update PR opener
-        tests.append(private_www_submodule_update_PR_opener(config))
-
-        ## private www (heroku) deployer
-        tests.append(private_www_deployer(config))
-
-        ## use case library PR builder
-        tests.append(use_case_library_PR_builder(config))
-
-        ## use case library (gh-pages) deployer
-        tests.append(use_case_library_deployer(config))
-
-        # centillion CI tests
-        # 
-        # uncle-archie meta-CI tests
-        # 
-        # private-www CI tests
-        # 
-        # use-case-library CI tests
-
-        # save 
-        self.tests = tests
-
+        self.tasks = []
 
     def process_payload(self, payload, meta, config):
         """
         Call the parent method (to dump the payload)
         then run all the DCPPC tasks.
         """
-        # Dump payload
-        super().process_payload(payload,meta,config)
-        for t in self.tests:
+        # Run all tasks on the payload
+        for t in self.tasks:
             t.run(payload,meta,config)
+
+
+class LoggingPayloadHandler(TaskPayloadHandler):
+    def __init__(self,config,**kwargs):
+        """
+        Create a logging task and store it in the task container
+        """
+        super().__init__(config,**kwargs)
+
+        self.tasks.append(LoggingTask(config,**kwargs))
+
+
+class PRBuildPayloadHandler(TaskPayloadHandler):
+    def __init__(self,config,**kwargs):
+        """
+        Create a PR build task and store it in the task container
+        """
+        super().__init__(config,**kwargs)
+
+        self.tasks.append(BuildPRTask(config,**kwargs))
+
 

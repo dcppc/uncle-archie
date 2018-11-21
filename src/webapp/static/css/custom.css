@@ -1,0 +1,81 @@
+{#
+{% if INTROCOLOR is none %}
+    {% set INTROCOLOR='#EEE' %}
+{% endif %}
+
+{% if ACOLOR is none %}
+    {% set ACOLOR='#42DCA3' %}
+{% endif %}
+
+{% if AHOVERCOLOR is none %}
+    {% set AHOVERCOLOR='#1D9B6C' %}
+{% endif %}
+
+{% if ACOLOR is none %}
+    {% set ACOLOR='#42DCA3' %}
+{% endif %}
+
+{% if INTROBKGCOLOR is none %}
+    {% set INTROBKGCOLOR='theme/img/intro-bg-foyer.jpg' %}
+{% endif %}
+
+{% if INTROBKG is none %}
+    {% set INTROBKG='theme/img/intro-bg-foyer.jpg' %}
+{% endif %}
+
+{% if LINKSBKG is none %}
+    {% set LINKSBKG='theme/img/links-bg-books.jpg' %}
+{% endif %}
+#}
+
+.intro {
+  color: white;
+  width: 100%;
+  padding: 100px 0;
+  background: url( {{ INTROBKG }} ) no-repeat bottom center scroll;
+  background-color: black;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  -o-background-size: cover;
+}
+
+.links-section {
+  color: white;
+  width: 100%;
+  padding: 50px 0;
+  background: url( {{ LINKSBKG }} ) no-repeat center center scroll;
+  background-color: black;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  -o-background-size: cover;
+}
+
+
+
+
+.scuryv-knave-intro {
+    color: {{ INTROCOLOR }};
+}
+a {
+  color: {{ ACOLOR }};
+}
+a:hover,
+a:focus {
+  color: {{ AHOVERCOLOR }};
+}
+.btn-default {
+  border: 1px solid {{ ACOLOR }};
+  color: {{ ACOLOR }};
+  /*background-color: transparent;*/
+  background-color: #000;
+}
+.btn-default:hover,
+.btn-default:focus {
+  border: 1px solid {{ ACOLOR }};
+  outline: none;
+  color: black;
+  background-color: {{ ACOLOR }};
+}
+
