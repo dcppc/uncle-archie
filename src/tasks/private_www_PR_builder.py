@@ -1,7 +1,8 @@
 from .github_base import PyGithubTask
 
-from urllib.parse import urljoin
+import os
 import logging
+from urllib.parse import urljoin
 import yaml
 
 class private_www_PR_builder(PyGithubTask):
@@ -41,7 +42,7 @@ class private_www_PR_builder(PyGithubTask):
         # Create a temporary working directory
         self.make_temp_dir()
 
-        msg = "%s: run(): Made temporary directory at %s"%(self.temp_dir)
+        msg = "%s: run(): Made temporary directory at %s"%(self.LABEL, self.temp_dir)
         logging.debug(msg)
 
         # Each command below takes care of its own logging
@@ -53,6 +54,7 @@ class private_www_PR_builder(PyGithubTask):
 
             # clone
             # - ghurl
+            import pdb; pdb.set_trace()
             self.git_clone(payload)
 
             # checkout
@@ -63,7 +65,7 @@ class private_www_PR_builder(PyGithubTask):
             self.submodules_update(payload)
 
             # adjust base_url in mkdocs.yml
-            self.modify_mkdocs_yml()
+            self.modify_mkdocs_yml(payload)
 
             # ---------
             # Test:
@@ -77,16 +79,18 @@ class private_www_PR_builder(PyGithubTask):
             # virtualenv teardown
             self.virtualenv_teardown()
 
-            # build test: outcome of the snakemake build test
-            # move results to htdocs dir
+            # build test: 
+            # mark commit with status of build test
+            # 
+            # i dunno what url prep is
             self.build_test_url_prep(payload)
-
-            # set commit status
             self.build_test_status_update(payload)
 
-            # serve test: built and served-up documentation
-            # move results to htdocs dir
+            # serve test:
+            # build and serve up documentation
+            # (move build output to htdocs dir)
             self.serve_test_url_prep(payload)
+
             # set commit status
             self.serve_test_status_update(payload)
 
@@ -99,7 +103,7 @@ class private_www_PR_builder(PyGithubTask):
             # Cleanup:
 
             # rm temporary directory
-            rm_temp_dir()
+            self.rm_temp_dir()
 
 
     def validate(self,payload):
@@ -113,7 +117,7 @@ class private_www_PR_builder(PyGithubTask):
         if self.is_pr(payload):
 
             # must be a whitelisted repo
-            if self.get_full_repo_name(payload) in self.repo_whitelist or len(self.repo_whitelist) is 0:
+            if self.get_full_repo_name(payload) in self.repo_whitelist or len(self.repo_whitelist)==0:
 
                 # must be PR being opened or synced
                 if self.is_pr_opened(payload) or self.is_pr_sync(payload):
@@ -130,7 +134,7 @@ class private_www_PR_builder(PyGithubTask):
             else:
                 msg = "%s: validate(): Skipping task, "%(self.LABEL)
                 msg += "this payload's repository %s "%(self.get_full_repo_name(payload))
-                msg += "is not on the whitelist: %s"%(", ".join(self.repo_whitelist))
+                msg += "is not on the whitelist (%d): %s"%(len(self.repo_whitelist),", ".join(self.repo_whitelist))
                 logging.debug(msg)
 
         else:
@@ -165,17 +169,25 @@ class private_www_PR_builder(PyGithubTask):
 
         # run git clone command
         clonecmd = ['git','clone','--recursive',ghurl]
-        self.abort = run_cmd(
+        self.abort = self.run_cmd(
                 clonecmd,
                 "git clone",
                 self.temp_dir
         )
 
+        repo_short_name = self.get_short_repo_name(payload)
+        repo_dir = os.path.join(self.temp_dir,repo_short_name)
+        if not os.path.exists(repo_dir):
+            err = "Repo does not exist after clone command! Checked path: %s"%repo_dir
+            logging.exception(err)
+            raise Exception(err)
+
+
 
     def git_checkout_pr(self,payload):
         if not self.abort:
             # get head pr from payload
-            head_commit = get_pull_request_head_commit(payload)
+            head_commit = self.get_pull_request_head_commit(payload)
 
             # get repo dir
             repo_short_name = self.get_short_repo_name(payload)
@@ -183,7 +195,7 @@ class private_www_PR_builder(PyGithubTask):
 
             # checkout head pr
             cocmd = ['git','checkout',head_commit]
-            self.abort = run_cmd(
+            self.abort = self.run_cmd(
                     cocmd,
                     "git checkout",
                     repo_dir
@@ -199,7 +211,7 @@ class private_www_PR_builder(PyGithubTask):
 
             # checkout head pr
             sucmd = ['git','submodule','update','--init']
-            self.abort = run_cmd(
+            self.abort = self.run_cmd(
                     sucmd,
                     "submodule update",
                     repo_dir
@@ -207,7 +219,7 @@ class private_www_PR_builder(PyGithubTask):
 
 
     #############################################
-    # Setup methods
+    # Action methods
 
 
     def modify_mkdocs_yml(self,payload):
@@ -219,6 +231,7 @@ class private_www_PR_builder(PyGithubTask):
         if self.debug:
             return True
 
+        repo_short_name = self.get_short_repo_name(payload)
         mkdocs_yml_file = os.path.join(self.temp_dir,repo_short_name,'mkdocs.yml')
         with open(mkdocs_yml_file,'r') as f:
             lines = f.readlines()
@@ -250,7 +263,7 @@ class private_www_PR_builder(PyGithubTask):
             repo_dir = os.path.join(self.temp_dir,repo_short_name)
 
             buildcmd = ['snakemake','--nocolor','build_docs']
-            self.abort = run_cmd(
+            self.abort = self.run_cmd(
                     buildcmd,
                     "snakemake build",
                     repo_dir
@@ -268,6 +281,10 @@ class private_www_PR_builder(PyGithubTask):
         Move files to prepare the output log
         to be hosted in the htdocs dir
         """
+        HTDOCS="/www/archie.nihdatacommons.us/htdocs"
+        OUTPUT_LOG="output/log"
+        OUTPUT_SERVE="output/serve"
+
         # copy self.temp_dir,self.log_file
         # to self.htdocs_dir,self.log_file
         pass
@@ -276,7 +293,7 @@ class private_www_PR_builder(PyGithubTask):
     def build_test_status_update(self,payload): 
         # get head pr from payload
         full_repo_name = None
-        head_commit = get_pull_request_head_commit(payload)
+        head_commit = self.get_pull_request_head_commit(payload)
         pass_msg = 'Uncle Archie Task: %s: Success!'%(self.LABEL)
         fail_msg = 'Uncle Archie Task: %s: Task failed.'%(self.LABEL)
         status_url = urljoin(self.base_url,self.log_file)
@@ -329,6 +346,12 @@ class private_www_PR_builder(PyGithubTask):
         """
         # copy self.temp_dir,repo_dir,site
         # to self.htdocs_dir,unique_dir,X
+
+        HTDOCS="/www/archie.nihdatacommons.us/htdocs"
+        
+        OUTPUT_LOG="output/log"
+        OUTPUT_SERVE="output/serve"
+
         pass
 
 
