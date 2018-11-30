@@ -259,7 +259,7 @@ class UncleArchieTask(object):
         Called by child classes.
         """
         self.temp_dir = tempfile.mkdtemp()
-        return scratch_dir
+        return self.temp_dir
 
 
     def rm_temp_dir(self):
@@ -318,19 +318,14 @@ class UncleArchieTask(object):
         msg += "    %s\n"%(" ".join(cmd))
         logging.debug(msg)
 
-        # if testing,
-        # btw where is self.debug defined
-        # base? where?
-        # task?
-        # use the config, you tasks
-        # this is the base task
-        # use the config
-        # config'TESTING']
-        if config['TESTING']:
+        # the constructor initializes 
+        # self.testing and self.debug
+        if self.testing:
             # print
-            msg = "UncleArchieTask: run_cmd(): Found TESSTING variable set.\n"
-            msg += "Command: %s"%(" ".join(cmd))
-            logging.info(msg)
+            msg = "UncleArchieTask: run_cmd(): Found TESTING variable set\n"
+            msg += "  for command: %s\n"%(" ".join(cmd))
+            msg += "  (not running the command)"
+            logging.debug(msg)
             return False
         else:
 
