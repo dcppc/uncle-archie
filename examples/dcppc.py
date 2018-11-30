@@ -10,12 +10,12 @@ from secrets import GITHUB_ACCESS_TOKEN
 app = archie.webapp.get_flask_app()
 
 app.config['DEBUG'] = True
-app.config['TESTING'] = True
+#app.config['TESTING'] = True
 app.config['GITHUB_ACCESS_TOKEN'] = GITHUB_ACCESS_TOKEN
 
 client = app.test_client()
 
-app.set_payload_handler('pr_build')
+app.set_payload_handler('dcppc')
 
 logging.debug("-"*40)
 logging.debug("post_pr_opened(client)")
@@ -32,5 +32,4 @@ r = archie.tests.post_pr_closed_unmerged(client)
 logging.debug("-"*40)
 logging.debug("post_pr_sync(client)")
 r = archie.tests.post_pr_sync(client)
-
 
