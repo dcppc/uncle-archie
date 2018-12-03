@@ -288,6 +288,7 @@ class private_www_PR_builder(PyGithubTask):
         # get head pr from payload
         full_repo_name = self.get_full_repo_name(payload)
         head_commit = self.get_pull_request_head_commit(payload)
+        pull_number = self.get_pull_request_number(payload)
         pass_msg = 'Uncle Archie Task: %s: Success!'%(self.LABEL)
         fail_msg = 'Uncle Archie Task: %s: Task failed.'%(self.LABEL)
         status_url = urljoin(self.base_url,self.log_file)
