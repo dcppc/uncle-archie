@@ -27,15 +27,15 @@ logging.debug("-"*40)
 logging.debug("post_pr_opened(client)")
 r = archie.tests.post_pr_opened(client)
 
-### logging.debug("-"*40)
-### logging.debug("post_pr_closed_merged(client)")
-### r = archie.tests.post_pr_closed_merged(client)
-### 
-### logging.debug("-"*40)
-### logging.debug("post_pr_closed_unmerged(client)")
-### r = archie.tests.post_pr_closed_unmerged(client)
-### 
-### logging.debug("-"*40)
-### logging.debug("post_pr_sync(client)")
-### r = archie.tests.post_pr_sync(client)
+logging.debug("-"*40)
+logging.debug("post_pr_closed_merged(client)")
+r = archie.tests.post_pr_closed_merged(client)
+
+logging.debug("-"*40)
+logging.debug("post_pr_closed_unmerged(client)")
+r = archie.tests.post_pr_closed_unmerged(client)
+
+logging.debug("-"*40)
+logging.debug("post_pr_sync(client)")
+r = archie.tests.post_pr_sync(client)
 
