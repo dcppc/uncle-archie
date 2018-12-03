@@ -156,7 +156,7 @@ class UncleArchieTask(object):
         Uncle Archie is running in testing
         mode (default: no)
         """
-        self.debug = False
+        self.testing = False
         if 'TESTING' in config.keys():
             if config['TESTING'] is True:
                 self.testing = True
@@ -339,7 +339,7 @@ class UncleArchieTask(object):
             o = proc.stdout.read().decode('utf-8')
             e = proc.stderr.read().decode('utf-8')
 
-            elines = ["=====================================\n",
+            olines = ["=====================================\n",
                       "======= CMD: %s\n"%(" ".join(cmd)),
                       "======= STDOUT\n",
                       "=====================================\n",
@@ -361,16 +361,20 @@ class UncleArchieTask(object):
             msg = "UncleArchieTask: run_cmd(): Finished running command"
             logging.debug(msg)
 
-            if "exception" in o.lower \
-            or "exception" in e.lower:
-                err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected exception [X]"
+            if "exception" in o.lower() \
+            or "exception" in e.lower():
+                err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected exception in output [X]"
                 logging.error(err)
+                logging.error(o)
+                logging.error(e)
                 return True
 
-            if "error" in o.lower \
-            or "error" in e.lower:
-                err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected error [X]"
+            if "error" in o.lower() \
+            or "error" in e.lower():
+                err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected error in output [X]"
                 logging.error(err)
+                logging.error(o)
+                logging.error(e)
                 return True
 
             return False

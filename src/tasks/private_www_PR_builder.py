@@ -1,5 +1,6 @@
 from .github_base import PyGithubTask
 
+import github
 import os
 import logging
 from urllib.parse import urljoin
@@ -10,6 +11,7 @@ class private_www_PR_builder(PyGithubTask):
     Builds pull requests on the private-www repo.
     """
     LABEL = "private_www_PR_builder"
+    WHITELIST = ['dcppc/private-www']
 
     def run(self,payload,meta,config):
         """
@@ -54,7 +56,6 @@ class private_www_PR_builder(PyGithubTask):
 
             # clone
             # - ghurl
-            import pdb; pdb.set_trace()
             self.git_clone(payload)
 
             # checkout
@@ -117,7 +118,7 @@ class private_www_PR_builder(PyGithubTask):
         if self.is_pr(payload):
 
             # must be a whitelisted repo
-            if self.get_full_repo_name(payload) in self.repo_whitelist or len(self.repo_whitelist)==0:
+            if self.get_full_repo_name(payload) in self.WHITELIST:
 
                 # must be PR being opened or synced
                 if self.is_pr_opened(payload) or self.is_pr_sync(payload):
@@ -127,14 +128,14 @@ class private_www_PR_builder(PyGithubTask):
                 else:
                     msg = "%s: validate(): Skipping task, "%(self.LABEL)
                     msg += "this payload's repository %s "%(self.get_full_repo_name(payload))
-                    msg += "is on the whitelist, but this PR is not "
+                    msg += "is in the whitelist, but this PR is not "
                     msg += "being opened or synced."
                     logging.debug(msg)
 
             else:
                 msg = "%s: validate(): Skipping task, "%(self.LABEL)
                 msg += "this payload's repository %s "%(self.get_full_repo_name(payload))
-                msg += "is not on the whitelist (%d): %s"%(len(self.repo_whitelist),", ".join(self.repo_whitelist))
+                msg += "is not in the whitelist: %s"%(", ".join(self.WHITELIST))
                 logging.debug(msg)
 
         else:
@@ -175,13 +176,6 @@ class private_www_PR_builder(PyGithubTask):
                 self.temp_dir
         )
 
-        repo_short_name = self.get_short_repo_name(payload)
-        repo_dir = os.path.join(self.temp_dir,repo_short_name)
-        if not os.path.exists(repo_dir):
-            err = "Repo does not exist after clone command! Checked path: %s"%repo_dir
-            logging.exception(err)
-            raise Exception(err)
-
 
 
     def git_checkout_pr(self,payload):
@@ -218,9 +212,9 @@ class private_www_PR_builder(PyGithubTask):
             )
 
 
+
     #############################################
     # Action methods
-
 
     def modify_mkdocs_yml(self,payload):
         """
@@ -292,7 +286,7 @@ class private_www_PR_builder(PyGithubTask):
 
     def build_test_status_update(self,payload): 
         # get head pr from payload
-        full_repo_name = None
+        full_repo_name = self.get_full_repo_name(payload)
         head_commit = self.get_pull_request_head_commit(payload)
         pass_msg = 'Uncle Archie Task: %s: Success!'%(self.LABEL)
         fail_msg = 'Uncle Archie Task: %s: Task failed.'%(self.LABEL)
@@ -306,10 +300,10 @@ class private_www_PR_builder(PyGithubTask):
                         head_commit,
                         "success",
                         pass_msg,
-                        self.label,
+                        self.LABEL,
                         status_url
                 )
-            except GithubException as e:
+            except github.GithubException as e:
                 logging.error("Github error: commit status failed to update.")
 
             logging.info("private-www build test succes:")
@@ -325,10 +319,10 @@ class private_www_PR_builder(PyGithubTask):
                         head_commit,
                         "failure",
                         fail_msg,
-                        self.label,
+                        self.LABEL,
                         status_url
                 )
-            except GithubException as e:
+            except github.GithubException as e:
                 logging.error("Github error: commit status failed to update.")
 
             logging.info("private-www build test failure:")
