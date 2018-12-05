@@ -273,7 +273,8 @@ class UncleArchieTask(object):
 
         Called by child classes.
         """
-        shutil.rmtree(self.temp_dir)
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
         self.temp_dir = None
 
 
@@ -328,6 +329,13 @@ class UncleArchieTask(object):
             logging.debug(msg)
             return False
         else:
+
+            if not os.path.exists(cwd):
+                msg = "UncleArchieTask: run_cmd(): "
+                msg += "Specified directory %s does not exist!"%(cwd)
+                msg += " (not running command)"
+                logging.debug(msg)
+                return False
 
             proc = subprocess.Popen(
                     cmd,
