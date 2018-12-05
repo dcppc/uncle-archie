@@ -277,6 +277,14 @@ class private_www_PR_builder(PyGithubTask):
                     repo_dir
             )
 
+            pip_bin = os.path.join(self.venv_dir,self.venv_label,'bin','pip')
+            oyamlinstallcmd = [pip_bin,'install','oyaml']
+            self.abort = self.run_cmd(
+                    oyamlinstallcmd,
+                    "pip install oyaml",
+                    repo_dir
+            )
+
             msg = "PyGithubTask: virtualenv_install(): Success!"
             logging.debug(msg)
 
