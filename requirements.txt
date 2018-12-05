@@ -4,4 +4,3 @@ requests>=2.19
 mkdocs>=1.0
 pyyaml
 pytest
-oyaml
