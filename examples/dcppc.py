@@ -23,19 +23,41 @@ client = app.test_client()
 
 app.set_payload_handler('dcppc')
 
-logging.debug("-"*40)
-logging.debug("post_pr_opened(client)")
-r = archie.tests.post_pr_opened(client)
+
 
 logging.debug("-"*40)
-logging.debug("post_pr_closed_merged(client)")
-r = archie.tests.post_pr_closed_merged(client)
+logging.debug("sync")
+r = archie.tests.dcppc_private_www_sync(client)
 
-logging.debug("-"*40)
-logging.debug("post_pr_closed_unmerged(client)")
-r = archie.tests.post_pr_closed_unmerged(client)
+### logging.debug("-"*40)
+### logging.debug("closed (merged)")
+### r = archie.tests.dcppc_private_www_closed_merged(client)
+### 
+### logging.debug("-"*40)
+### logging.debug("closed (unmerged)")
+### r = archie.tests.dcppc_private_www_closed_unmerged(client)
+### 
+### logging.debug("-"*40)
+### logging.debug("push")
+### r = archie.tests.dcppc_private_www_push(client)
 
-logging.debug("-"*40)
-logging.debug("post_pr_sync(client)")
-r = archie.tests.post_pr_sync(client)
+
+############################
+
+
+#logging.debug("-"*40)
+#logging.debug("post_pr_opened(client)")
+#r = archie.tests.post_pr_opened(client)
+#
+#logging.debug("-"*40)
+#logging.debug("post_pr_closed_merged(client)")
+#r = archie.tests.post_pr_closed_merged(client)
+#
+#logging.debug("-"*40)
+#logging.debug("post_pr_closed_unmerged(client)")
+#r = archie.tests.post_pr_closed_unmerged(client)
+#
+#logging.debug("-"*40)
+#logging.debug("post_pr_sync(client)")
+#r = archie.tests.post_pr_sync(client)
 
