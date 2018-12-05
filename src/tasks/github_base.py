@@ -1,7 +1,7 @@
 from .base import UncleArchieTask
 import github
 from github import Github
-import re
+import os, re
 import subprocess
 import logging
 import pprint
