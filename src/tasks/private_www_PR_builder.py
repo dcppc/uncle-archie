@@ -74,6 +74,13 @@ class private_www_PR_builder(PyGithubTask):
             # virtualenv setup
             self.virtualenv_setup()
 
+            # virtualenv install
+            # (this is repo-dependent,
+            #  so defined in this class,
+            #  not in the github task base 
+            #  class in github_base.py)
+            self.virtualenv_install(payload)
+
             # snakemake
             outcome = self.snakemake(payload)
 
@@ -243,6 +250,49 @@ class private_www_PR_builder(PyGithubTask):
             f.write("\n".join(lines))
 
 
+    def virtualenv_install(self,payload):
+        """
+        Install required packages into the
+        Python virtual environment.
+        """
+        # get repo dir
+        repo_short_name = self.get_short_repo_name(payload)
+        repo_dir = os.path.join(self.temp_dir,repo_short_name)
+
+        # requirements.txt file
+        req_file = 'requirements.txt'
+        req_file_abs = os.path.join(repo_dir,req_file)
+
+        msg = "private_www_PR_builder: virtualenv_install(): Looking for %s "%(req_file)
+        msg += "in directory %s"%(repo_dir)
+        logging.debug(msg)
+
+        if os.path.exists(req_file_abs):
+
+            pip_bin = os.path.join(self.venv_dir,self.venv_label,'bin','pip')
+            installcmd = [pip_bin,'install','-r',req_file]
+            self.abort = self.run_cmd(
+                    installcmd,
+                    "pip install",
+                    repo_dir
+            )
+
+            msg = "PyGithubTask: virtualenv_install(): Success!"
+            logging.debug(msg)
+
+            if not self.abort:
+                # passed the test
+                return True
+            else:
+                return False
+
+        else:
+            msg = "PyGithubTask: virtualenv_install(): Doing nothing."
+            logging.debug(msg)
+            return True
+
+
+
     def snakemake(self,payload):
         """
         Run the snakemake build command
@@ -252,20 +302,24 @@ class private_www_PR_builder(PyGithubTask):
         otherwise return false.
         """
         if not self.abort:
+
             # get repo dir
             repo_short_name = self.get_short_repo_name(payload)
             repo_dir = os.path.join(self.temp_dir,repo_short_name)
 
-            buildcmd = ['snakemake','--nocolor','build_docs']
-            self.abort = self.run_cmd(
-                    buildcmd,
-                    "snakemake build",
-                    repo_dir
-            )
+            if self.venv_dir:
 
-            if not self.abort:
-                # passed the test
-                return True
+                snakemake_bin = os.path.join(self.venv_dir,self.venv_label,'bin','snakemake')
+                buildcmd = [snakemake_bin,'--nocolor','build_docs']
+                self.abort = self.run_cmd(
+                        buildcmd,
+                        "snakemake build",
+                        repo_dir
+                )
+
+                if not self.abort:
+                    # passed the test
+                    return True
 
         return False
 
