@@ -16,12 +16,15 @@ trigger each Task.
 """
 
 class test_pr_payload_handler(payload_handler_base):
-    def test_private_www_build_payload(self):
+    def test_private_www_build_sync_payload(self):
         """
-        Test that sending a private-www (PR) build
-        payload will trigger the correct task.
+        Test that sending a private-www sync payload
+        to the private-www build task will trigger
+        the correct tasks.
         """
         log_statements = [
+                'UncleArchieTask: __init__(): Starting constructor',
+                'Task name: private_www_PR_builder',
                 'UncleArchieTask: __init__(): Success!',
                 'PyGithubTask: __init__(): New virtual environment will be named "vp"',
                 'UncleArchieTask: run_cmd(): Finished running "git clone" command',
@@ -37,6 +40,57 @@ class test_pr_payload_handler(payload_handler_base):
         self.doit(
                 payload_handler,
                 archie.tests.dcppc_private_www_sync,
+                log_statements
+        )
+
+
+    def test_private_www_build_closed_merged_payload(self):
+        log_statements = [
+                'UncleArchieTask: __init__(): Starting constructor',
+                'Task name: private_www_PR_builder',
+                'UncleArchieTask: __init__(): Success!',
+                'PyGithubTask: __init__(): New virtual environment will be named "vp"',
+                'private_www_PR_builder: run(): Beginning to run task',
+                'private_www_PR_builder: validate(): Skipping task'
+        ]
+        payload_handler = 'dcppc'
+        self.doit(
+                payload_handler,
+                archie.tests.dcppc_private_www_closed_merged,
+                log_statements
+        )
+
+
+    def test_private_www_build_closed_unmerged_payload(self):
+        log_statements = [
+                'UncleArchieTask: __init__(): Starting constructor',
+                'Task name: private_www_PR_builder',
+                'UncleArchieTask: __init__(): Success!',
+                'PyGithubTask: __init__(): New virtual environment will be named "vp"',
+                'private_www_PR_builder: run(): Beginning to run task',
+                'private_www_PR_builder: validate(): Skipping task'
+        ]
+        payload_handler = 'dcppc'
+        self.doit(
+                payload_handler,
+                archie.tests.dcppc_private_www_closed_unmerged,
+                log_statements
+        )
+
+
+    def test_private_www_build_push_payload(self):
+        log_statements = [
+                'UncleArchieTask: __init__(): Starting constructor',
+                'Task name: private_www_PR_builder',
+                'UncleArchieTask: __init__(): Success!',
+                'PyGithubTask: __init__(): New virtual environment will be named "vp"',
+                'private_www_PR_builder: run(): Beginning to run task',
+                'private_www_PR_builder: validate(): Skipping task'
+        ]
+        payload_handler = 'dcppc'
+        self.doit(
+                payload_handler,
+                archie.tests.dcppc_private_www_push,
                 log_statements
         )
 
