@@ -5,6 +5,7 @@ class payload_handler_base(unittest.TestCase):
 
     def doit(self,payload_handler_id,func,log_statements):
         """
+
         Generic pattern for running a test
         """
         app = archie.webapp.get_flask_app()

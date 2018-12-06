@@ -45,8 +45,9 @@ class test_pr_payload_handler(payload_handler_base):
                 "Repo ssh url: git@github.com:charlesreid1/search-demo-mkdocs-material.git",
                 "Repo html url: https://github.com/charlesreid1/search-demo-mkdocs-material",
         ]
+        payload_handler = 'pr_build'
         self.doit(
-                'pr_build',
+                payload_handler,
                 archie.tests.post_pr_opened,
                 log_statements
         )
