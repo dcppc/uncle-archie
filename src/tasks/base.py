@@ -366,7 +366,7 @@ class UncleArchieTask(object):
             self.log += olines
             self.log += elines
 
-            msg = "UncleArchieTask: run_cmd(): Finished running command"
+            msg = "UncleArchieTask: run_cmd(): Finished running \"%s\" command"%(descr)
             logging.debug(msg)
 
             if "exception" in o.lower() \
