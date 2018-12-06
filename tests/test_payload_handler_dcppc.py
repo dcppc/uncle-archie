@@ -17,11 +17,7 @@ trigger each Task.
 
 class test_pr_payload_handler(payload_handler_base):
     def test_private_www_build_sync_payload(self):
-        """
-        Test that sending a private-www sync payload
-        to the private-www build task will trigger
-        the correct tasks.
-        """
+        """Test private-www PR sync payload with private-www build task."""
         log_statements = [
                 'UncleArchieTask: __init__(): Starting constructor',
                 'Task name: private_www_PR_builder',
@@ -45,6 +41,7 @@ class test_pr_payload_handler(payload_handler_base):
 
 
     def test_private_www_build_closed_merged_payload(self):
+        """Test private-www PR closed (merged) payload with private-www build task."""
         log_statements = [
                 'UncleArchieTask: __init__(): Starting constructor',
                 'Task name: private_www_PR_builder',
@@ -62,6 +59,7 @@ class test_pr_payload_handler(payload_handler_base):
 
 
     def test_private_www_build_closed_unmerged_payload(self):
+        """Test private-www PR closed (unmerged) payload with private-www build task."""
         log_statements = [
                 'UncleArchieTask: __init__(): Starting constructor',
                 'Task name: private_www_PR_builder',
@@ -79,6 +77,7 @@ class test_pr_payload_handler(payload_handler_base):
 
 
     def test_private_www_build_push_payload(self):
+        """Test private-www push payload with private-www build task."""
         log_statements = [
                 'UncleArchieTask: __init__(): Starting constructor',
                 'Task name: private_www_PR_builder',
