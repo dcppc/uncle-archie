@@ -1,5 +1,8 @@
 from .base import UncleArchieTask
-import re
+import github
+from github import Github
+import os, re
+import subprocess
 import logging
 import pprint
 
@@ -292,7 +295,7 @@ class GithubTask(UncleArchieTask):
                             description = build_msg,
                             context = task_name
             )
-        except GithubException as e:
+        except github.GithubException as e:
             logging.info("ERROR: Github API: Set commit status for %s failed to update."%(head_commit))
 
 
@@ -336,9 +339,9 @@ class PyGithubTask(GithubTask):
         Python in their task.
 
         config vars:
-            vp_label :  What to call the virtual environment
-            vp_dir :    (cwd = curr. working dir) the location 
-                        of the virtual environment
+            venv_label :  What to call the virtual environment
+            venv_dir :    (cwd = curr. working dir) the location 
+                          of the virtual environment
         """
         super().__init__(config,**kwargs)
 
@@ -381,7 +384,7 @@ class PyGithubTask(GithubTask):
         logging.debug(msg)
 
         # Create the virtual environment
-        subprocess.call(['virtualenv',self.venv_label],cwd=self.vp_dir)
+        subprocess.call(['virtualenv',self.venv_label],cwd=self.venv_dir)
 
         msg = "PyGithubTask: virtualenv_setup(): Success!"
         logging.debug(msg)
@@ -395,11 +398,11 @@ class PyGithubTask(GithubTask):
         config vars:
             None
         """
-        msg = "PyGithubTask: virtualenv_teardown(): Removing virtual environment at \"%s\" "%(self.vp_dir)
+        msg = "PyGithubTask: virtualenv_teardown(): Removing virtual environment at \"%s\" "%(self.venv_dir)
         logging.debug(msg)
 
         # Run the command ourselves, no logging needed
-        subprocess.call(['rm','-fr',self.vp_dir])
+        subprocess.call(['rm','-fr',self.venv_dir])
 
         msg = "PyGithubTask: virtualenv_setup(): Success!"
         logging.debug(msg)

@@ -5,7 +5,7 @@ import archie
 import os
 import json
 
-from .secrets import GITHUB_ACCESS_TOKEN
+from secrets import GITHUB_ACCESS_TOKEN
 
 app = archie.webapp.get_flask_app()
 
@@ -15,7 +15,7 @@ app.config['GITHUB_ACCESS_TOKEN'] = GITHUB_ACCESS_TOKEN
 
 client = app.test_client()
 
-app.set_payload_handler('pr_test')
+app.set_payload_handler('pr_build')
 
 logging.debug("-"*40)
 logging.debug("post_pr_opened(client)")

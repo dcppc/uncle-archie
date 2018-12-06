@@ -1,9 +1,9 @@
-from .handlers import LoggingPayloadHandler
+from .handlers import TaskPayloadHandler
 
 from ..tasks import *
 import pprint
 
-class DCPPCPayloadHandler(LoggingPayloadHandler):
+class DCPPCPayloadHandler(TaskPayloadHandler):
     """
     The DCPPC Payload Handler handles payloads
     by running all available DCPPC Tasks on 

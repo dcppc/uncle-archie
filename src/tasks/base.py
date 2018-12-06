@@ -156,7 +156,7 @@ class UncleArchieTask(object):
         Uncle Archie is running in testing
         mode (default: no)
         """
-        self.debug = False
+        self.testing = False
         if 'TESTING' in config.keys():
             if config['TESTING'] is True:
                 self.testing = True
@@ -259,7 +259,7 @@ class UncleArchieTask(object):
         Called by child classes.
         """
         self.temp_dir = tempfile.mkdtemp()
-        return scratch_dir
+        return self.temp_dir
 
 
     def rm_temp_dir(self):
@@ -273,7 +273,8 @@ class UncleArchieTask(object):
 
         Called by child classes.
         """
-        shutil.rmtree(self.temp_dir)
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
         self.temp_dir = None
 
 
@@ -318,21 +319,23 @@ class UncleArchieTask(object):
         msg += "    %s\n"%(" ".join(cmd))
         logging.debug(msg)
 
-        # if testing,
-        # btw where is self.debug defined
-        # base? where?
-        # task?
-        # use the config, you tasks
-        # this is the base task
-        # use the config
-        # config'TESTING']
-        if config['TESTING']:
+        # the constructor initializes 
+        # self.testing and self.debug
+        if self.testing:
             # print
-            msg = "UncleArchieTask: run_cmd(): Found TESSTING variable set.\n"
-            msg += "Command: %s"%(" ".join(cmd))
-            logging.info(msg)
+            msg = "UncleArchieTask: run_cmd(): Found TESTING variable set\n"
+            msg += "  for command: %s\n"%(" ".join(cmd))
+            msg += "  (not running the command)"
+            logging.debug(msg)
             return False
         else:
+
+            if not os.path.exists(cwd):
+                msg = "UncleArchieTask: run_cmd(): "
+                msg += "Specified directory %s does not exist!"%(cwd)
+                msg += " (not running command)"
+                logging.debug(msg)
+                return False
 
             proc = subprocess.Popen(
                     cmd,
@@ -344,7 +347,7 @@ class UncleArchieTask(object):
             o = proc.stdout.read().decode('utf-8')
             e = proc.stderr.read().decode('utf-8')
 
-            elines = ["=====================================\n",
+            olines = ["=====================================\n",
                       "======= CMD: %s\n"%(" ".join(cmd)),
                       "======= STDOUT\n",
                       "=====================================\n",
@@ -363,19 +366,23 @@ class UncleArchieTask(object):
             self.log += olines
             self.log += elines
 
-            msg = "UncleArchieTask: run_cmd(): Finished running command"
+            msg = "UncleArchieTask: run_cmd(): Finished running \"%s\" command"%(descr)
             logging.debug(msg)
 
-            if "exception" in o.lower \
-            or "exception" in e.lower:
-                err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected exception [X]"
+            if "exception" in o.lower() \
+            or "exception" in e.lower():
+                err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected exception in output [X]"
                 logging.error(err)
+                logging.error(o)
+                logging.error(e)
                 return True
 
-            if "error" in o.lower \
-            or "error" in e.lower:
-                err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected error [X]"
+            if "error" in o.lower() \
+            or "error" in e.lower():
+                err = " [X] ERROR: UncleArchieTask: run_cmd(): Detected error in output [X]"
                 logging.error(err)
+                logging.error(o)
+                logging.error(e)
                 return True
 
             return False
