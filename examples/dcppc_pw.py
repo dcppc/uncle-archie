@@ -5,20 +5,22 @@ import json
 
 from secrets import GITHUB_ACCESS_TOKEN
 
+# logging stuff
 logging.basicConfig(level=logging.DEBUG)
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
 annoying = logging.getLogger('urllib3.connectionpool')
 annoying.disabled=True
 
+# archie app
 app = archie.webapp.get_flask_app()
-
 app.config['DEBUG'] = True
 app.config['GITHUB_ACCESS_TOKEN'] = GITHUB_ACCESS_TOKEN
+app.set_payload_handler('dcppc')
 
+# archie test client
 client = app.test_client()
 
-app.set_payload_handler('dcppc')
 
 ############################
 # private-www
